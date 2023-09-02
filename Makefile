@@ -1,10 +1,13 @@
 TRANSCRIBER = tsc
-FILENAME = gitApiEx
 
 all:
-	$(TRANSCRIBER) $(FILENAME).ts
+	$(TRANSCRIBER) createToken.ts
+	$(TRANSCRIBER) runGitHubApi.ts
 
 test: 
-	node $(FILENAME).js
+	node runGitHubApi.js
+
+clean: 
+	rm createToken.js runGitHubApi.js
 
 PHONY:
