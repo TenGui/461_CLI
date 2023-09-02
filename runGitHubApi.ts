@@ -1,3 +1,5 @@
-import { createToken } from "./createToken";
+/* 
+Dependencies Installed:
 
-createToken();
+npm install @types/node
+*/
