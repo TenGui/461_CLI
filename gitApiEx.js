@@ -4,6 +4,11 @@ Installed Packages:
 
 sudo apt install gh
 npm install @types/node
+npm install @actions/github
+npm install @actions/core
+npm install github-api
+npm install @octokit/rest
+
 */
 exports.__esModule = true;
 // Must Authenticate Git Login Before Using The API
@@ -25,13 +30,18 @@ function runCLI(shellCommand) {
             return;
         }
         console.log("stdout:\n".concat(stdout));
-        if (error) {
-            console.log('gh auth login succeeded!');
-        }
-        else {
-            console.error('gh auth login failed.');
-        }
     });
 }
 // Running With Token To Automate the Authorization
-runCLI('gh auth login --with-token < mytoken.txt');
+// GITHUB_TOKEN Auto Token Generator
+var core = require("@actions/core");
+// import { context, GitHub } from '@actions/github'
+// HERE IMPORTANT TO DEFINE THE SECRET GITHUB TOKEN IN THE REPO WORKFLOW
+// Getting & Verifying The Token
+var repoToken = core.getInput('github_token');
+if (!repoToken) {
+    console.error("Token Generation Failed Or Is Blank");
+}
+else {
+    console.log("Token Generated Successfully");
+}
