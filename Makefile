@@ -1,12 +1,12 @@
 TRANSCRIBER = tsc
 
 all:
-	$(TRANSCRIBER) runGitHubApi.ts
+	$(TRANSCRIBER) runNpmApi.ts
 
 test: 
-	node runGitHubApi.js
+	node runNpmApi.js
 
 clean: 
-	rm runGitHubApi.js
+	rm runNpmApi.js
 
 PHONY:
