@@ -4,7 +4,9 @@
   "description": "Basic Package For Beginning The CLI",
   "main": "index.js",
   "scripts": {
-    "test": "cli test"
+    "test": "cli test",
+    "build": "tsc ./src/run.ts --outfile ./run",
+    "make_exec": "chmod +x ./run"
   },
   "repository": {
     "type": "git",

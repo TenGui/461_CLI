@@ -1,4 +1,4 @@
-#!/usr/bin/env ./node_modules/.bin/ts-node-script
+//title
 
 function printsmthn(s: string) {
   console.log("Your string: " + s);
