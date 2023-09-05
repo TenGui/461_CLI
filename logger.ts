@@ -22,6 +22,8 @@ export function logMsg(msg: string, option?: string) {
     }
 }
 
+// Work On Loggin To File To Save A Log
+
 export default logger;
 
 // notice the change from commonJS to es2020 in the tsconfig file
