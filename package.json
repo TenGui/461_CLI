@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "cli test",
-    "build": "tsc ./src/run.ts --outfile ./run",
+    "build": "tsc ./src/run.ts",
     "make_exec": "chmod +x ./run"
   },
   "repository": {
