@@ -45,4 +45,4 @@ test/*.js
 
 ##SPECIAL
 run
-run.js
+src/**/*.js
