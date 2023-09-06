@@ -1,9 +1,4 @@
-import logger from './logger.ts';
 import { logMsg } from './logger.ts';
-
-logger.info('Hello');
-logger.error('Hello');
-logger.fatal('Hello');
 
 // Just Run ts-node pinoEx.ts as usual and all of the logging data should show up
 // info - basic info statement

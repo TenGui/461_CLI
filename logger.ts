@@ -1,9 +1,8 @@
 //https://www.youtube.com/watch?v=2kKeQl_m8iY&ab_channel=RichardOliverBray
-
 import pino from 'pino';
-// const fs = require("fs");
 
-const logger = pino({
+/*
+const transportConfig = {
     transport: {
         target: "pino-pretty",
         options: {
@@ -11,9 +10,19 @@ const logger = pino({
             ignore: "pid,hostname",
         },
     },
-},
-// pino.destination('./logs.log')
-);
+}
+*/
+
+const transport = pino.transport({
+    targets: [{
+      level: 'trace',
+      target: 'pino/file',
+      options: { 
+        destination: './logs.log',
+        }
+    }]
+  })
+  const logger = pino(transport);
 
 export function logMsg(msg: string, option?: string) {
     if(option == "info" || option === undefined) {
@@ -24,9 +33,3 @@ export function logMsg(msg: string, option?: string) {
         logger.fatal(msg);
     }
 }
-
-// Work On Loggin To File To Save A Log
-
-export default logger;
-
-// notice the change from commonJS to es2020 in the tsconfig file
