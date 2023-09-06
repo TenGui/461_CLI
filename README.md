@@ -1,16 +1,9 @@
-# 461_CLI
+# 46100 Group 3 Phase 1
 
-Names:
-Cyrus Xu
-David Sousa
-Shao Ning, Hunag
-Caden Brennan
-Santiago Mendez
+Cyrus Xu, David Sousa, Shao Ning, Hunag, Caden Brennan, Santiago Mendez
 
-should be able to run ./run.ts now
+### to compile into ./run:
 
-to compile into ./run
-
-1. run ./node_module/typescript/bin/tsc ./run.ts
-2. run chmod +x ./run to allow command line execution
-3. ./run to run ./run
+1. navigate to ./461_CLI
+2. run `npm run build`
+3. run `npm run make_exec`
