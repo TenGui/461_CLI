@@ -4,4 +4,4 @@ import { logMsg } from './logger.ts';
 // msg - message being logged
 // option? - optionial type specifier - defaults to info
 
-logMsg('TEST HELLO BRO', 'error');
+logMsg('TEST Logging Info', 'info');
