@@ -1,4 +1,4 @@
-import { logMsg } from './logger.ts';
+import { logMsg } from './logger.ts'
 
 // How To Run - logMsg(msg : string, option? : string)
 // msg - message being logged
