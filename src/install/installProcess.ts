@@ -4,9 +4,9 @@ import * as fs from "fs";
 import * as path from "path";
 
 function install(
-  packagePath: string,
-  logFolderPath: string,
-  fileName: string
+  packagePath: string = "/package.json",
+  logFolderPath: string = "/logs",
+  fileName: string = "install.log"
 ): boolean {
   const fullPackagePath = path.join(process.cwd(), packagePath);
   const dirPath = path.join(process.cwd(), logFolderPath);
@@ -36,9 +36,11 @@ function install(
     } catch (error) {
       console.log(`Installation of ${dependency} failed.`);
       console.log(error);
+      console.log("\x1b[41m", "Installation cancelled.", "\x1b[0m");
       return false;
     }
   }
+  console.log("\x1b[32m", "Installation completed successfully.", "\x1b[0m");
   return true;
 }
 
