@@ -1,9 +1,20 @@
-//title
+#!/usr/bin/env node
+import * as run_install from "./install/runInstall";
 
-function printsmthn(s: string) {
-  console.log("Your string: " + s);
-  return null;
+if (process.argv.length != 3) {
+  console.log("Usage: run.ts <filename>");
+  process.exit(1);
 }
 
-printsmthn("Hello World");
-console.log("hi there");
+if (process.argv[2] == "install") {
+  const installResult: boolean = run_install.install(
+    "/package.json",
+    "/logs",
+    "install.log"
+  );
+  if (installResult) {
+    console.log("Installation completed successfully.");
+  } else {
+    console.log("Installation failed.");
+  }
+}
