@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "cli test",
-    "build": "tsc ./src/run.ts --outfile ./run",
-    "make_exec": "chmod +x ./run"
+    "build": "tsc --project ./tsconfig.json && chmod +x ./src/run.js",
+    "build_windows": "tsc --project ./tsconfig.json & chmod +x ./src/run.js"
   },
   "repository": {
     "type": "git",

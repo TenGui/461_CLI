@@ -1,9 +1,21 @@
-//title
+#!/usr/bin/env node
+import * as runInstall from "./install/installProcess";
 
-function printsmthn(s: string) {
-  console.log("Your string: " + s);
-  return null;
+if (process.argv.length != 3) {
+  console.log("Usage: \n./run install\n./run <url_file>\n./run test");
+  process.exit(1);
 }
 
-printsmthn("Hello World");
-console.log("hi there");
+if (process.argv[2] == "install") {
+  const installResult: boolean = runInstall.install();
+  installResult ? process.exit(0) : process.exit(1);
+} else if (process.argv[2] == "test") {
+  console.log("Test not yet implemented");
+  process.exit(1);
+} else {
+  const filePath: string = process.argv[2];
+  //Check if argv[2] is a valid relative path
+  process.exit(1);
+}
+
+process.exit(-1);
