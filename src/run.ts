@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import * as runInstall from "./install/installProcess";
+import * as evalUrls from "./url_list/evalUrls";
 
 if (process.argv.length != 3) {
   console.log("Usage: \n./run install\n./run <url_file>\n./run test");
@@ -14,8 +15,8 @@ if (process.argv[2] == "install") {
   process.exit(1);
 } else {
   const filePath: string = process.argv[2];
-  //Check if argv[2] is a valid relative path
-  process.exit(1);
+  const status = evalUrls.eval_file(filePath);
+  status ? process.exit(0) : process.exit(1);
 }
 
 process.exit(-1);
