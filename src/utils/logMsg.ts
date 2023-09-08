@@ -4,4 +4,4 @@ import { logMsg } from "./logger";
 // msg - message being logged
 // option? - optionial type specifier - defaults to info
 
-logMsg("TEST Logging Info", "info");
+logMsg("David : Begining Work On Github GraphQL API");
