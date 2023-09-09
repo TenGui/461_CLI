@@ -1,12 +1,16 @@
 import * as fs from "fs";
 import * as path from "path";
+import { RateLimiter } from "../utils/apiRateLimit";
 
-function eval_file(filepath: string = "URL_FILE_PATH"): boolean {
+async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
   const url_list = get_urls(filepath);
   url_list.forEach((urlstr) => {
     //do something
   });
-  return false;
+  const limiter = new RateLimiter();
+  const info = await limiter.getGithubRepoInfo("ShaoNingHuang", "461_CLI");
+  const info2 = await limiter.getGithubRepoInfo("ShaoNingHuang", "461_CLI");
+  const info3 = await limiter.getGithubRepoInfo("ShaoNingHuang", "461_CLI");
 }
 
 function get_urls(filepath: string): string[] {
