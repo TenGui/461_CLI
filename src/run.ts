@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import * as runInstall from "./install/installProcess";
 import * as evalUrls from "./url_list/evalUrls";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 if (process.argv.length != 3) {
   console.log("Usage: \n./run install\n./run <url_file>\n./run test");
@@ -15,8 +18,5 @@ if (process.argv[2] == "install") {
   process.exit(1);
 } else {
   const filePath: string = process.argv[2];
-  const status = evalUrls.eval_file(filePath);
-  status ? process.exit(0) : process.exit(1);
+  evalUrls.eval_file(filePath);
 }
-
-process.exit(-1);
