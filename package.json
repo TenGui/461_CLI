@@ -20,6 +20,8 @@
   "homepage": "https://github.com/TenGui/461_CLI#readme",
   "devDependencies": {
     "@types/jest": "^29.5.4",
+    "dotenv": "^16.3.1",
+    "graphql": "^16.8.0",
     "jest": "^29.6.4",
     "pino": "^8.15.0",
     "ts-jest": "^29.1.1",
