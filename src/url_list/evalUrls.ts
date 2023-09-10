@@ -8,9 +8,12 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
     //do something
   });
   const limiter = new RateLimiter();
-  const info = await limiter.getGithubRepoInfo("ShaoNingHuang", "461_CLI");
-  const info2 = await limiter.getGithubRepoInfo("ShaoNingHuang", "461_CLI");
-  const info3 = await limiter.getGithubRepoInfo("ShaoNingHuang", "461_CLI");
+  const info = await limiter.getGitHubInfo("/repos/ShaoNingHuang/461_CLI");
+  console.log("info: " + info.ssh_url);
+  const info2 = await limiter.getGitHubInfo("/repos/ShaoNingHuang/461_CLI");
+  console.log("info2: " + info2.ssh_url);
+  console.log("Exiting...");
+  process.exit(0);
 }
 
 function get_urls(filepath: string): string[] {
