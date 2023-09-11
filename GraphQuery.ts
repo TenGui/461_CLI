@@ -10,10 +10,16 @@ const repo = '461_CLI'; // Replace with your repo variable
 // Define the GraphQL query with the owner and repo variables
 const graphqlQuery = `
 query {
-    repository(owner: "${owner}", name: "${repo}") {
-      forkCount
+  repository(owner: "${owner}", name: "${repo}") {
+    collaborators(first: 100) {
+      edges {
+        node {
+          login
+        }
+      }
     }
-  }  
+  }
+}
 `;
 
 // GitHub API GraphQL endpoint
@@ -53,12 +59,16 @@ const requestOptions = {
 axios(requestOptions)
   .then(response => {
     const data = response.data;
-    const forkCount = data.data.repository.forkCount;
+    const collaborators = data.data.repository.collaborators.edges;
 
-    if (forkCount !== undefined) {
-      console.log(`Fork count for ${owner}/${repo}: ${forkCount}`);
+    if (collaborators) {
+      console.log(`List of contributors for ${owner}/${repo}:`);
+      collaborators.forEach(({ node }: any) => {
+        const login = node.login;
+        console.log(login);
+      });
     } else {
-      console.error('Unable to retrieve fork count.');
+      console.error('Unable to retrieve the list of contributors.');
     }
   })
   .catch(error => {
