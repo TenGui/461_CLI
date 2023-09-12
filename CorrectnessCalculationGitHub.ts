@@ -31,8 +31,8 @@ const closedIssuesUrl = `https://api.github.com/repos/${owner}/${repo}/issues?st
 // GitHub API REST endpoint for getting repository information
 const repoInfoUrl = `https://api.github.com/repos/${owner}/${repo}`;
 
-// GitHub API REST endpoint for getting releases
-const releasesUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
+// GitHub API REST endpoint for getting release assets
+const releaseAssetsUrl = `https://api.github.com/repos/${owner}/${repo}/releases/latest`;
 
 // Set up the request headers with your GitHub Personal Access Token
 const headers = {
@@ -40,31 +40,43 @@ const headers = {
   'Content-Type': 'application/json',
 };
 
-let hasReleases = false; // Variable to store whether the repository has releases or not
-let totalDownloads = 0; // Variable to store the total downloads of releases
+let hasReleases = false;
 
 // Function to check if the repository has releases
-const checkForReleases = () => {
-  return axios
-    .get(releasesUrl, { headers })
-    .then((response) => {
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        hasReleases = true;
-        // Calculate the total downloads if there are releases
-        for (const release of response.data) {
-          if (release.assets) {
-            for (const asset of release.assets) {
-              totalDownloads += asset.download_count || 0;
-            }
+const checkReleases = () => {
+  return axios.get(releaseAssetsUrl, { headers })
+    .then(response => {
+      hasReleases = response.data && response.data.assets && response.data.assets.length > 0;
+    })
+    .catch(error => {
+      console.error('Error checking releases:', error);
+    });
+};
+
+// Function to fetch the weekly downloads for release assets
+const fetchWeeklyReleaseDownloads = () => {
+  const now = new Date();
+  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // One week ago
+
+  return axios.get(releaseAssetsUrl, { headers })
+    .then(response => {
+      const release = response.data;
+      if (release && release.assets) {
+        let weeklyDownloads = 0;
+        for (const asset of release.assets) {
+          if (asset.created_at >= oneWeekAgo.toISOString()) {
+            weeklyDownloads += asset.download_count || 0;
           }
         }
+        return weeklyDownloads;
       } else {
-        hasReleases = false;
+        console.error('Unable to retrieve release assets.');
+        return -1; // Return -1 to indicate an error
       }
     })
-    .catch((error) => {
-      console.error('Error:', error);
-      hasReleases = false; // Return false to indicate an error or no releases
+    .catch(error => {
+      console.error('Error fetching weekly downloads:', error);
+      return -1; // Return -1 to indicate an error
     });
 };
 
@@ -73,7 +85,7 @@ const fetchOpenIssues = () => {
   return axios.get(openIssuesUrl, { headers })
     .then(response => response.data.length)
     .catch(error => {
-      console.error('Error:', error);
+      console.error('Error fetching open issues:', error);
       return -1; // Return -1 to indicate an error
     });
 };
@@ -83,7 +95,7 @@ const fetchClosedIssues = () => {
   return axios.get(closedIssuesUrl, { headers })
     .then(response => response.data.length)
     .catch(error => {
-      console.error('Error:', error);
+      console.error('Error fetching closed issues:', error);
       return -1; // Return -1 to indicate an error
     });
 };
@@ -103,30 +115,25 @@ const fetchRepoStats = () => {
       }
     })
     .catch(error => {
-      console.error('Error:', error);
+      console.error('Error fetching repository stats:', error);
       return { stars: -1, forks: -1 }; // Return -1 for stars and forks to indicate an error
     });
 };
 
-// Call the function to check for releases first
-checkForReleases()
-  .then(() => {
-    // Call the functions to fetch open and closed issues, stars, and forks
-    Promise.all([fetchOpenIssues(), fetchClosedIssues(), fetchRepoStats()])
-      .then(([openIssuesCount, closedIssuesCount, { stars, forks }]) => {
-        console.log(`Total number of open issues for ${owner}/${repo}: ${openIssuesCount}`);
-        console.log(`Total number of closed (resolved) issues for ${owner}/${repo}: ${closedIssuesCount}`);
-        console.log(`Stars: ${stars}`);
-        console.log(`Forks: ${forks}`);
-        if (hasReleases) {
-          console.log(`The repository ${owner}/${repo} has releases.`);
-          console.log(`Total downloads for release assets: ${totalDownloads}`);
-        } else {
-          console.log(`The repository ${owner}/${repo} does not have any releases.`);
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+// Call the functions to check for releases, fetch open and closed issues, stars, forks, and weekly release downloads
+Promise.all([checkReleases(), fetchOpenIssues(), fetchClosedIssues(), fetchRepoStats(), fetchWeeklyReleaseDownloads()])
+  .then(([_, openIssuesCount, closedIssuesCount, { stars, forks }, weeklyDownloads]) => {
+    console.log(`Total number of open issues for ${owner}/${repo}: ${openIssuesCount}`);
+    console.log(`Total number of closed (resolved) issues for ${owner}/${repo}: ${closedIssuesCount}`);
+    console.log(`Stars: ${stars}`);
+    console.log(`Forks: ${forks}`);
+    if (hasReleases) {
+      console.log(`The repository ${owner}/${repo} has releases.`);
+      console.log(`Weekly downloads for release assets: ${weeklyDownloads}`);
+    } else {
+      console.log(`The repository ${owner}/${repo} does not have any releases.`);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
   });
-
