@@ -7,8 +7,8 @@ import axios from 'axios';
 const owner = 'TenGui'; // Replace with your owner variable
 const repo = '461_CLI'; // Replace with your repo variable
 
-// Define the GraphQL query with the owner and repo variables
-const graphqlQuery = `
+// Define the GraphQL queries with the owner and repo variables
+const collaboratorQuery = `
 query {
   repository(owner: "${owner}", name: "${repo}") {
     collaborators(first: 100) {
@@ -16,6 +16,18 @@ query {
         node {
           login
         }
+      }
+    }
+  }
+}
+`;
+
+const commitQuery = (login:any) => `
+query {
+  user(login: "${login}") {
+    contributionsCollection {
+      contributionCalendar {
+        totalContributions
       }
     }
   }
@@ -47,30 +59,27 @@ axios.get(apiUrl, { headers })
     }
   });
 
-// Create the request options
-const requestOptions = {
-  method: 'POST',
-  url: apiUrl,
-  headers,
-  data: JSON.stringify({ query: graphqlQuery }),
-};
-
-// Send the GraphQL query using Axios
-axios(requestOptions)
-  .then(response => {
-    const data = response.data;
-    const collaborators = data.data.repository.collaborators.edges;
+// Function to fetch the total number of commits per user
+const fetchCommitsPerUser = async () => {
+  try {
+    const collaboratorResponse = await axios.post(apiUrl, { query: collaboratorQuery }, { headers });
+    const collaborators = collaboratorResponse.data.data.repository.collaborators.edges;
 
     if (collaborators) {
-      console.log(`List of contributors for ${owner}/${repo}:`);
-      collaborators.forEach(({ node }: any) => {
+      console.log(`Total number of commits per user for ${owner}/${repo}:`);
+      for (const { node } of collaborators) {
         const login = node.login;
-        console.log(login);
-      });
+        const commitResponse = await axios.post(apiUrl, { query: commitQuery(login) }, { headers });
+        const totalCommits = commitResponse.data.data.user.contributionsCollection.contributionCalendar.totalContributions;
+        console.log(`${login}: ${totalCommits} commits`);
+      }
     } else {
-      console.error('Unable to retrieve the list of contributors.');
+      console.error('Unable to retrieve the list of collaborators.');
     }
-  })
-  .catch(error => {
+  } catch (error) {
     console.error('Error:', error);
-  });
+  }
+};
+
+// Call the function to fetch commits per user
+fetchCommitsPerUser();
