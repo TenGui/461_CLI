@@ -16,7 +16,7 @@ function getOwnerAndRepoFromUrl(url: string): { owner: string; repo: string } {
 }
 
 // Example usage:
-const githubRepoUrl = 'https://github.com/TenGui/461_CLI'; // Replace with your GitHub repository URL
+const githubRepoUrl = 'https://github.com/oven-sh/bun'; // Replace with your GitHub repository URL
 const { owner, repo } = getOwnerAndRepoFromUrl(githubRepoUrl);
 
 console.log(`Owner: ${owner}`);
@@ -31,10 +31,41 @@ const closedIssuesUrl = `https://api.github.com/repos/${owner}/${repo}/issues?st
 // GitHub API REST endpoint for getting repository information
 const repoInfoUrl = `https://api.github.com/repos/${owner}/${repo}`;
 
+// GitHub API REST endpoint for getting releases
+const releasesUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
+
 // Set up the request headers with your GitHub Personal Access Token
 const headers = {
   Authorization: `Bearer ${process.env.API_KEY}`,
   'Content-Type': 'application/json',
+};
+
+let hasReleases = false; // Variable to store whether the repository has releases or not
+let totalDownloads = 0; // Variable to store the total downloads of releases
+
+// Function to check if the repository has releases
+const checkForReleases = () => {
+  return axios
+    .get(releasesUrl, { headers })
+    .then((response) => {
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        hasReleases = true;
+        // Calculate the total downloads if there are releases
+        for (const release of response.data) {
+          if (release.assets) {
+            for (const asset of release.assets) {
+              totalDownloads += asset.download_count || 0;
+            }
+          }
+        }
+      } else {
+        hasReleases = false;
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      hasReleases = false; // Return false to indicate an error or no releases
+    });
 };
 
 // Function to fetch the total number of open issues
@@ -77,11 +108,25 @@ const fetchRepoStats = () => {
     });
 };
 
-// Call the functions to fetch open and closed issues, stars, and forks
-Promise.all([fetchOpenIssues(), fetchClosedIssues(), fetchRepoStats()])
-  .then(([openIssuesCount, closedIssuesCount, { stars, forks }]) => {
-    console.log(`Total number of open issues for ${owner}/${repo}: ${openIssuesCount}`);
-    console.log(`Total number of closed (resolved) issues for ${owner}/${repo}: ${closedIssuesCount}`);
-    console.log(`Stars: ${stars}`);
-    console.log(`Forks: ${forks}`);
+// Call the function to check for releases first
+checkForReleases()
+  .then(() => {
+    // Call the functions to fetch open and closed issues, stars, and forks
+    Promise.all([fetchOpenIssues(), fetchClosedIssues(), fetchRepoStats()])
+      .then(([openIssuesCount, closedIssuesCount, { stars, forks }]) => {
+        console.log(`Total number of open issues for ${owner}/${repo}: ${openIssuesCount}`);
+        console.log(`Total number of closed (resolved) issues for ${owner}/${repo}: ${closedIssuesCount}`);
+        console.log(`Stars: ${stars}`);
+        console.log(`Forks: ${forks}`);
+        if (hasReleases) {
+          console.log(`The repository ${owner}/${repo} has releases.`);
+          console.log(`Total downloads for release assets: ${totalDownloads}`);
+        } else {
+          console.log(`The repository ${owner}/${repo} does not have any releases.`);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
   });
+
