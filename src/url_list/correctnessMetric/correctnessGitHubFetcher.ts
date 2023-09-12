@@ -93,3 +93,4 @@ export function fetchRepoStats(repoInfoUrl: string, headers: any): Promise<{ sta
       return { stars: -1, forks: -1 }; // Return -1 for stars and forks to indicate an error
     });
 }
+
