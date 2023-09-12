@@ -38,50 +38,50 @@ const headers = {
 };
 
 // Function to fetch the total number of open issues
-const fetchOpenIssues = async () => {
-  try {
-    const response = await axios.get(openIssuesUrl, { headers });
-    const openIssues = response.data.length;
-
-    console.log(`Total number of open issues for ${owner}/${repo}: ${openIssues}`);
-  } catch (error) {
-    console.error('Error:', error);
-  }
+const fetchOpenIssues = () => {
+  return axios.get(openIssuesUrl, { headers })
+    .then(response => response.data.length)
+    .catch(error => {
+      console.error('Error:', error);
+      return -1; // Return -1 to indicate an error
+    });
 };
 
 // Function to fetch the total number of closed (resolved) issues
-const fetchClosedIssues = async () => {
-  try {
-    const response = await axios.get(closedIssuesUrl, { headers });
-    const closedIssues = response.data.length;
-
-    console.log(`Total number of closed (resolved) issues for ${owner}/${repo}: ${closedIssues}`);
-  } catch (error) {
-    console.error('Error:', error);
-  }
+const fetchClosedIssues = () => {
+  return axios.get(closedIssuesUrl, { headers })
+    .then(response => response.data.length)
+    .catch(error => {
+      console.error('Error:', error);
+      return -1; // Return -1 to indicate an error
+    });
 };
 
 // Function to fetch the number of stars and forks for the repository
-const fetchRepoStats = async () => {
-  try {
-    const response = await axios.get(repoInfoUrl, { headers });
-    const repoInfo = response.data;
-
-    if (repoInfo) {
-      const stars = repoInfo.stargazers_count;
-      const forks = repoInfo.forks_count;
-
-      console.log(`Stars: ${stars}`);
-      console.log(`Forks: ${forks}`);
-    } else {
-      console.error('Unable to retrieve repository information.');
-    }
-  } catch (error) {
-    console.error('Error:', error);
-  }
+const fetchRepoStats = () => {
+  return axios.get(repoInfoUrl, { headers })
+    .then(response => {
+      const repoInfo = response.data;
+      if (repoInfo) {
+        const stars = repoInfo.stargazers_count;
+        const forks = repoInfo.forks_count;
+        return { stars, forks };
+      } else {
+        console.error('Unable to retrieve repository information.');
+        return { stars: -1, forks: -1 }; // Return -1 for stars and forks to indicate an error
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      return { stars: -1, forks: -1 }; // Return -1 for stars and forks to indicate an error
+    });
 };
 
 // Call the functions to fetch open and closed issues, stars, and forks
-fetchOpenIssues();
-fetchClosedIssues();
-fetchRepoStats();
+Promise.all([fetchOpenIssues(), fetchClosedIssues(), fetchRepoStats()])
+  .then(([openIssuesCount, closedIssuesCount, { stars, forks }]) => {
+    console.log(`Total number of open issues for ${owner}/${repo}: ${openIssuesCount}`);
+    console.log(`Total number of closed (resolved) issues for ${owner}/${repo}: ${closedIssuesCount}`);
+    console.log(`Stars: ${stars}`);
+    console.log(`Forks: ${forks}`);
+  });
