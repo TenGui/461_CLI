@@ -4,8 +4,24 @@ dotenv.config();
 import axios from 'axios';
 
 // Define the GitHub owner and repository name variables
-const owner = 'TenGui'; // Replace with your owner variable
-const repo = '461_CLI'; // Replace with your repo variable
+function getOwnerAndRepoFromUrl(url: string): { owner: string; repo: string } {
+  const urlParts = url.split('/');
+  if (urlParts.length >= 4 && urlParts[0] === 'https:' && urlParts[2] === 'github.com') {
+    const owner = urlParts[3];
+    const repo = urlParts[4];
+    return { owner, repo };
+  } else {
+    throw new Error('Invalid GitHub repository URL');
+  }
+}
+
+// Example usage:
+const githubRepoUrl = 'https://github.com/TenGui/461_CLI'; // Replace with your GitHub repository URL
+const { owner, repo } = getOwnerAndRepoFromUrl(githubRepoUrl);
+
+console.log(`Owner: ${owner}`);
+console.log(`Repo: ${repo}`);
+
 
 // Define the GraphQL queries with the owner and repo variables
 const collaboratorQuery = `
