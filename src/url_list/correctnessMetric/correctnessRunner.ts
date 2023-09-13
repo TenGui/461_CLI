@@ -6,10 +6,12 @@ import {
   fetchRepoStats, 
   fetchWeeklyReleaseDownloads,
 } from "./correctnessGitHubFetcher";
+import { extractPackageNameFromNpmLink } from "./correctnessNpmFetcher";
 
 import { identifyLinkType } from "./distinguishLink";
 
-const linkType = identifyLinkType("https://www.npmjs.com/package/@npmcli/metavuln-calculator");
+const link = "https://www.npmjs.com/package/@npmcli/metavuln-calculator";
+const linkType = identifyLinkType(link);
 
 if(linkType.localeCompare("GitHub Repository Link") == 0) {
 
@@ -47,5 +49,8 @@ if(linkType.localeCompare("GitHub Repository Link") == 0) {
     console.error('Error:', error);
   });
 } else if(linkType.localeCompare("npm Package Link") == 0) {
-  console.log("Hello");
+  
+  const npmName = extractPackageNameFromNpmLink(link);
+  console.log(`Package Name: ${npmName}`);
+
 }
