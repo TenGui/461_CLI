@@ -1,19 +1,23 @@
 import * as fs from "fs";
 import * as path from "path";
 import { RateLimiter } from "../utils/apiRateLimit";
+import * as LicenseRunner from "./licenseMetric/licenseRunner";
 
 async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
   const url_list = get_urls(filepath);
-  url_list.forEach((urlstr) => {
+  url_list.forEach(async (urlstr) => {
+    const limiter = new RateLimiter();
+    const url = CreateApiUrl(urlstr);
+    const licenseScore = await LicenseRunner.getLicenseScore(limiter, url);
+    console.log(urlstr, licenseScore);
     //do something
   });
-  const limiter = new RateLimiter();
-  const info = await limiter.getGitHubInfo("/repos/ShaoNingHuang/461_CLI");
-  console.log("info: " + info.ssh_url);
-  const info2 = await limiter.getGitHubInfo("/repos/ShaoNingHuang/461_CLI");
-  console.log("info2: " + info2.ssh_url);
-  console.log("Exiting...");
-  process.exit(0);
+}
+
+function CreateApiUrl(url: string): string {
+  const username = url.split("/")[3];
+  const repo = url.split("/")[4];
+  return `/repos/${username}/${repo}`;
 }
 
 function get_urls(filepath: string): string[] {
