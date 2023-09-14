@@ -13,4 +13,28 @@ export function identifyLinkType(link: string) {
       return 'Unknown Link';
     }
   }
+
+export function getOwnerAndRepoFromGitHubUrl(githubUrl: string) {
+    try {
+      // Remove any trailing slashes and split the URL by '/'
+      const urlParts = githubUrl.replace(/\/$/, '').split('/');
+  
+      // Check if the URL matches the expected GitHub repository URL format
+      if (
+        urlParts.length >= 4 &&
+        urlParts[0] === 'https:' &&
+        urlParts[2] === 'github.com'
+      ) {
+        const owner = urlParts[3];
+        const repo = urlParts[4];
+        return { owner, repo };
+      } else {
+        throw new Error('Invalid GitHub URL');
+      }
+    } catch (error) {
+      console.error('Error extracting owner and repo:', error);
+      return { owner: null, repo: null };
+    }
+  }
+
   
