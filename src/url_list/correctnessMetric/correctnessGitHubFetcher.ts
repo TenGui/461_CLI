@@ -1,25 +1,54 @@
 import axios from 'axios';
 
-export async function fetchTotalOpenIssues(owner: string, repo: string, githubToken: string): Promise<number> {
-  try {
-    // Set up the request headers with the provided GitHub API key
-    const headers = {
-      Authorization: `Bearer ${githubToken}`,
-      'Content-Type': 'application/json',
-    };
+const graphqlEndpoint = 'https://api.github.com/graphql';
 
-    // Define the GitHub API endpoint for open issues
-    const openIssuesUrl = `https://api.github.com/repos/${owner}/${repo}`;
+/**
+ * Fetches the total number of issues for a GitHub repository.
+ * @param owner The owner (username) of the GitHub repository.
+ * @param name The name of the GitHub repository.
+ * @param githubToken The GitHub API token for authentication.
+ * @returns A Promise that resolves with the total number of issues.
+ */
+export function fetchTotalIssues(owner: string, name: string, githubToken: string): Promise<number> {
+  const totalIssuesQuery = `
+    query($owner: String!, $name: String!) {
+      repository(owner: $owner, name: $name) {
+        issues {
+          totalCount
+        }
+      }
+    }
+  `;
 
-    // Send the GET request to fetch repository details
-    const response = await axios.get(openIssuesUrl, { headers });
+  const variables = {
+    owner,
+    name,
+  };
 
-    // Extract the total count of open issues from the response
-    const totalOpenIssues = response.data.open_issues_count || 0;
-
-    return totalOpenIssues;
-  } catch (error) {
-    console.error('Error fetching total open issues:', error);
-    return -1; // Return -1 to indicate an error
-  }
+  return axios
+    .post(
+      graphqlEndpoint,
+      {
+        query: totalIssuesQuery,
+        variables,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${githubToken}`,
+        },
+      }
+    )
+    .then((response) => {
+      const data = response.data.data;
+      if (data && data.repository && data.repository.issues) {
+        return data.repository.issues.totalCount || 0;
+      } else {
+        console.error('GraphQL response did not contain the expected data structure:', response.data);
+        return -1; // Return -1 to indicate an error
+      }
+    })
+    .catch((error) => {
+      console.error('Error fetching total issues:', error);
+      return -1; // Return -1 to indicate an error
+    });
 }
