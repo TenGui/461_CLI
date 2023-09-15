@@ -32,13 +32,6 @@ export function getOwnerAndRepoFromGitHubUrl(githubUrl: string) {
         throw new Error('Invalid GitHub URL');
       }
     } catch (error) {
-      console.error('Error extracting owner and repo:', error);
-      return { owner: null, repo: null };
+      
     }
   }
- 
-  
-
-  
-
-  

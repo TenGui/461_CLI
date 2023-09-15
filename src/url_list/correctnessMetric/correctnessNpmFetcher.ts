@@ -1,87 +1,67 @@
 import axios from 'axios';
 
-export function getPackageNameFromNpmLink(npmLink: string): string | null {
-    // Regular expression pattern to match npm package URLs
-    const npmPattern = /^https:\/\/(www\.)?npmjs\.com\/package\/([^/?#]+)(\?.*)?$/;
-  
-    // Check if the npm link matches the pattern
-    const match = npmLink.match(npmPattern);
-  
-    if (match) {
-      // Extract the package name from the match
-      const packageName = match[2];
-  
-      return packageName;
-    } else {
-      return null; // Return null for invalid or unmatched npm links
-    }
-  }
-
-
-export async function getTotalDownloadsLastWeek(packageName: string): Promise<number> {
+async function getWeeklyDownloadCount(packageName: string, startDate: string, endDate: string): Promise<number | undefined> {
   try {
-    // Calculate the date range for the last 7 days
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 7);
+    // Construct the API URL
+    const apiUrl = `https://api.npmjs.org/downloads/point/${startDate}:${endDate}/${packageName}`;
 
-    // Convert the dates to ISO format
-    const endDateISO = endDate.toISOString().split('T')[0];
-    const startDateISO = startDate.toISOString().split('T')[0];
+    // Make the API request
+    const response = await axios.get(apiUrl);
 
-    // Construct the URL for the npm package API with the date range
-    const url = `https://api.npmjs.org/downloads/range/${startDateISO}:${endDateISO}/${packageName}`;
-
-    // Send an HTTP GET request to the API
-    const response = await axios.get(url);
-
-    // Check if the request was successful and extract the total downloads for the last week
-    if (response.status === 200 && response.data && response.data.downloads) {
-      return response.data.downloads.reduce((total: number, week: any) => {
-        return total + week.downloads;
-      }, 0);
+    if (response.status === 200) {
+      const weeklyDownloadCount: number = response.data.downloads;
+      return weeklyDownloadCount;
     } else {
-      // Return null as the default value
-      return -1;
+      console.error(`Failed to retrieve download data. Status: ${response.status}`);
+      return undefined;
     }
-  } catch (error: any) {
-    // Handle any errors, e.g., network issues or package not found
-    console.error(`Error fetching total downloads for ${packageName}: ${error.message}`);
-    return -1;
+  } catch (error) {
+    console.error(`Error fetching download counts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return undefined;
   }
 }
 
-export async function getHighestTotalDownloadsAcrossWeeks(packageName: string): Promise<number> {
+async function getMaxWeeklyDownloads(packageName: string, numberOfWeeks: number): Promise<number | undefined> {
   try {
-    // Construct the URL for the npm package API to fetch all weekly downloads
-    const url = `https://api.npmjs.org/downloads/range/1000-01-01:3000-01-01/${packageName}`;
-    
-    // Send an HTTP GET request to the API to fetch all weekly downloads
-    const response = await axios.get(url);
+    let maxDownloadCount = 0;
+    const today = new Date();
 
-    // Check if the request was successful and extract the weekly download data
-    if (response.status === 200 && response.data && response.data.downloads) {
-      const weeklyDownloads = response.data.downloads;
+    // Loop through the past 'numberOfWeeks' weeks
+    for (let i = 0; i < numberOfWeeks; i++) {
+      const endDate = new Date(today);
+      endDate.setDate(endDate.getDate() - i * 7);
+      const startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - 6);
 
-      // Calculate the highest total downloads across all weeks
-      let highestTotalDownloads = 0;
-      for (const week of weeklyDownloads) {
-        if (week.downloads > highestTotalDownloads) {
-          highestTotalDownloads = week.downloads;
-        }
+      const endDateStr = endDate.toISOString().slice(0, 10);
+      const startDateStr = startDate.toISOString().slice(0, 10);
+
+      const weeklyDownloadCount = await getWeeklyDownloadCount(packageName, startDateStr, endDateStr);
+
+      if (weeklyDownloadCount !== undefined) {
+        maxDownloadCount = Math.max(maxDownloadCount, weeklyDownloadCount);
       }
-
-      return highestTotalDownloads;
-    } else {
-      // Return null as the default value
-      return -1;
     }
-  } catch (error: any) {
-    // Handle any errors, e.g., network issues or package not found
-    console.error(`Error fetching download data for ${packageName}: ${error.message}`);
-    return -1;
+
+    return maxDownloadCount;
+  } catch (error) {
+    console.error(`Error fetching max weekly downloads: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return undefined;
   }
 }
 
+// Example usage:
+const packageName = 'lodash';
+const numberOfWeeks = 4; // Change this to the number of weeks you want to consider
 
-
+getMaxWeeklyDownloads(packageName, numberOfWeeks)
+  .then((maxDownloads) => {
+    if (maxDownloads !== undefined) {
+      console.log(`Maximum weekly downloads for ${packageName} in the past ${numberOfWeeks} weeks: ${maxDownloads}`);
+    } else {
+      console.log('Failed to retrieve max weekly downloads.');
+    }
+  })
+  .catch((error) => {
+    console.error(error instanceof Error ? error : 'Unknown error occurred');
+  });
