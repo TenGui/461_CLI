@@ -1,18 +1,18 @@
 export function identifyLinkType(link: string) {
-    // Regular expression pattern to match GitHub repository URLs
-    const githubPattern = /^https:\/\/github\.com\/([^/]+)\/([^/]+)(\/.*)?$/;
-  
-    // Regular expression pattern to match npm package URLs (including scoped packages)
-    const npmPattern = /^https:\/\/(www\.)?npmjs\.com\/(package\/)?(@[^/]+\/[^/]+)(\/.*)?$/;
-  
-    if (githubPattern.test(link)) {
-      return 'GitHub Repository Link';
-    } else if (npmPattern.test(link)) {
-      return 'npm Package Link';
-    } else {
-      return 'Unknown Link';
-    }
+  // Regular expression pattern to match GitHub repository URLs
+  const githubPattern = /^https:\/\/github\.com\/([^/]+)\/([^/]+)(\/.*)?$/;
+
+  // Regular expression pattern to match npm package URLs with "activeTab=versions" query parameter
+  const npmPattern = /^https:\/\/(www\.)?npmjs\.com\/package\/([^/?#]+)(\?.*activeTab=versions)?(\/.*)?$/;
+
+  if (githubPattern.test(link)) {
+    return 'GitHub Repository Link';
+  } else if (npmPattern.test(link)) {
+    return 'npm Package Link';
+  } else {
+    return 'Unknown Link';
   }
+}
 
 export function getOwnerAndRepoFromGitHubUrl(githubUrl: string) {
     try {
@@ -36,5 +36,9 @@ export function getOwnerAndRepoFromGitHubUrl(githubUrl: string) {
       return { owner: null, repo: null };
     }
   }
+ 
+  
+
+  
 
   

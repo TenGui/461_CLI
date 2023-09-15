@@ -1,6 +1,12 @@
-import { identifyLinkType, getOwnerAndRepoFromGitHubUrl } from "../../utils/distinguishLink";
+import { 
+  identifyLinkType, 
+  getOwnerAndRepoFromGitHubUrl, 
+  getNpmPackageInfoFromUrl,
+} from "../../utils/distinguishLink";
+
 import * as dotenv from "dotenv";
 dotenv.config();
+
 import { 
   fetchTotalIssues, 
   fetchClosedIssues, 
@@ -10,9 +16,16 @@ import {
   findBranchWithMostStarsAndForks,
 } from "./correctnessGitHubFetcher";
 
+import {
+  getPackageNameFromNpmLink,
+  getTotalDownloadsLastWeek,
+  getHighestTotalDownloadsAcrossWeeks,
+} from "./correctnessNpmFetcher";
+
 async function main() {
   const key = process.env.API_KEY;
-  const url = "https://github.com/godotengine/godot";
+  //const url = "https://github.com/godotengine/godot";
+  const url = "https://www.npmjs.com/package/lodash?activeTab=versions";
   let totalIssues = -1;
   let totalClosedIssues = -1;
   let currentWeeklyDownloads = -1;
@@ -49,6 +62,13 @@ async function main() {
     } catch (error) {
       console.error('Error:', error);
     }
+  } 
+  else if(identifyLinkType(url) == "npm Package Link") {
+    const { owner, name } = getNpmPackageInfoFromUrl(url);
+    
+    
+    
+    
   }
 }
 
