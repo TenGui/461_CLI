@@ -13,12 +13,17 @@ async function getRampUpScore(url: [string, string]): Promise<number> {
     await git.clone({
       fs,
       http,
-      dir,
+      dir: path.join(dir, "/mainrepo"),
       corsProxy: "https://cors.isomorphic-git.org",
       url: `https://github.com/${url[0]}/${url[1]}`,
-      singleBranch: true,
-      depth: 10,
     });
+    // await git.clone({
+    //   fs,
+    //   http,
+    //   dir: path.join(dir, "/wiki"),
+    //   corsProxy: "https://cors.isomorphic-git.org",
+    //   url: `https://github.com/${url[0]}/${url[1]}/wiki`,
+    // }); //not working, as not all repositories have a wiki
     const fileList = (await fs.readdirSync(dir, {
       recursive: true,
     })) as string[];

@@ -15,6 +15,7 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
     console.log(urlstr, licenseScore);
 
     const rampUpScore = await getRampUpScore(url);
+    console.log(urlstr, rampUpScore);
     //do something
   });
 }

@@ -48,3 +48,4 @@ test/*.js
 run
 src/**/*.js
 .DS_Store
+/rampup_repos
