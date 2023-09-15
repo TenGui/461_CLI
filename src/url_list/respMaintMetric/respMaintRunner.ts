@@ -30,10 +30,15 @@ if (linkType.localeCompare("GitHub Repository Link") === 0) {
     fetchClosedIssues(closedIssuesUrl, headers),
     fetchRepoStats(repoInfoUrl, headers),
   ])
-    .then(([openIssuesCount, closedIssuesCount, { stars, forks }]) => {
-      const issuesSolved = closedIssuesCount; // Use closed issues count as "issuesSolved"
-      const time = 30; // Set the time (in days) for the calculation
-      const respMaintScore = calcRespMaintScore(issuesSolved, time);
+    .then(([openIssues, closedIssues, { stars, forks }]) => {
+      const issuesSolved = closedIssues.length; // Use closed issues count as "issuesSolved"
+      const firstClosedIssue = new Date(closedIssues[closedIssues.length - 1].closed_at);
+      const lastClosedIssue = new Date(closedIssues[0].closed_at);
+
+      const timeDiffInMs = lastClosedIssue.getTime() - firstClosedIssue.getTime();
+      const timeDiffInDays = timeDiffInMs / (1000 * 3600 * 24);
+
+      const respMaintScore = calcRespMaintScore(issuesSolved, timeDiffInDays);
       console.log(`Responsive Maintainer Score: ${respMaintScore}`);
     })
     .catch(error => {
