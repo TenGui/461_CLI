@@ -15,7 +15,7 @@ class RateLimiter {
     this.github_api = "https://api.github.com";
   }
 
-  async getGitHubInfo(url: string) {
+  async getGitHubInfo(url: string, params = {}) {
     try {
       if (this.token == "") {
         console.error("No env variable 'GITHUB_TOKEN' provided");
@@ -25,10 +25,10 @@ class RateLimiter {
         headers: {
           Authorization: `token ${this.token}`,
         },
+        params: params,
       });
       return response.data;
     } catch (error) {
-      console.error("GitHub API request failed:", error);
       return null;
     }
   }
