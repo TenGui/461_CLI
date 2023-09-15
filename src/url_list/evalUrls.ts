@@ -1,6 +1,7 @@
 import { RateLimiter } from "../utils/apiRateLimit";
 import { get_urls, parseFromGitLink } from "../utils/utils";
 import * as LicenseRunner from "./licenseMetric/licenseRunner";
+import { getRampUpScore } from "./rampUpMetric/rampUpRunner";
 
 async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
   const url_list = get_urls(filepath);
@@ -12,6 +13,9 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
       `/repos/${url[0]}/${url[1]}`
     );
     console.log(urlstr, licenseScore);
+
+    const rampUpScore = await getRampUpScore(url);
+    console.log(urlstr, rampUpScore);
     //do something
   });
 }
