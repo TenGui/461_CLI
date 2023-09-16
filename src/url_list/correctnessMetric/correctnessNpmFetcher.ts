@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-async function getWeeklyDownloadCount(packageName: string, startDate: string, endDate: string): Promise<number | undefined> {
+export async function getWeeklyDownloadCount(packageName: string, startDate: string, endDate: string): Promise<number> {
   try {
     // Construct the API URL
     const apiUrl = `https://api.npmjs.org/downloads/point/${startDate}:${endDate}/${packageName}`;
@@ -13,20 +13,19 @@ async function getWeeklyDownloadCount(packageName: string, startDate: string, en
       return weeklyDownloadCount;
     } else {
       console.error(`Failed to retrieve download data. Status: ${response.status}`);
-      return undefined;
+      return -1;
     }
   } catch (error) {
     console.error(`Error fetching download counts: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    return undefined;
+    return -1;
   }
 }
 
-async function getMaxWeeklyDownloads(packageName: string, numberOfWeeks: number): Promise<number | undefined> {
+export async function getMaxWeeklyDownloads(packageName: string, numberOfWeeks: number): Promise<number> {
   try {
     let maxDownloadCount = 0;
     const today = new Date();
 
-    // Loop through the past 'numberOfWeeks' weeks
     for (let i = 0; i < numberOfWeeks; i++) {
       const endDate = new Date(today);
       endDate.setDate(endDate.getDate() - i * 7);
@@ -46,22 +45,6 @@ async function getMaxWeeklyDownloads(packageName: string, numberOfWeeks: number)
     return maxDownloadCount;
   } catch (error) {
     console.error(`Error fetching max weekly downloads: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    return undefined;
+    return -1;
   }
 }
-
-// Example usage:
-const packageName = 'lodash';
-const numberOfWeeks = 4; // Change this to the number of weeks you want to consider
-
-getMaxWeeklyDownloads(packageName, numberOfWeeks)
-  .then((maxDownloads) => {
-    if (maxDownloads !== undefined) {
-      console.log(`Maximum weekly downloads for ${packageName} in the past ${numberOfWeeks} weeks: ${maxDownloads}`);
-    } else {
-      console.log('Failed to retrieve max weekly downloads.');
-    }
-  })
-  .catch((error) => {
-    console.error(error instanceof Error ? error : 'Unknown error occurred');
-  });
