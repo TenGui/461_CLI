@@ -2,17 +2,6 @@ import axios from 'axios';
 
 const graphqlEndpoint = 'https://api.github.com/graphql';
 
-export function fetchTotalIssues(owner: string, name: string, githubToken: string): Promise<number> {
-  const totalIssuesQuery = `
-    query($owner: String!, $name: String!) {
-      repository(owner: $owner, name: $name) {
-        issues {
-          totalCount
-        }
-      }
-    }
-  `;
-
   const variables = {
     owner,
     name,
@@ -45,6 +34,17 @@ export function fetchTotalIssues(owner: string, name: string, githubToken: strin
       return -1; // Return -1 to indicate an error
     });
 }
+
+export function fetchTotalIssues(owner: string, name: string, githubToken: string): Promise<number> {
+  const totalIssuesQuery = `
+    query($owner: String!, $name: String!) {
+      repository(owner: $owner, name: $name) {
+        issues {
+          totalCount
+        }
+      }
+    }
+  `;
 
 export function fetchClosedIssues(owner: string, name: string, githubToken: string): Promise<number> {
   const closedIssuesQuery = `

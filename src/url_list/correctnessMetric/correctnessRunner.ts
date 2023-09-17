@@ -1,32 +1,15 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { 
-  identifyLinkType, 
-  getGitHubRepoInfo, 
-  npmToGitHub,
-  getPackageNameFromNpmLink,
-} from "../../utils/distinguishLink";
+import axios from "axios";
 
-import { 
-  fetchTotalIssues, 
-  fetchClosedIssues, 
-  fetchWeeklyDownloads,
-  fetchAllTimeHighestDownloads,
-  fetchTotalStarsAndForks,
-  findBranchWithMostStarsAndForks,
-} from "./correctnessGitHubFetcher";
+const graphqlEndpoint = 'https://api.github.com/graphql';
 
-import {
-  getMaxWeeklyDownloads,
-  getWeeklyDownloadCount
-} from "./correctnessNpmFetcher";
-import { get } from "http";
-
-async function main() {
+async function getCorrectness(
+  url:string, 
+  RateLimiter: any
+  ): Promise<number> {
   const key = process.env.API_KEY;
-  const url = "https://github.com/godotengine/godot";
-  //const url = "https://www.npmjs.com/package/lodash?activeTab=versions";
   let totalIssues = -1;
   let totalClosedIssues = -1;
   let currentWeeklyDownloads = -1;
@@ -34,73 +17,61 @@ async function main() {
   let totalStorks = -1;
   let maxStorks = -1;
 
-  if (identifyLinkType(url) == 'GitHub Repository Link') {
-    const repoInfo = getGitHubRepoInfo(url);
-    const owner = repoInfo?.owner;
-    const repo = repoInfo?.repoName;
+  const repoInfo = getGitHubRepoInfo(url);
+  const owner = repoInfo?.owner;
+  const name = repoInfo?.name;
 
-    // Use async/await to wait for the Promise to resolve
-    try {
-      totalIssues = await fetchTotalIssues(owner as string, repo as string, key as string);
-      console.log(totalIssues);
+  const variables = {
+    owner,
+    name,
+  };
 
-      totalClosedIssues = await fetchClosedIssues(owner as string, repo as string, key as string);
-      console.log(totalClosedIssues);
-
-      currentWeeklyDownloads = await fetchWeeklyDownloads(owner as string, repo as string, key as string);
-      console.log(currentWeeklyDownloads);
-
-      allTimeHighestDownloads = await fetchAllTimeHighestDownloads(owner as string, repo as string, key as string);
-      console.log(allTimeHighestDownloads);
-
-      totalStorks = await fetchTotalStarsAndForks(owner as string, repo as string, key as string);
-      console.log(totalStorks);
-
-      maxStorks = await findBranchWithMostStarsAndForks(owner as string, repo as string, key as string);
-      console.log(maxStorks);
-
-      let correctnessScore = 0.4 * (totalClosedIssues / totalIssues) + 0.4 * (currentWeeklyDownloads / allTimeHighestDownloads) + 0.2 * (totalStorks / maxStorks);
-      console.log(correctnessScore);
-
-    } catch (error) {
-      console.error('Error:', error);
+  const query = `
+  query($owner: String!, $name: String!) {
+    repository(owner: $owner, name: $name) {
+      openIssues: issues(states: OPEN) {
+        totalCount
     }
-  } 
-  else if(identifyLinkType(url) == "npm Package Link") {
-    const npmName = getPackageNameFromNpmLink(url);
-    const githubUrl = await npmToGitHub(npmName as string);
-    const repoStats = getGitHubRepoInfo(githubUrl as string);
-    const owner = repoStats?.owner;
-    const repo = repoStats?.repoName;
-
-    try {
-      totalIssues = await fetchTotalIssues(owner as string, repo as string, key as string);
-      console.log(totalIssues);
-
-      totalClosedIssues = await fetchClosedIssues(owner as string, repo as string, key as string);
-      console.log(totalClosedIssues);
-
-      currentWeeklyDownloads = await getWeeklyDownloadCount(npmName as string, "2020-01-01", "2020-01-07");
-      console.log(currentWeeklyDownloads);
-
-      allTimeHighestDownloads = await getMaxWeeklyDownloads(npmName as string, 100);
-      console.log(allTimeHighestDownloads);
-
-      totalStorks = await fetchTotalStarsAndForks(owner as string, repo as string, key as string);
-      console.log(totalStorks);
-
-      maxStorks = await findBranchWithMostStarsAndForks(owner as string, repo as string, key as string);
-      console.log(maxStorks);
-
-      let correctnessScore = 0.4 * (totalClosedIssues / totalIssues) + 0.4 * (currentWeeklyDownloads / allTimeHighestDownloads) + 0.2 * (totalStorks / maxStorks);
-      console.log(correctnessScore);
-
-    } catch (error) {
-      console.error('Error:', error);
+    closedIssues: issues(states: CLOSED) {
+      totalCount
     }
   }
 }
+`;
 
+  axios({
+    url: graphqlEndpoint,
+    method: 'post',
+    headers: {
+      Authorization: `Bearer ${key}`,
+    },
+    data: {
+      query,
+      variables,
+    },
+    })
+    .then((result) => {
+      console.log(`total open issues: ${result.data.data.repository.openIssues.totalCount}`);
+      console.log(`total closed issues ${result.data.data.repository.closedIssues.totalCount}`);
+    });
+ 
+    const releaseResponse = await RateLimiter.getGitHubInfo(
+      url + "/releases"
+    );
+    return 0;
+}
 
+export { getCorrectness };
 
-main(); // Call the async function to execute the code
+function getGitHubRepoInfo(gitHubLink: string): { owner: string; name: string } | null {
+  const regex = /github\.com\/([^/]+)\/([^/]+)/;
+  const match = gitHubLink.match(regex);
+
+  if (match && match.length === 3) {
+    const owner = match[1];
+    const name = match[2];
+    return { owner, name };
+  }
+
+  return null;
+}
