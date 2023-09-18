@@ -19,6 +19,7 @@ if (process.argv[2] == "install") {
     process.exit(0);
   }
   catch (err) {
+    console.log(err);
     process.exit(1);
   }
 
