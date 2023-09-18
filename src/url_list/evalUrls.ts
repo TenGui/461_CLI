@@ -1,7 +1,7 @@
 import { RateLimiter } from "../utils/apiRateLimit";
 import { get_urls, parseFromGitLink } from "../utils/utils";
 import * as LicenseRunner from "./licenseMetric/licenseRunner";
-import * as BusFactorRunner  from "./busFactorMetric/busFactorRunner";
+import * as BusFactorRunner from "./busFactorMetric/busFactorRunner";
 import * as RampUpRunner from "./rampUpMetric/rampUpRunner";
 
 async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
@@ -17,8 +17,9 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
 
     //RAMPUP SCORE
     const rampUpScore = await RampUpRunner.getRampUpScore(url);
+
     //BUSFACTOR SCORE
-    const busFactorScore = await BusFactorRunner.getBusFactorScore(
+    const busFactorScore: number = await BusFactorRunner.getBusFactorScore(
       limiter,
       `/repos/${url[0]}/${url[1]}`
     );
@@ -39,7 +40,7 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
     };
 
     const adjustedScores: { [x: string]: number } = {
-      //licenseScore: licenseScore,
+      licenseScore: licenseScore,
       rampUpScore: rampUpScore,
       busFactorScore: busFactorScore,
       maintainerScore: maintainerScore,
