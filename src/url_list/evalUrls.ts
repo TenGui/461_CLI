@@ -16,7 +16,7 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
     );
 
     //RAMPUP SCORE
-    const rampUpScore = await RampUpRunner.getRampUpScore(url);
+    const rampUpScore: number = await RampUpRunner.getRampUpScore(url);
 
     //BUSFACTOR SCORE
     const busFactorScore: number = await BusFactorRunner.getBusFactorScore(
