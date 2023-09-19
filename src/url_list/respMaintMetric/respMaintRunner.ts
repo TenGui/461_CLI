@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv";
 import { calcRespMaintScore } from "./calcRespMaintScore";
-//dotenv.config();
+dotenv.config();
 
 import axios from "axios";
 
