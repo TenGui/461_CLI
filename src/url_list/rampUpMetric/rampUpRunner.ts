@@ -2,7 +2,7 @@ import * as path from "path";
 import * as git from "isomorphic-git";
 import * as http from "isomorphic-git/http/node";
 import * as fs from "fs";
-import { countLines } from "./countLines";
+import { getFileWithEnd, sumLines } from "./rampUpUtils";
 import { calcRampUpScore } from "./calcRampUpScore";
 
 async function getRampUpScore(url: [string, string]): Promise<number> {
@@ -17,32 +17,13 @@ async function getRampUpScore(url: [string, string]): Promise<number> {
       corsProxy: "https://cors.isomorphic-git.org",
       url: `https://github.com/${url[0]}/${url[1]}`,
     });
-    // await git.clone({
-    //   fs,
-    //   http,
-    //   dir: path.join(dir, "/wiki"),
-    //   corsProxy: "https://cors.isomorphic-git.org",
-    //   url: `https://github.com/${url[0]}/${url[1]}/wiki`,
-    // }); //not working, as not all repositories have a wiki
     const fileList = (await fs.readdirSync(dir, {
       recursive: true,
     })) as string[];
-    const mdList = fileList.filter((filename: string) => {
-      return filename.endsWith(".md");
-    });
-    const jsList = fileList.filter((filename: string) => {
-      return filename.endsWith(".js");
-    });
-    const linesMD = await Promise.all(
-      mdList.map(async (filename: string): Promise<number> => {
-        return await countLines(path.join(dir, filename));
-      })
-    ).then((lines) => lines.reduce((a, b) => a + b, 0));
-    const linesJS = await Promise.all(
-      jsList.map(async (filename: string): Promise<number> => {
-        return await countLines(path.join(dir, filename));
-      })
-    ).then((lines) => lines.reduce((a, b) => a + b, 0));
+    const mdList = getFileWithEnd(".md", fileList);
+    const jsList = getFileWithEnd(".js", fileList);
+    const linesMD = await sumLines(mdList);
+    const linesJS = await sumLines(jsList);
 
     fs.rmSync(dir, { recursive: true, force: true }); //clean up dir
     return calcRampUpScore(linesMD, linesJS);
