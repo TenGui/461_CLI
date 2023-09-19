@@ -23,7 +23,7 @@ async function getRespMaintScore(url: [string, string]) {
     const query = `
     query {
       repository(owner: "${owner}", name: "${name}") {
-        issues(states: CLOSED) {
+        issues(last:50, states: CLOSED) {
           totalCount
           nodes {
             closedAt
