@@ -99,16 +99,21 @@ async function getCorrectness(url: string) {
         maxReleaseWeeklyDownloads = CurrWeeklyDownloads;
     }
    
-    const correctness =
-      0.5 * (totalClosedIssues / (totalOpenIssues + totalClosedIssues)) +
-      0.5 * (lastReleaseWeeklyDownloads / maxReleaseWeeklyDownloads);
-
+    let correctness = calcCorrectnessScore(totalClosedIssues, totalOpenIssues, maxReleaseWeeklyDownloads, lastReleaseWeeklyDownloads);
     return correctness;
   } catch (error) {
     console.error('Error fetching data:', error);
     // Handle the error or return a default value if necessary
     return 0;
   }
+}
+
+export async function calcCorrectnessScore(totalClosedIssues, totalOpenIssues, maxReleaseWeeklyDownloads, lastReleaseWeeklyDownloads): number {
+  const correctness =
+    0.5 * (totalClosedIssues / (totalOpenIssues + totalClosedIssues)) +
+    0.5 * (lastReleaseWeeklyDownloads / maxReleaseWeeklyDownloads);
+
+  return correctness;
 }
 
 export { getCorrectness };
