@@ -47,3 +47,5 @@ test/*.js
 ##SPECIAL
 run
 src/**/*.js
+.DS_Store
+/rampup_repos
