@@ -1,60 +1,70 @@
+import * as dotenv from "dotenv";
 import { calcRespMaintScore } from "./calcRespMaintScore";
-import { identifyLinkType } from "./distinguishLink";
-import { getOwnerAndRepoFromUrl, fetchOpenIssues, fetchClosedIssues, fetchRepoStats } from "./GitHubFetcher";
-import { extractPackageNameFromNpmLink, getPackageInfo } from "./NpmFetcher";
+dotenv.config();
 
-const link = "https://www.npmjs.com/package/@npmcli/metavuln-calculator";
-const linkType = identifyLinkType(link);
+import axios from "axios";
 
-if (linkType.localeCompare("GitHub Repository Link") === 0) {
-  const githubRepoUrl = 'https://github.com/oven-sh/bun'; // Replace with your GitHub repository URL
-  const { owner, repo } = getOwnerAndRepoFromUrl(githubRepoUrl);
+const graphqlEndpoint = 'https://api.github.com/graphql';
 
-  console.log(`Owner: ${owner}`);
-  console.log(`Repo: ${repo}`);
+async function getRespMaintScore(url: [string, string]) {
+  try {
+    const key = process.env.API_KEY;
+    const owner = url[0];
+    const name = url[1];
 
-  // GitHub API REST endpoints
-  const openIssuesUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=open`;
-  const closedIssuesUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed`;
-  const repoInfoUrl = `https://api.github.com/repos/${owner}/${repo}`;
+    let totalClosedIssues = 0;
+    let totalTime = 0;
 
-  // Set up the request headers with your GitHub Personal Access Token
-  const headers = {
-    Authorization: `Bearer ${process.env.API_KEY}`,
-    'Content-Type': 'application/json',
-  };
+    const variables = {
+      owner,
+      name,
+    };
 
-  // Call the functions to fetch open and closed issues, stars, forks, etc.
-  Promise.all([
-    fetchOpenIssues(openIssuesUrl, headers),
-    fetchClosedIssues(closedIssuesUrl, headers),
-    fetchRepoStats(repoInfoUrl, headers),
-  ])
-    .then(([openIssues, closedIssues, { stars, forks }]) => {
-      const issuesSolved = closedIssues.length; // Use closed issues count as "issuesSolved"
-      const firstClosedIssue = new Date(closedIssues[closedIssues.length - 1].closed_at);
-      const lastClosedIssue = new Date(closedIssues[0].closed_at);
+    const query = `
+    query {
+      repository(owner: "${owner}", name: "${name}") {
+        issues(last:50, states: CLOSED) {
+          totalCount
+          nodes {
+            closedAt
+            createdAt
+          }
+        }
+      }
+    }
+  `;
 
-      const timeDiffInMs = lastClosedIssue.getTime() - firstClosedIssue.getTime();
-      const timeDiffInDays = timeDiffInMs / (1000 * 3600 * 24);
+  const result = await axios({
+    url: graphqlEndpoint,
+    method: 'post',
+    headers: {
+      Authorization: `Bearer ${key}`,
+    },
+    data: {
+      query,
+      variables,
+    },
+  });
 
-      const respMaintScore = calcRespMaintScore(issuesSolved, timeDiffInDays);
-      console.log(`Responsive Maintainer Score: ${respMaintScore}`);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
-} else if (linkType.localeCompare("npm Package Link") === 0) {
-  const npmName = extractPackageNameFromNpmLink(link);
-  console.log(`Package Name: ${npmName}`);
+  const closedIssues = result.data.data.repository.issues.nodes;
+  totalClosedIssues = result.data.data.repository.issues.totalCount;
 
-  // Call the function to fetch npm package info
-  getPackageInfo(npmName)
-    .then(({ totalDownloads, weeklyDownloads }) => {
-      console.log(`Total Downloads: ${totalDownloads}`);
-      console.log(`Weekly Downloads: ${weeklyDownloads}`);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
+  for (const issue of closedIssues) {
+    const closedDate = new Date(issue.closedAt);
+    const createdDate = new Date(issue.createdAt);
+    const timeDiff = closedDate.getTime() - createdDate.getTime();
+    totalTime += timeDiff;
+  }
+
+  // Calculate the responsiveMaintainer score.
+  const responsiveMaintainerScore = calcRespMaintScore(totalClosedIssues, totalTime);
+
+  return responsiveMaintainerScore;
+
+} catch (error) {
+    console.error('Error fetching total issues:', error);
+    return 0; 
+  }
 }
+
+export { getRespMaintScore }; 
