@@ -1,56 +1,154 @@
-import { 
-  getOwnerAndRepoFromUrl, 
-  checkReleases, 
-  fetchOpenIssues, 
-  fetchClosedIssues, 
-  fetchRepoStats, 
-  fetchWeeklyReleaseDownloads,
-} from "./correctnessGitHubFetcher";
-import { extractPackageNameFromNpmLink } from "./correctnessNpmFetcher";
+import * as dotenv from "dotenv";
+dotenv.config();
 
-import { identifyLinkType } from "./distinguishLink";
+import axios from "axios";
 
-const link = "https://www.npmjs.com/package/@npmcli/metavuln-calculator";
-const linkType = identifyLinkType(link);
+const graphqlEndpoint = 'https://api.github.com/graphql';
 
-if(linkType.localeCompare("GitHub Repository Link") == 0) {
+async function getCorrectness(url: string) {
+  try {
+    const key = process.env.API_KEY;
+    const repoInfo = getGitHubRepoInfo(url);
+    const owner = repoInfo?.owner;
+    const name = repoInfo?.name;
 
-  const githubRepoUrl = 'https://github.com/oven-sh/bun'; // Replace with your GitHub repository URL
-  const { owner, repo } = getOwnerAndRepoFromUrl(githubRepoUrl);
+    let totalOpenIssues = 0;
+    let totalClosedIssues = 0;
+    let lastReleaseWeeklyDownloads = 0;
+    let maxReleaseWeeklyDownloads = 0;
 
-  console.log(`Owner: ${owner}`);
-  console.log(`Repo: ${repo}`);
+    const variables = {
+      owner,
+      name,
+    };
 
-// GitHub API REST endpoints
-  const openIssuesUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=open`;
-  const closedIssuesUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed`;
-  const repoInfoUrl = `https://api.github.com/repos/${owner}/${repo}`;
-  const releaseAssetsUrl = `https://api.github.com/repos/${owner}/${repo}/releases/latest`;
+    const query = `
+      query ($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name) {
+          openIssues: issues(states: OPEN) {
+            totalCount
+          }
+          closedIssues: issues(states: CLOSED) {
+            totalCount
+          }
+          stargazerCount
+          forkCount
+          releases(first: 50, orderBy: { field: CREATED_AT, direction: DESC }) {
+            totalCount
+            nodes {
+              repository {
+                stargazers {
+                  totalCount
+                }
+                forks {
+                  totalCount
+                }
+              }
+              releaseAssets(first: 20) {
+                nodes {
+                  name
+                  downloadCount
+                  createdAt
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
 
-// Set up the request headers with your GitHub Personal Access Token
-  const headers = {
-  Authorization: `Bearer ${process.env.API_KEY}`,
-  'Content-Type': 'application/json',
-  };
+    const result = await axios({
+      url: graphqlEndpoint,
+      method: 'post',
+      headers: {
+        Authorization: `Bearer ${key}`,
+      },
+      data: {
+        query,
+        variables,
+      },
+    });
 
-  // Call the functions to check for releases, fetch open and closed issues, stars, forks, and weekly release downloads
-  Promise.all([
-  checkReleases(releaseAssetsUrl, headers),
-  fetchOpenIssues(openIssuesUrl, headers),
-  fetchClosedIssues(closedIssuesUrl, headers),
-  fetchRepoStats(repoInfoUrl, headers),
-  fetchWeeklyReleaseDownloads(releaseAssetsUrl, headers),
-  ])
-  .then(([hasReleases, openIssuesCount, closedIssuesCount, { stars, forks }, weeklyDownloads]) => {
-    const statsArray = [hasReleases, openIssuesCount, closedIssuesCount, stars, forks, weeklyDownloads];
-    console.log('Stats Array:', statsArray);
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
-} else if(linkType.localeCompare("npm Package Link") == 0) {
-  
-  const npmName = extractPackageNameFromNpmLink(link);
-  console.log(`Package Name: ${npmName}`);
+    totalOpenIssues = result.data.data.repository.openIssues.totalCount;
+    totalClosedIssues = result.data.data.repository.closedIssues.totalCount;
 
+    const releases = result.data.data.repository.releases.nodes;
+
+    // Calculate lastReleaseWeeklyDownloads and maxReleaseWeeklyDownloads here
+    const releaseDate = releases[0].releaseAssets.nodes[0].createdAt;
+    const elapsedTime = calculateWeeksDifference(releaseDate);
+    const assetCount = releases[0].releaseAssets.nodes.length;
+    let totalAssetDownloads = 0;
+
+    for (let i = 0; i < assetCount; i++) {
+      totalAssetDownloads += releases[0].releaseAssets.nodes[i].downloadCount;
+    }
+
+    lastReleaseWeeklyDownloads = totalAssetDownloads / elapsedTime;
+    maxReleaseWeeklyDownloads = lastReleaseWeeklyDownloads;
+
+    for (let i = 1; i < releases.length; i++) {
+      if (releases[i].releaseAssets.nodes[0] === undefined) continue;
+
+      const currReleaseDate = releases[i].releaseAssets.nodes[0].createdAt;
+      const currElapsedTime = calculateWeeksDifference(currReleaseDate);
+      const currAssetCount = releases[i].releaseAssets.nodes.length;
+      let currTotalAssetDownloads = 0;
+
+      for (let j = 0; j < currAssetCount; j++) {
+        currTotalAssetDownloads += releases[i].releaseAssets.nodes[j].downloadCount;
+      }
+
+      if (currTotalAssetDownloads / currElapsedTime > maxReleaseWeeklyDownloads) {
+        maxReleaseWeeklyDownloads = currTotalAssetDownloads / currElapsedTime;
+      }
+    }
+
+    const correctness =
+      0.5 * (totalClosedIssues / (totalOpenIssues + totalClosedIssues)) +
+      0.5 * (lastReleaseWeeklyDownloads / maxReleaseWeeklyDownloads);
+
+    return correctness;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    // Handle the error or return a default value if necessary
+    return 0;
+  }
+}
+
+export { getCorrectness };
+
+function getGitHubRepoInfo(gitHubLink: string): { owner: string; name: string } | null {
+  const regex = /github\.com\/([^/]+)\/([^/]+)/;
+  const match = gitHubLink.match(regex);
+
+  if (match && match.length === 3) {
+    const owner = match[1];
+    const name = match[2];
+    return { owner, name };
+  }
+
+  return null;
+}
+
+function calculateWeeksDifference(timestamp: string): number {
+  // Convert the timestamp to a JavaScript Date object
+  const startTime = new Date(timestamp);
+
+  // Check if the provided timestamp is a valid date
+  if (isNaN(startTime.getTime())) {
+    console.error('Invalid timestamp format');
+    return -1;
+  }
+
+  // Get the current time
+  const currentTime = new Date();
+
+  // Calculate the time difference in milliseconds
+  const timeDifferenceMs = currentTime.getTime() - startTime.getTime();
+
+  // Convert the time difference to weeks
+  const weeksDifference = timeDifferenceMs / (1000 * 60 * 60 * 24 * 7);
+
+  return weeksDifference;
 }
