@@ -3,7 +3,11 @@ import { getCorrectness } from "./correctnessRunner";
 
 const limiter = new RateLimiter();
 async function main() {
-    const correctness = await getCorrectness("https://github.com/godotengine/godot");
+    // Example Urls: 
+    // https://github.com/godotengine/godot
+    // https://github.com/facebookresearch/nougat
+    // https://github.com/MonoGame/MonoGame
+    const correctness = await getCorrectness("https://github.com/MonoGame/MonoGame");
     console.log(correctness);
 }
 
