@@ -3,6 +3,7 @@ import { get_urls, parseFromGitLink } from "../utils/utils";
 import * as LicenseRunner from "./licenseMetric/licenseRunner";
 import * as BusFactorRunner from "./busFactorMetric/busFactorRunner";
 import * as RampUpRunner from "./rampUpMetric/rampUpRunner";
+import * as RespMaintRunner from "./respMaintMetric/respMaintRunner";
 
 async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
   const url_list = get_urls(filepath);
@@ -25,7 +26,8 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
     );
 
     //RESPONSIVE MAINTAINER SCORE
-    const maintainerScore: number = 0;
+    const maintainerScore: number = await RespMaintRunner.getRespMaintScore(url);
+
 
     //CORRECTNESS SCORE
     const correctnessScore: number = 0;
