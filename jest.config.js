@@ -6,7 +6,7 @@ module.exports = {
   // },
   // setupFiles: ["<rootDir>/setupTests.js"], // Run setupTests.js before tests.
   // collectCoverage: true, // Enable code coverage reporting.
-  // coverageReporters: ["html", "text-summary"], // Specify coverage report formats.
+   coverageReporters: ["html", "text-summary"], // Specify coverage report formats.
   // reporters: ["default"], // Use the default test reporter.
   // moduleNameMapper: {
   //   // Map module imports to mock files.

@@ -4,7 +4,7 @@
   "description": "Basic Package For Beginning The CLI",
   "main": "index.js",
   "scripts": {
-    "test": "cli test",
+    "test": "jest . --verbose --coverage",
     "build": "tsc --project ./tsconfig.json && chmod +x ./src/run.js",
     "build_windows": "tsc --project ./tsconfig.json && node ./src/run.js"
   },
