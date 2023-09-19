@@ -1,96 +1,238 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
+import axios from 'axios';
 
-import axios, { AxiosResponse } from 'axios';
+const graphqlEndpoint = 'https://api.github.com/graphql';
 
-// Define the GitHub owner and repository name variables
-export function getOwnerAndRepoFromUrl(url: string): { owner: string; repo: string } {
-  const urlParts = url.split('/');
-  if (urlParts.length >= 4 && urlParts[0] === 'https:' && urlParts[2] === 'github.com') {
-    const owner = urlParts[3];
-    const repo = urlParts[4];
-    return { owner, repo };
-  } else {
-    throw new Error('Invalid GitHub repository URL');
-  }
-}
+  const variables = {
+    owner,
+    name,
+  };
 
-// Function to check if the repository has releases
-export function checkReleases(releaseAssetsUrl: string, headers: any): Promise<boolean> {
-  return axios.get(releaseAssetsUrl, { headers })
-    .then((response: AxiosResponse) => {
-      return response.data && response.data.assets && response.data.assets.length > 0;
-    })
-    .catch(error => {
-      console.error('Error checking releases:', error);
-      return false;
-    });
-}
-
-// Function to fetch the weekly downloads for release assets
-export function fetchWeeklyReleaseDownloads(releaseAssetsUrl: string, headers: any): Promise<number> {
-  const now = new Date();
-  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // One week ago
-
-  return axios.get(releaseAssetsUrl, { headers })
-    .then((response: AxiosResponse) => {
-      const release = response.data;
-      if (release && release.assets) {
-        let weeklyDownloads = 0;
-        for (const asset of release.assets) {
-          if (asset.created_at >= oneWeekAgo.toISOString()) {
-            weeklyDownloads += asset.download_count || 0;
-          }
-        }
-        return weeklyDownloads;
+  return axios
+    .post(
+      graphqlEndpoint,
+      {
+        query: totalIssuesQuery,
+        variables,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${githubToken}`,
+        },
+      }
+    )
+    .then((response) => {
+      const data = response.data.data;
+      if (data && data.repository && data.repository.issues) {
+        return data.repository.issues.totalCount || 0;
       } else {
-        console.error('Unable to retrieve release assets.');
+        console.error('GraphQL response did not contain the expected data structure:', response.data);
         return -1; // Return -1 to indicate an error
       }
     })
-    .catch(error => {
-      console.error('Error fetching weekly downloads:', error);
+    .catch((error) => {
+      console.error('Error fetching total issues:', error);
       return -1; // Return -1 to indicate an error
     });
 }
 
-// Function to fetch the total number of open issues
-export function fetchOpenIssues(openIssuesUrl: string, headers: any): Promise<number> {
-  return axios.get(openIssuesUrl, { headers })
-    .then((response: AxiosResponse) => response.data.length)
-    .catch(error => {
-      console.error('Error fetching open issues:', error);
-      return -1; // Return -1 to indicate an error
-    });
-}
+export function fetchTotalIssues(owner: string, name: string, githubToken: string): Promise<number> {
+  const totalIssuesQuery = `
+    query($owner: String!, $name: String!) {
+      repository(owner: $owner, name: $name) {
+        issues {
+          totalCount
+        }
+      }
+    }
+  `;
 
-// Function to fetch the total number of closed (resolved) issues
-export function fetchClosedIssues(closedIssuesUrl: string, headers: any): Promise<number> {
-  return axios.get(closedIssuesUrl, { headers })
-    .then((response: AxiosResponse) => response.data.length)
-    .catch(error => {
+export function fetchClosedIssues(owner: string, name: string, githubToken: string): Promise<number> {
+  const closedIssuesQuery = `
+    query($owner: String!, $name: String!) {
+      repository(owner: $owner, name: $name) {
+        issues(states: CLOSED) {
+          totalCount
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    owner,
+    name,
+  };
+
+  return axios
+    .post(
+      graphqlEndpoint,
+      {
+        query: closedIssuesQuery,
+        variables,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${githubToken}`,
+        },
+      }
+    )
+    .then((response) => {
+      const data = response.data.data;
+      if (data && data.repository && data.repository.issues) {
+        return data.repository.issues.totalCount || 0;
+      } else {
+        console.error('GraphQL response did not contain the expected data structure:', response.data);
+        return -1; // Return -1 to indicate an error
+      }
+    })
+    .catch((error) => {
       console.error('Error fetching closed issues:', error);
       return -1; // Return -1 to indicate an error
     });
 }
 
-// Function to fetch the number of stars and forks for the repository
-export function fetchRepoStats(repoInfoUrl: string, headers: any): Promise<{ stars: number; forks: number }> {
-  return axios.get(repoInfoUrl, { headers })
-    .then((response: AxiosResponse) => {
-      const repoInfo = response.data;
-      if (repoInfo) {
-        const stars = repoInfo.stargazers_count;
-        const forks = repoInfo.forks_count;
-        return { stars, forks };
-      } else {
-        console.error('Unable to retrieve repository information.');
-        return { stars: -1, forks: -1 }; // Return -1 for stars and forks to indicate an error
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching repository stats:', error);
-      return { stars: -1, forks: -1 }; // Return -1 for stars and forks to indicate an error
+export async function fetchWeeklyDownloads(owner: string, name: string, githubToken: string): Promise<number> {
+  const releasesEndpoint = `https://api.github.com/repos/${owner}/${name}/releases`;
+
+  try {
+    // Make a GET request to fetch the latest release
+    const response = await axios.get(releasesEndpoint, {
+      headers: {
+        Authorization: `Bearer ${githubToken}`,
+      },
+      params: {
+        per_page: 1, // Limit to 1 release to get the latest
+      },
     });
+
+    const releases = response.data;
+    if (Array.isArray(releases) && releases.length > 0) {
+      const latestRelease = releases[0];
+      const assets = latestRelease.assets || [];
+      
+      // Calculate the sum of download counts for all release assets
+      const weeklyDownloads: number = assets.reduce(
+        (total: number, asset: { download_count?: number }) =>
+          total + (asset.download_count || 0),
+        0
+      );
+
+      return weeklyDownloads;
+    } else {
+      console.error('No releases found for the repository.');
+      return -1; // Return -1 to indicate an error
+    }
+  } catch (error) {
+    console.error('Error fetching weekly downloads:', error);
+    return -1; // Return -1 to indicate an error
+  }
 }
 
+export async function fetchAllTimeHighestDownloads(owner: string, name: string, githubToken: string): Promise<number> {
+  const releasesEndpoint = `https://api.github.com/repos/${owner}/${name}/releases`;
+
+  try {
+    // Make a GET request to fetch all releases
+    const response = await axios.get(releasesEndpoint, {
+      headers: {
+        Authorization: `Bearer ${githubToken}`,
+      },
+    });
+
+    const releases = response.data;
+    if (Array.isArray(releases) && releases.length > 0) {
+      let highestDownloads = 0;
+
+      for (const release of releases) {
+        const assets = release.assets || [];
+
+        // Calculate the sum of download counts for all release assets
+        const weeklyDownloads: number = assets.reduce(
+          (total: number, asset: { download_count?: number }) =>
+            total + (asset.download_count || 0),
+          0
+        );
+
+        // Compare with the highest download count found so far
+        if (weeklyDownloads > highestDownloads) {
+          highestDownloads = weeklyDownloads;
+        }
+      }
+
+      return highestDownloads;
+    } else {
+      console.error('No releases found for the repository.');
+      return -1; // Return -1 to indicate an error
+    }
+  } catch (error) {
+    console.error('Error fetching all-time highest downloads:', error);
+    return -1; // Return -1 to indicate an error
+  }
+}
+
+export async function fetchTotalStarsAndForks(owner: string, name: string, githubToken: string): Promise<number> {
+  const repoEndpoint = `https://api.github.com/repos/${owner}/${name}`;
+
+  try {
+    // Make a GET request to fetch repository information
+    const response = await axios.get(repoEndpoint, {
+      headers: {
+        Authorization: `Bearer ${githubToken}`,
+      },
+    });
+
+    const repoData = response.data;
+
+    if (repoData) {
+      return repoData.stargazers_count + repoData.forks_count;
+    } else {
+      console.error('No repository data found.');
+      return -1; // Return -1 to indicate an error
+    }
+  } catch (error) {
+    console.error('Error fetching stars and forks:', error);
+    return -1; // Return -1 to indicate an error
+  }
+}
+
+interface Branch {
+  name: string;
+}
+
+async function fetchBranches(owner: string, repo: string, token: string): Promise<Branch[]> {
+  try {
+    const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/branches`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching branches:', error);
+    throw error;
+  }
+}
+
+export async function findBranchWithMostStarsAndForks(owner: string, repo: string, token: string): Promise<number> {
+  try {
+    const branches = await fetchBranches(owner, repo, token);
+
+    if (branches.length === 0) {
+      throw new Error('No branches found for the repository.');
+    }
+
+    let maxStarsAndForks = 0;
+
+    for (const branch of branches) {
+      const branchStarsAndForks = await fetchTotalStarsAndForks(owner, repo, token);
+      if (branchStarsAndForks > maxStarsAndForks) {
+        maxStarsAndForks = branchStarsAndForks;
+      }
+    }
+
+    return maxStarsAndForks;
+  } catch (error) {
+    console.error('Error finding branch with most stars and forks:', error);
+    throw error;
+  }
+}
