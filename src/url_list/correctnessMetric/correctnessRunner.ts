@@ -76,7 +76,7 @@ async function getCorrectness(url: string) {
 
     if(recent == -1) { // No Releases With Valid Assets
       console.log("No Releases With Valid Assets");
-      return;
+      return totalClosedIssues / (totalClosedIssues + totalOpenIssues);
     }
 
     let recentRelease = releases[recent].releaseAssets.nodes[0].createdAt;

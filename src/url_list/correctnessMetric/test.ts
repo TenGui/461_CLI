@@ -1,7 +1,5 @@
-import { RateLimiter } from "../../utils/apiRateLimit";
 import { getCorrectness } from "./correctnessRunner";
 
-const limiter = new RateLimiter();
 async function main() {
     // Example Urls: 
     // https://github.com/godotengine/godot
@@ -11,7 +9,7 @@ async function main() {
     // https://github.com/meshery/meshery
     // For The Stat To Work The Repo Needs To Have Valid Release Assets
 
-    const correctness = await getCorrectness("https://github.com/meshery/meshery");
+    const correctness = await getCorrectness("https://github.com/williamyang1991/Rerender_A_Video");
     console.log(correctness);
 }
 
