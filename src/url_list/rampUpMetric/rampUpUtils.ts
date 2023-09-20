@@ -8,7 +8,7 @@ async function countLines(dir: string): Promise<number> {
 
 function getFileWithEnd(postfix: string, fileList: string[]): string[] {
   const filteredList = fileList.filter((filename: string) => {
-    return filename.endsWith(postfix);
+    return filename.endsWith(".md");
   });
   return filteredList;
 }
