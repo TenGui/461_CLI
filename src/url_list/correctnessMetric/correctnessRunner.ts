@@ -31,19 +31,9 @@ async function getCorrectness(url: string) {
           closedIssues: issues(states: CLOSED) {
             totalCount
           }
-          stargazerCount
-          forkCount
-          releases(first: 50, orderBy: { field: CREATED_AT, direction: DESC }) {
+          releases(first: 100, orderBy: { field: CREATED_AT, direction: DESC }) {
             totalCount
             nodes {
-              repository {
-                stargazers {
-                  totalCount
-                }
-                forks {
-                  totalCount
-                }
-              }
               releaseAssets(first: 20) {
                 nodes {
                   name
@@ -73,47 +63,57 @@ async function getCorrectness(url: string) {
     totalClosedIssues = result.data.data.repository.closedIssues.totalCount;
 
     const releases = result.data.data.repository.releases.nodes;
+    const releasesCount = releases.length;
 
-    // Calculate lastReleaseWeeklyDownloads and maxReleaseWeeklyDownloads here
-    const releaseDate = releases[0].releaseAssets.nodes[0].createdAt;
-    const elapsedTime = calculateWeeksDifference(releaseDate);
-    const assetCount = releases[0].releaseAssets.nodes.length;
-    let totalAssetDownloads = 0;
-
-    for (let i = 0; i < assetCount; i++) {
-      totalAssetDownloads += releases[0].releaseAssets.nodes[i].downloadCount;
+    // Find The First Release With Valid Assets
+    let recent = -1;
+    for(let i = 0; i < releasesCount; i++) {
+      if(releases[i] === undefined || releases[i].releaseAssets === undefined || releases[i].releaseAssets.nodes[0] === undefined)
+        continue;
+      recent = i;
+      break;
     }
 
-    lastReleaseWeeklyDownloads = totalAssetDownloads / elapsedTime;
+    if(recent == -1) { // No Releases With Valid Assets
+      //console.log("No Releases With Valid Assets");
+      return totalClosedIssues / (totalClosedIssues + totalOpenIssues);
+    }
+
+    let recentRelease = releases[recent].releaseAssets.nodes[0].createdAt;
+    let weeksDifference = calculateWeeksDifference(recentRelease);
+    let recentDownloads = releases[recent].releaseAssets.nodes[0].downloadCount;
+    lastReleaseWeeklyDownloads = recentDownloads / weeksDifference;
     maxReleaseWeeklyDownloads = lastReleaseWeeklyDownloads;
 
-    for (let i = 1; i < releases.length; i++) {
-      if (releases[i].releaseAssets.nodes[0] === undefined) continue;
+    // Find The Max Release With Valid Assets
+    for(let i = recent + 1; i < releasesCount; i++) {
+      if(releases[i] === undefined || releases[i].releaseAssets.nodes[0] === undefined)
+        continue;
 
-      const currReleaseDate = releases[i].releaseAssets.nodes[0].createdAt;
-      const currElapsedTime = calculateWeeksDifference(currReleaseDate);
-      const currAssetCount = releases[i].releaseAssets.nodes.length;
-      let currTotalAssetDownloads = 0;
+      recentRelease = releases[i].releaseAssets.nodes[0].createdAt;
+      weeksDifference = calculateWeeksDifference(recentRelease);
+      recentDownloads = releases[i].releaseAssets.nodes[0].downloadCount;
 
-      for (let j = 0; j < currAssetCount; j++) {
-        currTotalAssetDownloads += releases[i].releaseAssets.nodes[j].downloadCount;
-      }
-
-      if (currTotalAssetDownloads / currElapsedTime > maxReleaseWeeklyDownloads) {
-        maxReleaseWeeklyDownloads = currTotalAssetDownloads / currElapsedTime;
-      }
+      let CurrWeeklyDownloads = recentDownloads / weeksDifference;
+      if(CurrWeeklyDownloads > maxReleaseWeeklyDownloads)
+        maxReleaseWeeklyDownloads = CurrWeeklyDownloads;
     }
-
-    const correctness =
-      0.5 * (totalClosedIssues / (totalOpenIssues + totalClosedIssues)) +
-      0.5 * (lastReleaseWeeklyDownloads / maxReleaseWeeklyDownloads);
-
+   
+    let correctness = calcCorrectnessScore(totalClosedIssues, totalOpenIssues, maxReleaseWeeklyDownloads, lastReleaseWeeklyDownloads);
     return correctness;
   } catch (error) {
     console.error('Error fetching data:', error);
     // Handle the error or return a default value if necessary
     return 0;
   }
+}
+
+export async function calcCorrectnessScore(totalClosedIssues, totalOpenIssues, maxReleaseWeeklyDownloads, lastReleaseWeeklyDownloads): number {
+  const correctness =
+    0.5 * (totalClosedIssues / (totalOpenIssues + totalClosedIssues)) +
+    0.5 * (lastReleaseWeeklyDownloads / maxReleaseWeeklyDownloads);
+
+  return correctness;
 }
 
 export { getCorrectness };
