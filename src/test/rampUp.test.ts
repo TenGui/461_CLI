@@ -18,7 +18,7 @@ describe("File Reading", () => {
     expect(lines).toEqual(14);
   });
   it("Reads lines in a list of files", async () => {
-    let lines = await sumLines("", files);
+    let lines = await sumLines(files);
     expect(typeof lines).toBe("number");
   });
   it("Filters files by postfix", async () => {
@@ -27,6 +27,7 @@ describe("File Reading", () => {
     let filteredFiles = await getFileWithEnd(".txt", files);
     expect(getFileWithEnd(".txt", files).length).toEqual(2);
   });
+
 });
 
 describe("Calculating Score", () => {
@@ -54,3 +55,4 @@ describe("Calculating Score", () => {
     expect(calcRampUpScore(25, 200)).toBeLessThan(0.303);
   });
 });
+
