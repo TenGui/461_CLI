@@ -55,7 +55,7 @@ async function getRespMaintScore(url: [string, string]) {
     const timeDiff = closedDate.getTime() - createdDate.getTime();
     totalTime += timeDiff;
   }
-
+  totalTime = totalTime / 1000 / 60 / 60 / 24;
   // Calculate the responsiveMaintainer score.
   const responsiveMaintainerScore = calcRespMaintScore(totalClosedIssues, totalTime);
 
