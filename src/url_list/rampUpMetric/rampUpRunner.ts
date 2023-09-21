@@ -28,7 +28,6 @@ async function getRampUpScore(url: [string, string]): Promise<number> {
     fs.rmSync(dir, { recursive: true, force: true }); //clean up dir
     return calcRampUpScore(linesMD, linesJS);
   } catch (err) {
-    console.error(err);
     return 0;
   }
 }

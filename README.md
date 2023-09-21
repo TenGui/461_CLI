@@ -7,3 +7,7 @@ Cyrus Xu, David Sousa, Shao Ning, Hunag, Caden Brennan, Santiago Mendez
 1. navigate to ./461_CLI
 2. run `npm run build` or `npm run build_windows`
 3. run with `./src/run.js <args>`
+
+### to test
+
+1. run 'npm run test'
