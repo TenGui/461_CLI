@@ -5,12 +5,12 @@ import axios from "axios";
 
 const graphqlEndpoint = "https://api.github.com/graphql";
 
-async function getCorrectness(url: string) {
+async function getCorrectness(url: [string, string]) {
   try {
     const key = process.env.GITHUB_TOKEN;
-    const repoInfo = getGitHubRepoInfo(url);
-    const owner = repoInfo?.owner;
-    const name = repoInfo?.name;
+    
+    const owner = url[0];
+    const name = url[1];
 
     let totalOpenIssues = 0;
     let totalClosedIssues = 0;
@@ -135,21 +135,6 @@ export async function calcCorrectnessScore(
 }
 
 export { getCorrectness };
-
-function getGitHubRepoInfo(
-  gitHubLink: string
-): { owner: string; name: string } | null {
-  const regex = /github\.com\/([^/]+)\/([^/]+)/;
-  const match = gitHubLink.match(regex);
-
-  if (match && match.length === 3) {
-    const owner = match[1];
-    const name = match[2];
-    return { owner, name };
-  }
-
-  return null;
-}
 
 function calculateWeeksDifference(timestamp: string): number {
   // Convert the timestamp to a JavaScript Date object
