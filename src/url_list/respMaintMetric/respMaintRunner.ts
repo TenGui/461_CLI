@@ -4,11 +4,11 @@ dotenv.config();
 
 import axios from "axios";
 
-const graphqlEndpoint = 'https://api.github.com/graphql';
+const graphqlEndpoint = "https://api.github.com/graphql";
 
 async function getRespMaintScore(url: [string, string]) {
   try {
-    const key = process.env.API_KEY;
+    const key = process.env.GITHUB_TOKEN;
     const owner = url[0];
     const name = url[1];
 
@@ -34,37 +34,39 @@ async function getRespMaintScore(url: [string, string]) {
     }
   `;
 
-  const result = await axios({
-    url: graphqlEndpoint,
-    method: 'post',
-    headers: {
-      Authorization: `Bearer ${key}`,
-    },
-    data: {
-      query,
-      variables,
-    },
-  });
+    const result = await axios({
+      url: graphqlEndpoint,
+      method: "post",
+      headers: {
+        Authorization: `Bearer ${key}`,
+      },
+      data: {
+        query,
+        variables,
+      },
+    });
 
-  const closedIssues = result.data.data.repository.issues.nodes;
-  totalClosedIssues = result.data.data.repository.issues.totalCount;
+    const closedIssues = result.data.data.repository.issues.nodes;
+    totalClosedIssues = result.data.data.repository.issues.totalCount;
 
-  for (const issue of closedIssues) {
-    const closedDate = new Date(issue.closedAt);
-    const createdDate = new Date(issue.createdAt);
-    const timeDiff = closedDate.getTime() - createdDate.getTime();
-    totalTime += timeDiff;
-  }
-  totalTime = totalTime / 1000 / 60 / 60 / 24;
-  // Calculate the responsiveMaintainer score.
-  const responsiveMaintainerScore = calcRespMaintScore(totalClosedIssues, totalTime);
+    for (const issue of closedIssues) {
+      const closedDate = new Date(issue.closedAt);
+      const createdDate = new Date(issue.createdAt);
+      const timeDiff = closedDate.getTime() - createdDate.getTime();
+      totalTime += timeDiff;
+    }
+    totalTime = totalTime / 1000 / 60 / 60 / 24;
+    // Calculate the responsiveMaintainer score.
+    const responsiveMaintainerScore = calcRespMaintScore(
+      totalClosedIssues,
+      totalTime
+    );
 
-  return responsiveMaintainerScore;
-
-} catch (error) {
-    console.error('Error fetching total issues:', error);
-    return 0; 
+    return responsiveMaintainerScore;
+  } catch (error) {
+    console.error("Error fetching total issues:", error);
+    return 0;
   }
 }
 
-export { getRespMaintScore }; 
+export { getRespMaintScore };
