@@ -32,7 +32,9 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
     );
 
     //CORRECTNESS SCORE
-    const correctnessScore: number = 0;
+    const correctnessScore: number = await CorrectnessRunner.getCorrectness(
+      url
+    );
 
     //OVERALL SCORE
     const multipliers = {
