@@ -8,9 +8,8 @@ const graphqlEndpoint = 'https://api.github.com/graphql';
 
 async function getRespMaintScore(url: [string, string]) {
   try {
-    const key = process.env.API_KEY;
-    const owner = url[0];
-    const name = url[1];
+    const key = process.env.GITHUB_TOKEN;
+    const owner = url[0], name = url[1];
 
     let totalClosedIssues = 0;
     let totalTime = 0;
@@ -20,19 +19,7 @@ async function getRespMaintScore(url: [string, string]) {
       name,
     };
 
-    const query = `
-    query {
-      repository(owner: "${owner}", name: "${name}") {
-        issues(last:50, states: CLOSED) {
-          totalCount
-          nodes {
-            closedAt
-            createdAt
-          }
-        }
-      }
-    }
-  `;
+    const query = ` query { repository(owner: "${owner}", name: "${name}") { issues(last:50, states: CLOSED) { totalCount nodes { closedAt createdAt } } } } `;
 
   const result = await axios({
     url: graphqlEndpoint,
@@ -56,13 +43,12 @@ async function getRespMaintScore(url: [string, string]) {
     totalTime += timeDiff;
   }
   totalTime = totalTime / 1000 / 60 / 60 / 24;
-  // Calculate the responsiveMaintainer score.
+
   const responsiveMaintainerScore = calcRespMaintScore(totalClosedIssues, totalTime);
 
   return responsiveMaintainerScore;
 
 } catch (error) {
-    console.error('Error fetching total issues:', error);
     return 0; 
   }
 }
