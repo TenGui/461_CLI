@@ -6,7 +6,7 @@ describe("Correctness Metric", () => {
         expect(t1).toEqual(1);
     });
     it('Should Return 0.75', () => {
-        const t2 = calcCorrectnessScore(1,1,1,0.5);
+        const t2 = calcCorrectnessScore(1,0,1,0.5);
         expect(t2).toEqual(0.75);
     });
     it('Should Return 0.5', () => {
@@ -14,7 +14,7 @@ describe("Correctness Metric", () => {
         expect(t3).toEqual(0.5);
     });
     it('Should Return 0.5', () => {
-        const t4 = calcCorrectnessScore(0.5,1,1,1);
+        const t4 = calcCorrectnessScore(0,1,1,1);
         expect(t4).toEqual(0.5);
     });
 });
