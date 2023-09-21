@@ -26,8 +26,9 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
     );
 
     //RESPONSIVE MAINTAINER SCORE
-    const maintainerScore: number = await RespMaintRunner.getRespMaintScore(url);
-
+    const maintainerScore: number = await RespMaintRunner.getRespMaintScore(
+      url
+    );
 
     //CORRECTNESS SCORE
     const correctnessScore: number = 0;

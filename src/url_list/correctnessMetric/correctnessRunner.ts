@@ -3,11 +3,11 @@ dotenv.config();
 
 import axios from "axios";
 
-const graphqlEndpoint = 'https://api.github.com/graphql';
+const graphqlEndpoint = "https://api.github.com/graphql";
 
 async function getCorrectness(url: string) {
   try {
-    const key = process.env.API_KEY;
+    const key = process.env.GITHUB_TOKEN;
     const repoInfo = getGitHubRepoInfo(url);
     const owner = repoInfo?.owner;
     const name = repoInfo?.name;
@@ -49,7 +49,7 @@ async function getCorrectness(url: string) {
 
     const result = await axios({
       url: graphqlEndpoint,
-      method: 'post',
+      method: "post",
       headers: {
         Authorization: `Bearer ${key}`,
       },
@@ -67,14 +67,19 @@ async function getCorrectness(url: string) {
 
     // Find The First Release With Valid Assets
     let recent = -1;
-    for(let i = 0; i < releasesCount; i++) {
-      if(releases[i] === undefined || releases[i].releaseAssets === undefined || releases[i].releaseAssets.nodes[0] === undefined)
+    for (let i = 0; i < releasesCount; i++) {
+      if (
+        releases[i] === undefined ||
+        releases[i].releaseAssets === undefined ||
+        releases[i].releaseAssets.nodes[0] === undefined
+      )
         continue;
       recent = i;
       break;
     }
 
-    if(recent == -1) { // No Releases With Valid Assets
+    if (recent == -1) {
+      // No Releases With Valid Assets
       //console.log("No Releases With Valid Assets");
       return totalClosedIssues / (totalClosedIssues + totalOpenIssues);
     }
@@ -86,8 +91,11 @@ async function getCorrectness(url: string) {
     maxReleaseWeeklyDownloads = lastReleaseWeeklyDownloads;
 
     // Find The Max Release With Valid Assets
-    for(let i = recent + 1; i < releasesCount; i++) {
-      if(releases[i] === undefined || releases[i].releaseAssets.nodes[0] === undefined)
+    for (let i = recent + 1; i < releasesCount; i++) {
+      if (
+        releases[i] === undefined ||
+        releases[i].releaseAssets.nodes[0] === undefined
+      )
         continue;
 
       recentRelease = releases[i].releaseAssets.nodes[0].createdAt;
@@ -95,20 +103,30 @@ async function getCorrectness(url: string) {
       recentDownloads = releases[i].releaseAssets.nodes[0].downloadCount;
 
       let CurrWeeklyDownloads = recentDownloads / weeksDifference;
-      if(CurrWeeklyDownloads > maxReleaseWeeklyDownloads)
+      if (CurrWeeklyDownloads > maxReleaseWeeklyDownloads)
         maxReleaseWeeklyDownloads = CurrWeeklyDownloads;
     }
-   
-    let correctness = calcCorrectnessScore(totalClosedIssues, totalOpenIssues, maxReleaseWeeklyDownloads, lastReleaseWeeklyDownloads);
+
+    let correctness = calcCorrectnessScore(
+      totalClosedIssues,
+      totalOpenIssues,
+      maxReleaseWeeklyDownloads,
+      lastReleaseWeeklyDownloads
+    );
     return correctness;
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error("Error fetching data:", error);
     // Handle the error or return a default value if necessary
     return 0;
   }
 }
 
-export async function calcCorrectnessScore(totalClosedIssues, totalOpenIssues, maxReleaseWeeklyDownloads, lastReleaseWeeklyDownloads): number {
+export async function calcCorrectnessScore(
+  totalClosedIssues: number,
+  totalOpenIssues: number,
+  maxReleaseWeeklyDownloads: number,
+  lastReleaseWeeklyDownloads: number
+): Promise<number> {
   const correctness =
     0.5 * (totalClosedIssues / (totalOpenIssues + totalClosedIssues)) +
     0.5 * (lastReleaseWeeklyDownloads / maxReleaseWeeklyDownloads);
@@ -118,7 +136,9 @@ export async function calcCorrectnessScore(totalClosedIssues, totalOpenIssues, m
 
 export { getCorrectness };
 
-function getGitHubRepoInfo(gitHubLink: string): { owner: string; name: string } | null {
+function getGitHubRepoInfo(
+  gitHubLink: string
+): { owner: string; name: string } | null {
   const regex = /github\.com\/([^/]+)\/([^/]+)/;
   const match = gitHubLink.match(regex);
 
@@ -137,7 +157,7 @@ function calculateWeeksDifference(timestamp: string): number {
 
   // Check if the provided timestamp is a valid date
   if (isNaN(startTime.getTime())) {
-    console.error('Invalid timestamp format');
+    console.error("Invalid timestamp format");
     return -1;
   }
 

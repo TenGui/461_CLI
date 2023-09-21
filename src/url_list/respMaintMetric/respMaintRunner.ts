@@ -4,7 +4,7 @@ dotenv.config();
 
 import axios from "axios";
 
-const graphqlEndpoint = 'https://api.github.com/graphql';
+const graphqlEndpoint = "https://api.github.com/graphql";
 
 async function getRespMaintScore(url: [string, string]) {
   try {
@@ -21,20 +21,20 @@ async function getRespMaintScore(url: [string, string]) {
 
     const query = ` query { repository(owner: "${owner}", name: "${name}") { issues(last:50, states: CLOSED) { totalCount nodes { closedAt createdAt } } } } `;
 
-  const result = await axios({
-    url: graphqlEndpoint,
-    method: 'post',
-    headers: {
-      Authorization: `Bearer ${key}`,
-    },
-    data: {
-      query,
-      variables,
-    },
-  });
+    const result = await axios({
+      url: graphqlEndpoint,
+      method: "post",
+      headers: {
+        Authorization: `Bearer ${key}`,
+      },
+      data: {
+        query,
+        variables,
+      },
+    });
 
-  const closedIssues = result.data.data.repository.issues.nodes;
-  totalClosedIssues = result.data.data.repository.issues.totalCount;
+    const closedIssues = result.data.data.repository.issues.nodes;
+    totalClosedIssues = result.data.data.repository.issues.totalCount;
 
   for (const issue of closedIssues) {
     const closedDate = new Date(issue.closedAt);
@@ -53,4 +53,4 @@ async function getRespMaintScore(url: [string, string]) {
   }
 }
 
-export { getRespMaintScore }; 
+export { getRespMaintScore };
