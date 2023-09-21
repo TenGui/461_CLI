@@ -108,7 +108,7 @@ async function getCorrectness(url: string) {
   }
 }
 
-export async function calcCorrectnessScore(totalClosedIssues, totalOpenIssues, maxReleaseWeeklyDownloads, lastReleaseWeeklyDownloads): number {
+export async function calcCorrectnessScore(totalClosedIssues: number, totalOpenIssues: number, maxReleaseWeeklyDownloads: number, lastReleaseWeeklyDownloads: number): Promise<number> {
   const correctness =
     0.5 * (totalClosedIssues / (totalOpenIssues + totalClosedIssues)) +
     0.5 * (lastReleaseWeeklyDownloads / maxReleaseWeeklyDownloads);
