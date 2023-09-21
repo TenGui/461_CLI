@@ -27,14 +27,14 @@ if (process.argv[2] == "install") {
       }
     }
     
-    const testCasesPassedRegex = /Tests:\s+(\d+)\s+passed,\s+(\d+)\s+total/;
+    const testCasesPassedRegex = /Tests:\s*(?:(\d+)\s+failed,\s*)?(\d+)\s+passed,\s+(\d+)\s+total/;
     const testCasesPassed = outputInfo.match(testCasesPassedRegex);
     if (!testCasesPassed) {
       process.exit(1);
     }
     else{
-      const passed: number = parseInt(testCasesPassed[1]);
-      const total: number = parseInt(testCasesPassed[2]);
+      const passed: number = parseInt(testCasesPassed[2]);
+      const total: number = parseInt(testCasesPassed[3]);
       const coverage = JSON.parse(fs.readFileSync(path.join(process.cwd(), "/coverage/coverage-summary.json"), {encoding: "utf8"}));
       const line_coverage = coverage.total.lines.pct;
       console.log(`${passed}/${total} test cases passed. ${line_coverage}% line coverage achieved`);
