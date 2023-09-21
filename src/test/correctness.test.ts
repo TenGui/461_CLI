@@ -2,7 +2,7 @@ import {calcCorrectnessScore} from "../url_list/correctnessMetric/correctnessRun
 
 describe("Correctness Metric", () => {
     it('Should Return 1', () => {
-        const t1 = calcCorrectnessScore(1,1,1,1);
+        const t1 = calcCorrectnessScore(1,0,1,1);
         expect(t1).toEqual(1);
     });
     it('Should Return 0.75', () => {
