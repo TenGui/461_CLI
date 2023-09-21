@@ -4,6 +4,7 @@ import * as LicenseRunner from "./licenseMetric/licenseRunner";
 import * as BusFactorRunner from "./busFactorMetric/busFactorRunner";
 import * as RampUpRunner from "./rampUpMetric/rampUpRunner";
 import * as RespMaintRunner from "./respMaintMetric/respMaintRunner";
+import * as CorrectnessRunner from "./correctnessMetric/correctnessRunner";
 
 async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
   const url_list = get_urls(filepath);

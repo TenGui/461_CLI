@@ -1,4 +1,5 @@
 import { getCorrectness } from "./correctnessRunner";
+import { parseFromGitLink } from "../../utils/utils";
 
 async function main() {
     // Example Urls: 
@@ -12,7 +13,8 @@ async function main() {
     //
     // For The Stat To Work The Repo Needs To Have Valid Release Assets
 
-    const correctness = await getCorrectness("https://github.com/spatie/laravel-event-sourcing");
+    const url = parseFromGitLink("https://github.com/williamyang1991/Rerender_A_Video");
+    const correctness = await getCorrectness(url);
     console.log(correctness);
 }
 
