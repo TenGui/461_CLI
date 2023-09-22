@@ -13,7 +13,7 @@ async function main() {
     //
     // For The Stat To Work The Repo Needs To Have Valid Release Assets
 
-    const url = parseFromGitLink("https://github.com/williamyang1991/Rerender_A_Video");
+    const url = parseFromGitLink("https://github.com/jonschlinkert/is-even");
     const correctness = await getCorrectness(url);
     console.log(correctness);
 }

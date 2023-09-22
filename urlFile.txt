@@ -1,1 +1,1 @@
-https://github.com/facebookresearch/nougat
+https://github.com/absurd-npm/is-odd-num
