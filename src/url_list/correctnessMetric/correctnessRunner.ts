@@ -62,6 +62,8 @@ async function getCorrectness(url: [string, string]) {
     totalOpenIssues = result.data.data.repository.openIssues.totalCount;
     totalClosedIssues = result.data.data.repository.closedIssues.totalCount;
 
+    if(totalOpenIssues + totalClosedIssues == 0) { totalClosedIssues = 0; totalOpenIssues = 1; };
+
     const releases = result.data.data.repository.releases.nodes;
     const releasesCount = releases.length;
 
