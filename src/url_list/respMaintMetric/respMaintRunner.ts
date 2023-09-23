@@ -19,18 +19,14 @@ async function getRespMaintScore(url: [string, string]) {
     const closedIssues = result.data.data.repository.issues.nodes;
     totalClosedIssues = result.data.data.repository.issues.totalCount;
 
-  // Make thi part into a function.
   for (const issue of closedIssues) {
     const closedDate = new Date(issue.closedAt), createdDate = new Date(issue.createdAt), timeDiff = closedDate.getTime() - createdDate.getTime();
     totalTime += timeDiff;
   }
   totalTime = totalTime / 1000 / 60 / 60 / 24;
-  // End of function.
 
   const responsiveMaintainerScore = calcRespMaintScore(totalClosedIssues, totalTime);
-
   return responsiveMaintainerScore;
-
 } catch (error) {
     return 0; 
   }
