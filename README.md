@@ -10,4 +10,4 @@ Cyrus Xu, David Sousa, Shao Ning, Hunag, Caden Brennan, Santiago Mendez
 
 ### to test
 
-1. run 'npm run test'
+1. run `npm run test`
