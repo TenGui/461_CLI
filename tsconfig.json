@@ -1,5 +1,5 @@
 {
-  "files": ["src/run.ts"],
+  "files": ["run.ts"],
   "exclude": ["src/*"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest /src --coverage --silent",
-    "build": "tsc --project ./tsconfig.json && chmod +x ./src/run.js",
+    "build": "tsc --project ./tsconfig.json && chmod +x ./run.js ; mv ./run.js ./run",
     "build_windows": "tsc --project ./tsconfig.json && node ./src/run.js"
   },
   "repository": {
