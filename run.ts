@@ -12,6 +12,13 @@ if (process.argv.length != 3) {
   process.exit(1);
 }
 
+if (!process.env.GITHUB_TOKEN) {
+  process.exit(1);
+}
+if (!process.env.LOG_FILE) {
+  process.exit(1);
+}
+
 if (process.argv[2] == "install") {
   const installResult: boolean = runInstall.install();
   installResult ? process.exit(0) : process.exit(1);
