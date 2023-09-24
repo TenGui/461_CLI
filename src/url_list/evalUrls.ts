@@ -8,6 +8,7 @@ import * as CorrectnessRunner from "./correctnessMetric/correctnessRunner";
 
 async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
   const url_list = get_urls(filepath);
+  var finished = 0;
   url_list.forEach(async (urlstr) => {
     let url: [string, string] = ["", ""];
     if (urlstr.startsWith("https://www.npmjs.com")) {
@@ -24,6 +25,7 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
 
     //RAMPUP SCORE
     const rampUpScore: number = await RampUpRunner.getRampUpScore(url);
+    // const rampUpScore: number = 0;
 
     //BUSFACTOR SCORE
     const busFactorScore: number = await BusFactorRunner.getBusFactorScore(
@@ -77,7 +79,12 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
     console.log(
       `{"URL": "${urlstr}", "NetScore": ${overallScore}, "RampUp": ${adjustedScores.rampUpScore}, "Correctness": ${adjustedScores.correctnessScore}, "BusFactor": ${adjustedScores.busFactorScore}, "ResponsiveMaintainer": ${adjustedScores.maintainerScore}, "License": ${adjustedScores.licenseScore}}`
     );
+    finished += 1;
   });
+  while (finished < url_list.length) {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+  }
+  process.exit(0);
 }
 
 export { eval_file };

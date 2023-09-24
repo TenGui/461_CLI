@@ -10,13 +10,16 @@ async function getRampUpScore(url: [string, string]): Promise<number> {
     const dir = path.join(process.cwd(), `/rampup_repos/${url[0]}/${url[1]}`);
     await fs.rmSync(dir, { recursive: true, force: true }); //clear dir
     await fs.mkdirSync(dir, { recursive: true }); //create dir
-    await git.clone({
-      fs,
-      http,
-      dir: path.join(dir, "/mainrepo"),
-      corsProxy: "https://cors.isomorphic-git.org",
-      url: `https://github.com/${url[0]}/${url[1]}`,
-    });
+    await Promise.any([
+      git.clone({
+        fs,
+        http,
+        dir: path.join(dir, "/mainrepo"),
+        corsProxy: "https://cors.isomorphic-git.org",
+        url: `https://github.com/${url[0]}/${url[1]}`,
+      }),
+      new Promise((resolve) => setTimeout(resolve, 8000)),
+    ]);
     const fileList = (await fs.readdirSync(dir, {
       recursive: true,
     })) as string[];
