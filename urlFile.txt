@@ -1,1 +1,0 @@
-https://github.com/absurd-npm/is-odd-num

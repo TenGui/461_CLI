@@ -141,13 +141,13 @@ export async function calcCorrectnessScore(
 
 export { getCorrectness };
 
-function calculateWeeksDifference(timestamp: string): number {
+export function calculateWeeksDifference(timestamp: string): number {
   // Convert the timestamp to a JavaScript Date object
   const startTime = new Date(timestamp);
 
   // Check if the provided timestamp is a valid date
   if (isNaN(startTime.getTime())) {
-    console.error("Invalid timestamp format");
+    //console.error("Invalid timestamp format");
     return -1;
   }
 
