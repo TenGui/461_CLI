@@ -54,6 +54,7 @@ if (process.argv[2] == "install") {
       console.log(
         `${passed}/${total} test cases passed. ${line_coverage}% line coverage achieved.`
       );
+      process.exit(0);
     }
   } catch (err) {
     process.exit(1);
