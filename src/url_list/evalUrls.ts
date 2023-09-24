@@ -1,5 +1,5 @@
 import { RateLimiter } from "../utils/apiRateLimit";
-import { get_urls, parseFromGitLink } from "../utils/utils";
+import { GetDetailsFromNPM, get_urls, parseFromGitLink } from "../utils/utils";
 import * as LicenseRunner from "./licenseMetric/licenseRunner";
 import * as BusFactorRunner from "./busFactorMetric/busFactorRunner";
 import * as RampUpRunner from "./rampUpMetric/rampUpRunner";
@@ -9,8 +9,13 @@ import * as CorrectnessRunner from "./correctnessMetric/correctnessRunner";
 async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
   const url_list = get_urls(filepath);
   url_list.forEach(async (urlstr) => {
+    let url: [string, string] = ["", ""];
+    if (urlstr.startsWith("https://www.npmjs.com")) {
+      url = await GetDetailsFromNPM(urlstr);
+    } else {
+      url = parseFromGitLink(urlstr);
+    }
     const limiter = new RateLimiter();
-    const url = parseFromGitLink(urlstr);
     //LICENSE SCORE
     const licenseScore: number = await LicenseRunner.getLicenseScore(
       limiter,

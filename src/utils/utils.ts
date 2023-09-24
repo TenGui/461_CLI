@@ -17,3 +17,15 @@ export function get_urls(filepath: string): string[] {
     process.exit(-1);
   }
 }
+
+export async function GetDetailsFromNPM(
+  url: string
+): Promise<[string, string]> {
+  const packagename = url.split("/").pop();
+  const data = await fetch(`https://registry.npmjs.org/${packagename}`)
+    .then((res) => res.json())
+    .then((data) => data.repository.url);
+  const datasplit = data.split("/");
+  const repo = datasplit.pop().split(".")[0];
+  return [datasplit.pop(), repo];
+}
