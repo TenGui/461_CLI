@@ -75,7 +75,7 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
       ) / 100000;
 
     console.log(
-      `{"URL": ${urlstr}, "NetScore": ${overallScore}, "RampUp": ${adjustedScores.rampUpScore}, "Correctness": ${adjustedScores.correctnessScore}, "BusFactor": ${adjustedScores.busFactorScore}, "ResponsiveMaintainer": ${adjustedScores.maintainerScore}, "License": ${adjustedScores.licenseScore}}`
+      `{"URL": "${urlstr}", "NetScore": ${overallScore}, "RampUp": ${adjustedScores.rampUpScore}, "Correctness": ${adjustedScores.correctnessScore}, "BusFactor": ${adjustedScores.busFactorScore}, "ResponsiveMaintainer": ${adjustedScores.maintainerScore}, "License": ${adjustedScores.licenseScore}}`
     );
   });
 }

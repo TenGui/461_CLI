@@ -45,7 +45,7 @@ if (process.argv[2] == "install") {
       );
       const line_coverage = coverage.total.lines.pct;
       console.log(
-        `${passed}/${total} test cases passed. ${line_coverage}% line coverage achieved`
+        `${passed}/${total} test cases passed. ${line_coverage}% line coverage achieved.`
       );
     }
   } catch (err) {
