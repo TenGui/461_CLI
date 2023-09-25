@@ -53,7 +53,7 @@ if (process.argv[2] == "test") {
           { encoding: "utf8" }
         )
       );
-      const line_coverage = coverage.total.lines.pct;
+      const line_coverage = coverage.total.lines.pct.toFixed(0);
       console.log(
         `${passed}/${total} test cases passed. ${line_coverage}% line coverage achieved.`
       );
