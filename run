@@ -2,8 +2,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const runInstall = require("./src/install/installProcess");
-const dotenv = require("dotenv");
-dotenv.config();
+require("./envs");
 if (process.argv.length != 3) {
     console.log("Usage: \n./run install\n./run <url_file>\n./run test");
     process.exit(1);
@@ -22,6 +21,8 @@ const evalUrls = require("./src/url_list/evalUrls");
 const child_process = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const dotenv = require("dotenv");
+dotenv.config();
 if (process.argv[2] == "test") {
     try {
         const npmTestProcess = child_process.spawnSync("npm", ["test"], {

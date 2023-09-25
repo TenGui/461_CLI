@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 import * as runInstall from "./src/install/installProcess";
-import * as dotenv from "dotenv";
 
-dotenv.config();
+require("./envs");
 
 if (process.argv.length != 3) {
   console.log("Usage: \n./run install\n./run <url_file>\n./run test");
@@ -23,6 +22,9 @@ import * as evalUrls from "./src/url_list/evalUrls";
 import * as child_process from "child_process";
 import * as fs from "fs";
 import * as path from "path";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 if (process.argv[2] == "test") {
   try {
