@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 import * as runInstall from "./src/install/installProcess";
 
-require("./envs");
-
 if (process.argv.length != 3) {
   console.log("Usage: \n./run install\n./run <url_file>\n./run test");
   process.exit(1);
@@ -18,6 +16,7 @@ if (process.argv[2] == "install") {
   const installResult: boolean = runInstall.install();
   installResult ? process.exit(0) : process.exit(1);
 }
+
 import * as evalUrls from "./src/url_list/evalUrls";
 import * as child_process from "child_process";
 import * as fs from "fs";
