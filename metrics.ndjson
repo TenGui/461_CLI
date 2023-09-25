@@ -1,0 +1,5 @@
+{"metric": "RAMP_UP_SCORE", "api": "clone", "filepath": "src/url_list/rampUpMetric/rampUpRunner.ts", "line":14}
+{"metric": "LICENSE_SCORE", "api": "rest", "filepath": "src/url_list/licenseMetric/licenseRunner.ts", "line":4}
+{"metric": "BUS_FACTOR_SCORE", "api": "rest", "filepath": "src/url_list/busFactorMetric/busFactorRunner.ts", "line":7}
+{"metric": "CORRECTNESS_SCORE", "api": "graphql", "filepath": "src/url_list/correctnessMetric/correctnessRunner.ts", "line":50}
+{"metric": "RESPONSIVE_MAINTAINER_SCORE", "api": "graphql", "filepath": "src/url_list/respMaintMetric/respMaintRunner.ts", "line":17}

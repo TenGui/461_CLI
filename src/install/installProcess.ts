@@ -32,15 +32,15 @@ function install(
       });
       fs.appendFileSync(filePath, `=== ${dependency} Installation ===\n`);
       fs.appendFileSync(filePath, `STDOUT:\n${result}\n`);
-      console.log(`Installation of ${dependency} completed successfully.`);
+      // console.log(`Installation of ${dependency} completed successfully.`);
     } catch (error) {
-      console.log(`Installation of ${dependency} failed.`);
-      console.log(error);
-      console.log("\x1b[41m", "Installation cancelled.", "\x1b[0m");
+      // console.log(`Installation of ${dependency} failed.`);
+      // console.log(error);
+      // console.log("\x1b[41m", "Installation cancelled.", "\x1b[0m");
       return false;
     }
   }
-  console.log("\x1b[32m", "Installation completed successfully.", "\x1b[0m");
+  // console.log("\x1b[32m", "Installation completed successfully.", "\x1b[0m");
   return true;
 }
 

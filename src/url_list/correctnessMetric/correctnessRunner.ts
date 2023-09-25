@@ -8,7 +8,7 @@ const graphqlEndpoint = "https://api.github.com/graphql";
 async function getCorrectness(url: [string, string]) {
   try {
     const key = process.env.GITHUB_TOKEN;
-    
+
     const owner = url[0];
     const name = url[1];
 
@@ -62,7 +62,10 @@ async function getCorrectness(url: [string, string]) {
     totalOpenIssues = result.data.data.repository.openIssues.totalCount;
     totalClosedIssues = result.data.data.repository.closedIssues.totalCount;
 
-    if(totalOpenIssues + totalClosedIssues == 0) { totalClosedIssues = 0; totalOpenIssues = 1; };
+    if (totalOpenIssues + totalClosedIssues == 0) {
+      totalClosedIssues = 0;
+      totalOpenIssues = 1;
+    }
 
     const releases = result.data.data.repository.releases.nodes;
     const releasesCount = releases.length;
@@ -117,7 +120,7 @@ async function getCorrectness(url: [string, string]) {
     );
     return correctness;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    // console.error("Error fetching data:", error);
     // Handle the error or return a default value if necessary
     return 0;
   }
@@ -138,13 +141,13 @@ export async function calcCorrectnessScore(
 
 export { getCorrectness };
 
-function calculateWeeksDifference(timestamp: string): number {
+export function calculateWeeksDifference(timestamp: string): number {
   // Convert the timestamp to a JavaScript Date object
   const startTime = new Date(timestamp);
 
   // Check if the provided timestamp is a valid date
   if (isNaN(startTime.getTime())) {
-    console.error("Invalid timestamp format");
+    //console.error("Invalid timestamp format");
     return -1;
   }
 
