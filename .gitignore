@@ -46,7 +46,7 @@ test/*.js
 *.map
 
 ##SPECIAL
-run
-src/**/*.js
+# run
+# src/**/*.js
 .DS_Store
 /rampup_repos
