@@ -11,3 +11,22 @@ Cyrus Xu, David Sousa, Shao Ning, Hunag, Caden Brennan, Santiago Mendez
 ### to test
 
 1. run `npm run test`
+
+/src
+  /install
+    * installProccess.ts
+    Completes install of dependencies in userland. Exits 0 on success and non-zero on failure.
+  /test
+    * apiratelimiter.test.ts
+
+    * busfactor.test.ts
+
+    * correctness.test.ts
+
+    * license.test.ts
+
+    *rampUp.test.ts
+
+    *respmaint.test.ts
+
+  /url_list
