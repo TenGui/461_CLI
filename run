@@ -6,12 +6,6 @@ if (process.argv.length != 3) {
     console.log("Usage: \n./run install\n./run <url_file>\n./run test");
     process.exit(1);
 }
-if (!process.env.GITHUB_TOKEN) {
-    process.exit(1);
-}
-if (!process.env.LOG_FILE) {
-    process.exit(1);
-}
 if (process.argv[2] == "install") {
     const installResult = runInstall.install();
     installResult ? process.exit(0) : process.exit(1);
@@ -22,6 +16,12 @@ const fs = require("fs");
 const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config();
+if (!process.env.GITHUB_TOKEN) {
+    process.exit(1);
+}
+if (!process.env.LOG_FILE) {
+    process.exit(1);
+}
 if (process.argv[2] == "test") {
     try {
         const npmTestProcess = child_process.spawnSync("npm", ["test"], {
