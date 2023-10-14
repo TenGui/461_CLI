@@ -1,5 +1,4 @@
 # Inital Ignores:
-package-lock.json
 node_modules
 .env
 .txt
