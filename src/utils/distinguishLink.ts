@@ -32,7 +32,7 @@ export function getGitHubRepoInfo(repoLink:string) {
       throw new Error('Invalid GitHub repository URL');
     }
   } catch (error) {
-    
+    return {};
   }
 }
 

@@ -23,7 +23,7 @@ function install(
   }
 
   //Install Dependencies
-  for (let dependency in dependencies) {
+  for (const dependency in dependencies) {
     try {
       const command = `npm install ${dependency}`;
       const result = child_process.execSync(command, {
