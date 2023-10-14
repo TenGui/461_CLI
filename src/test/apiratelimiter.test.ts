@@ -8,7 +8,7 @@ describe("API Rate Limiter", () => {
         jest.resetAllMocks();
     });
     it('Should return error if no token', async () => {
-        let ratelimiter = new RateLimiter();
+        const ratelimiter = new RateLimiter();
         ratelimiter.Settoken("");
         const res = await ratelimiter.getGitHubInfo("/repos/expressjs/express");
         expect(console.error).toHaveBeenCalledWith("No env variable 'GITHUB_TOKEN' provided");

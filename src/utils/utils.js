@@ -10,8 +10,9 @@ function parseFromGitLink(url) {
 }
 exports.parseFromGitLink = parseFromGitLink;
 function get_urls(filepath) {
+    const fullpath = path.join(process.cwd(), filepath);
     try {
-        const filedata = fs.readFileSync(filepath, "utf-8");
+        const filedata = fs.readFileSync(fullpath, "utf-8");
         return filedata.split("\n").filter(Boolean);
     }
     catch {
