@@ -18,7 +18,7 @@ function install(packagePath = "/package.json", logFolderPath = "/logs", fileNam
             console.error(`Error creating folder '${dirPath}': ${err}`);
         }
     }
-    for (let dependency in dependencies) {
+    for (const dependency in dependencies) {
         try {
             const command = `npm install ${dependency}`;
             const result = child_process.execSync(command, {
