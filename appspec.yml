@@ -3,6 +3,8 @@ os: linux
 files:
   - source: /
     destination: /home/ec2-user/461_Team4_Phase2
+    overwrite: true
+file_exists_behavior: OVERWRITE
 hooks:
 # ApplicationStop:
 # DownloadBundle:
