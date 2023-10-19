@@ -1,5 +1,5 @@
 #!/bin/bash
 #Stopping existing node servers
-chmod +x /scripts/application_stop.sh
+sudo chmod +x /scripts/application_stop.sh
 echo "Stopping any existing node servers"
-pkill node 
+sudo pkill node 
