@@ -29,7 +29,6 @@ async function getRampUpScore(url) {
         const jsList = (0, rampUpUtils_1.getFileWithEnd)(".js", fileList);
         const linesMD = await (0, rampUpUtils_1.sumLines)(dir, mdList);
         const linesJS = await (0, rampUpUtils_1.sumLines)(dir, jsList);
-        fs.rmSync(dir, { recursive: true, force: true });
         return (0, calcRampUpScore_1.calcRampUpScore)(linesMD, linesJS);
     }
     catch (err) {

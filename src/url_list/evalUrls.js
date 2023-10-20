@@ -8,6 +8,7 @@ const BusFactorRunner = require("./busFactorMetric/busFactorRunner");
 const RampUpRunner = require("./rampUpMetric/rampUpRunner");
 const RespMaintRunner = require("./respMaintMetric/respMaintRunner");
 const CorrectnessRunner = require("./correctnessMetric/correctnessRunner");
+const PR_Runner = require("./PR_metric/pull_request");
 async function eval_file(filepath = "URL_FILE_PATH") {
     const url_list = (0, utils_1.get_urls)(filepath);
     var finished = 0;
@@ -25,6 +26,7 @@ async function eval_file(filepath = "URL_FILE_PATH") {
         const busFactorScore = await BusFactorRunner.getBusFactorScore(limiter, `/repos/${url[0]}/${url[1]}`);
         const maintainerScore = await RespMaintRunner.getRespMaintScore(url);
         const correctnessScore = await CorrectnessRunner.getCorrectness(url);
+        const pull_request_score = await PR_Runner.getPRscore(url);
         const multipliers = {
             license: 0,
             rampUp: 0.15,

@@ -5,6 +5,8 @@ import * as BusFactorRunner from "./busFactorMetric/busFactorRunner";
 import * as RampUpRunner from "./rampUpMetric/rampUpRunner";
 import * as RespMaintRunner from "./respMaintMetric/respMaintRunner";
 import * as CorrectnessRunner from "./correctnessMetric/correctnessRunner";
+import * as PR_Runner from "./PR_metric/pull_request";
+import { pull } from "isomorphic-git";
 
 async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
   const url_list = get_urls(filepath);
@@ -43,6 +45,10 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
       url
     );
 
+    const pull_request_score: number = await PR_Runner.getPRscore(
+      url
+    );
+    
     //OVERALL SCORE
     const multipliers = {
       license: 0,
