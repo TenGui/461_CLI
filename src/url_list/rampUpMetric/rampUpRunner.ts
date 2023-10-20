@@ -27,8 +27,7 @@ async function getRampUpScore(url: [string, string]): Promise<number> {
     const jsList = getFileWithEnd(".js", fileList);
     const linesMD = await sumLines(dir, mdList);
     const linesJS = await sumLines(dir, jsList);
-
-    fs.rmSync(dir, { recursive: true, force: true }); //clean up dir
+    
     return calcRampUpScore(linesMD, linesJS);
   } catch (err) {
     return 0;

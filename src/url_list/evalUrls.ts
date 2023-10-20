@@ -5,6 +5,8 @@ import * as BusFactorRunner from "./busFactorMetric/busFactorRunner";
 import * as RampUpRunner from "./rampUpMetric/rampUpRunner";
 import * as RespMaintRunner from "./respMaintMetric/respMaintRunner";
 import * as CorrectnessRunner from "./correctnessMetric/correctnessRunner";
+import * as PR_Runner from "./PR_metric/pull_request";
+import { pull } from "isomorphic-git";
 
 async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
   const url_list = get_urls(filepath);
@@ -43,13 +45,18 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
       url
     );
 
+    const pull_request_score: number = await PR_Runner.getPRscore(
+      url
+    );
+    
     //OVERALL SCORE
     const multipliers = {
-      license: 0,
+      license: 1,
       rampUp: 0.15,
       busFactor: 0.2,
       maintainer: 0.2,
-      correctness: 0.4,
+      correctness: 0.25,
+      pull_request: 0.2,
     };
 
     const adjustedScores: { [x: string]: number } = {
@@ -58,6 +65,7 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
       busFactorScore: busFactorScore,
       maintainerScore: maintainerScore,
       correctnessScore: correctnessScore,
+      pullrequestScore: pull_request_score,
     };
 
     Object.entries(adjustedScores).forEach(([key, score]): any => {
@@ -72,12 +80,13 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
           multipliers.busFactor * busFactorScore +
           multipliers.maintainer * maintainerScore +
           multipliers.correctness * correctnessScore +
+          multipliers.pull_request * pull_request_score +
           Number.EPSILON) *
           100000
       ) / 100000;
 
     console.log(
-      `{"URL": "${urlstr}", "NET_SCORE": ${overallScore}, "RAMP_UP_SCORE": ${adjustedScores.rampUpScore}, "CORRECTNESS_SCORE": ${adjustedScores.correctnessScore}, "BUS_FACTOR_SCORE": ${adjustedScores.busFactorScore}, "RESPONSIVE_MAINTAINER_SCORE": ${adjustedScores.maintainerScore}, "LICENSE_SCORE": ${adjustedScores.licenseScore}}`
+      `{"URL": "${urlstr}", "NET_SCORE": ${overallScore}, "RAMP_UP_SCORE": ${adjustedScores.rampUpScore}, "CORRECTNESS_SCORE": ${adjustedScores.correctnessScore}, "BUS_FACTOR_SCORE": ${adjustedScores.busFactorScore}, "RESPONSIVE_MAINTAINER_SCORE": ${adjustedScores.maintainerScore}, "LICENSE_SCORE": ${adjustedScores.licenseScore}, "PullRequest": ${adjustedScores.pullrequestScore}}`
     );
     finished += 1;
   });
