@@ -1,3 +1,5 @@
+import { eval_single_file } from "./utils/eval_single_url";
+
 const express = require('express');
 const fs = require('fs');
 
@@ -13,7 +15,7 @@ app.get('/', (req, res) => {
 app.get('/products', (req, res) => {
   res.send([
     {
-      productId: '101',
+      productId: '1011',
       price: 100,
     },
     {
@@ -22,6 +24,23 @@ app.get('/products', (req, res) => {
     },
   ]);
 });
+
+// Add a new endpoint that accepts an "id" parameter
+app.get('/package/:id/rate', async (req, res) => { // Add 'async' keyword here
+  try {
+    let URLs = ["https://www.npmjs.com/package/safe-regex"];
+    const url_file = URLs[req.params.id]; // Get the "id" parameter from the URL
+
+    const output = await eval_single_file(url_file);
+    console.log("test");
+    console.log(output);
+
+    res.status(200).send(output);
+  } catch (error) {
+    res.status(500).send("The package rating system choked on at least one of the metrics");
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Demo app is up and listening to port: ${port}`);

@@ -36,46 +36,46 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sumLines = exports.getFileWithEnd = exports.countLines = void 0;
-var fs = require("fs");
-var path = require("path");
-function countLines(dir) {
-    return __awaiter(this, void 0, void 0, function () {
-        var data, lines;
-        return __generator(this, function (_a) {
-            data = fs.readFileSync(dir);
-            lines = data.toString().split("\n").length;
-            return [2 /*return*/, lines];
-        });
+var eval_single_url_1 = require("./utils/eval_single_url");
+var express = require('express');
+var fs = require('fs');
+var app = express();
+var port = 3000;
+app.get('/', function (req, res) {
+    // Read the HTML content from the HTML file
+    var htmlContent = fs.readFileSync('src/html/index.html', 'utf8');
+    res.send(htmlContent);
+});
+app.get('/products', function (req, res) {
+    res.send([
+        {
+            productId: '1011',
+            price: 100,
+        },
+        {
+            productId: '102',
+            price: 150,
+        },
+    ]);
+});
+// Add a new endpoint that accepts an "id" parameter
+app.get('/package/:id/rate', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var URLs, url_file, output;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                URLs = ["https://www.npmjs.com/package/safe-regex"];
+                url_file = URLs[req.params.id];
+                return [4 /*yield*/, (0, eval_single_url_1.eval_single_file)(url_file)];
+            case 1:
+                output = _a.sent();
+                console.log("test");
+                console.log(output);
+                res.send(output);
+                return [2 /*return*/];
+        }
     });
-}
-exports.countLines = countLines;
-function getFileWithEnd(postfix, fileList) {
-    var filteredList = fileList.filter(function (filename) {
-        return filename.endsWith(postfix);
-    });
-    return filteredList;
-}
-exports.getFileWithEnd = getFileWithEnd;
-function sumLines(dir, fileList) {
-    return __awaiter(this, void 0, void 0, function () {
-        var lines;
-        var _this = this;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, Promise.all(fileList.map(function (filename) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, countLines(path.join(dir, filename))];
-                                case 1: return [2 /*return*/, _a.sent()];
-                            }
-                        });
-                    }); })).then(function (lines) { return lines.reduce(function (a, b) { return a + b; }, 0); })];
-                case 1:
-                    lines = _a.sent();
-                    return [2 /*return*/, lines];
-            }
-        });
-    });
-}
-exports.sumLines = sumLines;
+}); });
+app.listen(port, function () {
+    console.log("Demo app is up and listening to port: ".concat(port));
+});
