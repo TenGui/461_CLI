@@ -17,12 +17,11 @@ async function getPRscore(url) {
         const octokit = new Octokit({
             auth: process.env.GITHUB_TOKEN
         });
-        let allPr = [];
-        let prWithReview = [];
-        let page = 1;
+        let pr_with_review = [];
+        let total_pr = 0;
         let owner = url[0];
         let repo = url[1];
-        while (true) {
+        for (let page = 0; page <= 10; page++) {
             const response = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
                 owner: owner,
                 repo: repo,
@@ -34,12 +33,11 @@ async function getPRscore(url) {
             if (pullRequests.length === 0) {
                 break;
             }
-            const reviewedPr = pullRequests.filter((pr) => pr.requested_reviewers.length > 0);
-            allPr = allPr.concat(reviewedPr);
-            page += 1;
+            const reviewedPr = pullRequests.filter((pr) => pr.requested_reviewers.length > 0 && pr.merged_at != null);
+            pr_with_review = pr_with_review.concat(reviewedPr);
+            total_pr += pullRequests.length;
         }
-        console.log(allPr.length);
-        return linesJS;
+        return total_pr === 0 ? 0 : pr_with_review.length / total_pr;
     }
     catch (err) {
         console.log(err);

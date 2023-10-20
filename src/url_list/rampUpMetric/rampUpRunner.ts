@@ -27,7 +27,7 @@ async function getRampUpScore(url: [string, string]): Promise<number> {
     const jsList = getFileWithEnd(".js", fileList);
     const linesMD = await sumLines(dir, mdList);
     const linesJS = await sumLines(dir, jsList);
-
+    
     return calcRampUpScore(linesMD, linesJS);
   } catch (err) {
     return 0;

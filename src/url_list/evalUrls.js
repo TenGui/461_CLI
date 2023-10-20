@@ -28,11 +28,12 @@ async function eval_file(filepath = "URL_FILE_PATH") {
         const correctnessScore = await CorrectnessRunner.getCorrectness(url);
         const pull_request_score = await PR_Runner.getPRscore(url);
         const multipliers = {
-            license: 0,
+            license: 1,
             rampUp: 0.15,
             busFactor: 0.2,
             maintainer: 0.2,
-            correctness: 0.4,
+            correctness: 0.25,
+            pull_request: 0.2,
         };
         const adjustedScores = {
             licenseScore: licenseScore,
@@ -40,6 +41,7 @@ async function eval_file(filepath = "URL_FILE_PATH") {
             busFactorScore: busFactorScore,
             maintainerScore: maintainerScore,
             correctnessScore: correctnessScore,
+            pullrequestScore: pull_request_score,
         };
         Object.entries(adjustedScores).forEach(([key, score]) => {
             adjustedScores[key] =
@@ -50,9 +52,10 @@ async function eval_file(filepath = "URL_FILE_PATH") {
             multipliers.busFactor * busFactorScore +
             multipliers.maintainer * maintainerScore +
             multipliers.correctness * correctnessScore +
+            multipliers.pull_request * pull_request_score +
             Number.EPSILON) *
             100000) / 100000;
-        console.log(`{"URL": "${urlstr}", "NET_SCORE": ${overallScore}, "RAMP_UP_SCORE": ${adjustedScores.rampUpScore}, "CORRECTNESS_SCORE": ${adjustedScores.correctnessScore}, "BUS_FACTOR_SCORE": ${adjustedScores.busFactorScore}, "RESPONSIVE_MAINTAINER_SCORE": ${adjustedScores.maintainerScore}, "LICENSE_SCORE": ${adjustedScores.licenseScore}}`);
+        console.log(`{"URL": "${urlstr}", "NET_SCORE": ${overallScore}, "RAMP_UP_SCORE": ${adjustedScores.rampUpScore}, "CORRECTNESS_SCORE": ${adjustedScores.correctnessScore}, "BUS_FACTOR_SCORE": ${adjustedScores.busFactorScore}, "RESPONSIVE_MAINTAINER_SCORE": ${adjustedScores.maintainerScore}, "LICENSE_SCORE": ${adjustedScores.licenseScore}, "PullRequest": ${adjustedScores.pullrequestScore}}`);
         finished += 1;
     });
     while (finished < url_list.length) {

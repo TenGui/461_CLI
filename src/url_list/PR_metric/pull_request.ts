@@ -1,7 +1,6 @@
 import * as path from "path";
 import * as fs from "fs";
 import { getFileWithEnd, sumLines } from "../rampUpMetric/rampUpUtils";
-import { pull } from "isomorphic-git";
 const { Octokit } = require("@octokit/rest");
 
 async function getPRscore(url: [string, string]): Promise<number> {
@@ -22,10 +21,12 @@ async function getPRscore(url: [string, string]): Promise<number> {
       });
 
       let pr_with_review: any[] = [];
+      let total_pr = 0;
       let owner = url[0];
       let repo = url[1];
-
-      for (let page = 1; page <= 10; page++) {
+      
+      //We will only evaluate the first 1000 PR's to account for repositories with thousands of PR's
+      for (let page = 0; page <= 10; page++) {
         const response = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
           owner: owner,
           repo: repo,
@@ -35,21 +36,18 @@ async function getPRscore(url: [string, string]): Promise<number> {
         });
         const pullRequests = response.data;
         
-        //Check if there are no PR and we will stop at 1000 pr's to fasten runtime and repositories with thousands of PR's
+        //Check if there are no PR
         if (pullRequests.length === 0) {
           break;
         }
       
         // Filter pull requests that have been reviewed by at least one person
-        const reviewedPr = pullRequests.filter((pr: any) => pr.requested_reviewers.length > 0); // Specify the type of 'pr'
+        const reviewedPr = pullRequests.filter((pr: any) => pr.requested_reviewers.length > 0 && pr.merged_at != null);
         pr_with_review = pr_with_review.concat(reviewedPr);
+        total_pr += pullRequests.length
       }
       
-
-      //NOTE(CHUHAN), FINISHED FINDING ALL PR'S WITH REVIEW, NOW CALCULATE A PR SCORE
-      
-      console.log(pr_with_review.length)
-      return linesJS;
+      return total_pr === 0 ? 0 : pr_with_review.length / total_pr;
     } catch (err) {
       console.log(err);
       return 0;
