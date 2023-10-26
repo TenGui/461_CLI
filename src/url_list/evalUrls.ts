@@ -6,6 +6,7 @@ import * as RampUpRunner from "./rampUpMetric/rampUpRunner";
 import * as RespMaintRunner from "./respMaintMetric/respMaintRunner";
 import * as CorrectnessRunner from "./correctnessMetric/correctnessRunner";
 import * as PR_Runner from "./PR_metric/pull_request";
+import * as versionPinningRunner from "./versionPinningMetric/versionPinning"
 import { pull } from "isomorphic-git";
 
 async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
@@ -48,15 +49,20 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
     const pull_request_score: number = await PR_Runner.getPRscore(
       url
     );
+
+    const versionPinningScore: number = await versionPinningRunner.getScore(
+      url
+    );
     
     //OVERALL SCORE
     const multipliers = {
       license: 1,
       rampUp: 0.15,
-      busFactor: 0.2,
-      maintainer: 0.2,
+      busFactor: 0.15,
+      maintainer: 0.15,
       correctness: 0.25,
       pull_request: 0.2,
+      versionPinning: 0.1
     };
 
     const adjustedScores: { [x: string]: number } = {
@@ -66,6 +72,7 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
       maintainerScore: maintainerScore,
       correctnessScore: correctnessScore,
       pullrequestScore: pull_request_score,
+      versionPinningScore: versionPinningScore
     };
 
     Object.entries(adjustedScores).forEach(([key, score]): any => {

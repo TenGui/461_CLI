@@ -2,14 +2,16 @@ import axios from 'axios';
 import * as fs from 'fs';
 
 
-export async function getScore(url:string){
+export async function getScore(url:string[]): Promise<number>{
     //set up the url string Formatting
-    let splitURL:string[] = url.split("/");    
-    const GITHUB_TOKEN = 'YOUR_PAT';
-    const OWNER = splitURL[3];
-    const REPO = splitURL[4];
-    const FILE_PATH = 'main/package.json';
-    const apiUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${FILE_PATH}`;
+    //let splitURL:string[] = url.split("/");    
+    //const GITHUB_TOKEN = 'YOUR_PAT';
+    //const OWNER = splitURL[3];
+    //const REPO = splitURL[4];
+
+    
+    const FILE_PATH = '/main/package.json';
+    const apiUrl = 'https://raw.githubusercontent.com/' + url[0] +'/' + url[1] + FILE_PATH;
 
     return new Promise ((resolve, reject) =>{
     axios.get(apiUrl)
