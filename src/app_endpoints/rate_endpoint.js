@@ -36,46 +36,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sumLines = exports.getFileWithEnd = exports.countLines = void 0;
-var fs = require("fs");
-var path = require("path");
-function countLines(dir) {
-    return __awaiter(this, void 0, void 0, function () {
-        var data, lines;
-        return __generator(this, function (_a) {
-            data = fs.readFileSync(dir);
-            lines = data.toString().split("\n").length;
-            return [2 /*return*/, lines];
-        });
+var express = require('express');
+var app = express();
+// Import necessary modules or functions
+var eval_single_url_1 = require("../utils/eval_single_url");
+app.get('/package/:id/rate', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var URLs, url_file, output, error_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                URLs = ["https://www.npmjs.com/package/safe-regex"];
+                url_file = URLs[req.params.id];
+                return [4 /*yield*/, (0, eval_single_url_1.eval_single_file)(url_file)];
+            case 1:
+                output = _a.sent();
+                console.log("test");
+                console.log(output);
+                res.status(200).send(output);
+                return [3 /*break*/, 3];
+            case 2:
+                error_1 = _a.sent();
+                res.status(500).send("The package rating system choked on at least one of the metrics");
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
     });
-}
-exports.countLines = countLines;
-function getFileWithEnd(postfix, fileList) {
-    var filteredList = fileList.filter(function (filename) {
-        return filename.endsWith(postfix);
-    });
-    return filteredList;
-}
-exports.getFileWithEnd = getFileWithEnd;
-function sumLines(dir, fileList) {
-    return __awaiter(this, void 0, void 0, function () {
-        var lines;
-        var _this = this;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, Promise.all(fileList.map(function (filename) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, countLines(path.join(dir, filename))];
-                                case 1: return [2 /*return*/, _a.sent()];
-                            }
-                        });
-                    }); })).then(function (lines) { return lines.reduce(function (a, b) { return a + b; }, 0); })];
-                case 1:
-                    lines = _a.sent();
-                    return [2 /*return*/, lines];
-            }
-        });
-    });
-}
-exports.sumLines = sumLines;
+}); });
+exports.default = app;

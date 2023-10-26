@@ -55,5 +55,5 @@ if (process.argv[2] == "test") {
 }
 else {
     const filePath = process.argv[2];
-    evalUrls.eval_file(filePath);
+    const output = evalUrls.eval_file(filePath);
 }
