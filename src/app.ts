@@ -9,6 +9,8 @@ const port = 3000;
 import package_rate_endpoint from './app_endpoints/rate_endpoint'
 app.use('/', package_rate_endpoint);
 
+import router from './app_endpoints/database';
+app.use(router)
 
 //Home Page
 app.get('/', (req, res) => {

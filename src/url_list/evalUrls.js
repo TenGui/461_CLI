@@ -9,6 +9,7 @@ const RampUpRunner = require("./rampUpMetric/rampUpRunner");
 const RespMaintRunner = require("./respMaintMetric/respMaintRunner");
 const CorrectnessRunner = require("./correctnessMetric/correctnessRunner");
 const PR_Runner = require("./PR_metric/pull_request");
+const versionPinningRunner = require("./versionPinningMetric/versionPinning");
 async function eval_file(filepath = "URL_FILE_PATH") {
     const url_list = (0, utils_1.get_urls)(filepath);
     var finished = 0;
@@ -27,13 +28,15 @@ async function eval_file(filepath = "URL_FILE_PATH") {
         const maintainerScore = await RespMaintRunner.getRespMaintScore(url);
         const correctnessScore = await CorrectnessRunner.getCorrectness(url);
         const pull_request_score = await PR_Runner.getPRscore(url);
+        const versionPinningScore = await versionPinningRunner.getScore(url);
         const multipliers = {
             license: 1,
             rampUp: 0.15,
-            busFactor: 0.2,
-            maintainer: 0.2,
+            busFactor: 0.15,
+            maintainer: 0.15,
             correctness: 0.25,
             pull_request: 0.2,
+            versionPinning: 0.1
         };
         const adjustedScores = {
             licenseScore: licenseScore,
@@ -42,6 +45,7 @@ async function eval_file(filepath = "URL_FILE_PATH") {
             maintainerScore: maintainerScore,
             correctnessScore: correctnessScore,
             pullrequestScore: pull_request_score,
+            versionPinningScore: versionPinningScore
         };
         Object.entries(adjustedScores).forEach(([key, score]) => {
             adjustedScores[key] =
