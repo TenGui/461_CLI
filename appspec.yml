@@ -2,9 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/ec2-user/461_Team4_Phase2
-    overwrite: true
-file_exists_behavior: OVERWRITE
+    destination: /home/ec2-user/nodejs-aws-codedeploy-pipeline
 hooks:
 # ApplicationStop:
 # DownloadBundle:
@@ -21,4 +19,4 @@ hooks:
     - location: scripts/application_start.sh
       timeout: 300
       runas: root
-# ValidateService: 
+# ValidateService:
