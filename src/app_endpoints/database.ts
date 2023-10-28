@@ -35,14 +35,7 @@ app.get('/database', (req, res) => {
             const data = JSON.stringify(results); // Convert data to JSON
             res.send(data);
 
-            // Close the database connection when done
-            db.end((err) => {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                console.log("DB connection closed");
-            });
+
         });
     });
 });
