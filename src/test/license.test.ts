@@ -14,7 +14,7 @@ describe("License Metric", () => {
         const limiter = new RateLimiter();
         const licenseScore = await getLicenseScore(
             limiter,
-            `/repos/ShaoNingHuang/ECE39595-Spring2023-lab3`
+            `/repos/TenGui/461_CLI`
         );
         expect(licenseScore).toEqual(1);
     });
