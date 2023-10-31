@@ -4,6 +4,7 @@ var express = require('express');
 var fs = require('fs');
 var app = express();
 var port = 3000;
+var authorization_1 = require("./database_files/authorization");
 //Include all endpoints here
 var rate_endpoint_1 = require("./app_endpoints/rate_endpoint");
 app.use('/', rate_endpoint_1.default);
@@ -12,6 +13,8 @@ app.use(database_1.default);
 //Home Page
 app.get('/', function (req, res) {
     // Read the HTML content from the HTML file
+    var helper = new authorization_1.Helper();
+    helper.setEnvVariables();
     var htmlContent = fs.readFileSync('src/html/index.html', 'utf8');
     res.send(htmlContent);
 });

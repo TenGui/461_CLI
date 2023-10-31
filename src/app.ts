@@ -1,8 +1,8 @@
 const express = require('express');
 const fs = require('fs');
-
 const app = express();
 const port = 3000;
+import { Helper } from './database_files/authorization';
 
 
 //Include all endpoints here
@@ -15,6 +15,8 @@ app.use(router)
 //Home Page
 app.get('/', (req, res) => {
   // Read the HTML content from the HTML file
+  const helper = new Helper();
+  helper.setEnvVariables();
   const htmlContent = fs.readFileSync('src/html/index.html', 'utf8');
   res.send(htmlContent);
 });

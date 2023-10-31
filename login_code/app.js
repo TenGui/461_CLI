@@ -1,17 +1,22 @@
 const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
-const ejs = require('ejs');
-const path = require('path');
 
-const app = express();
+const router = express.Router(); // Create an Express router
 
-// Database connection
+// Replace these values with your RDS instance information
+const RDS_HOST = 'publicdb.cvr1hbjvaden.us-east-2.rds.amazonaws.com';
+const RDS_PORT = 3306; // Default MySQL port
+const RDS_USER = 'admin';
+const RDS_PASSWORD = 'project461';
+
+// Create a connection to the MySQL server
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'pranav',
-  password: 'sankar',
-  database: 'auth_demo'
+  host: RDS_HOST,
+  user: RDS_USER,
+  password: RDS_PASSWORD,
+  port: RDS_PORT,
+  database: 'user_database'
 });
 
 db.connect((err) => {
@@ -19,16 +24,8 @@ db.connect((err) => {
   console.log('Connected to MySQL');
 });
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
-// Routes
-app.get('/', (req, res) => {
-  res.render('login');
-});
-
-app.post('/login', (req, res) => {
+// Define the login route
+router.post('/login', (req, res) => {
   const { username, password } = req.body;
 
   const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
@@ -44,28 +41,4 @@ app.post('/login', (req, res) => {
   });
 });
 
-// Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
-
-
-
-/*const express = require('express');
-const mysql = require('mysql');
-const app = express();
-
-app.set('view engine', 'ejs');
-app.set('views', __dirname + '/views');
-
-
-app.get('/divs/:count', (req, res) => {
-  const divCount = parseInt(req.params.count, 10);
-  res.render('divs', { divCount });
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});*/
+module.exports = router; // Export the router
