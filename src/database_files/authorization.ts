@@ -1,5 +1,6 @@
 import * as mysql from "mysql2";
 import { db } from "./database_connect";
+const axios = require('axios');
 
 class Helper{
   private dbConnection: mysql.Connection;
@@ -21,9 +22,9 @@ class Helper{
 
       if (rows.length === 1) {
         const githubToken = rows[0].value;
-        console.log(`Retrieved GitHub token value: ${githubToken}`);
+        console.log(`Retrieved GitHub token value}`);
         process.env.GITHUB_TOKEN = githubToken;
-        console.log(`Exported GitHub token as GITHUB_TOKEN: ${process.env.GITHUB_TOKEN}`);
+        console.log(`Exported GitHub token as GITHUB_TOKEN`);
       } else {
         console.log("No matching rows found.");
       }
