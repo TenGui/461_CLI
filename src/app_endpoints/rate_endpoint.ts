@@ -8,7 +8,7 @@ app.get('/package/:id/rate', async (req, res) => {
   try {
 
     //Modify this section when database is setup
-    let URLs = ["https://www.npmjs.com/package/safe-regex"];
+    let URLs = ["https://github.com/knex/knex"];
     const url_file = URLs[req.params.id]; // Get the "id" parameter from the URL
     //
     

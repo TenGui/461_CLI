@@ -46,7 +46,7 @@ app.get('/package/:id/rate', function (req, res) { return __awaiter(void 0, void
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                URLs = ["https://www.npmjs.com/package/safe-regex"];
+                URLs = ["https://github.com/knex/knex"];
                 url_file = URLs[req.params.id];
                 return [4 /*yield*/, (0, eval_single_url_1.eval_single_file)(url_file)];
             case 1:

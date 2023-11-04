@@ -1,24 +1,52 @@
 const express = require('express');
-const fs = require('fs');
-
+const mysql = require('mysql');
+const bodyParser = require('body-parser');
+const path = require('path');
+const { db } = require("./database_files/database_connect");
 const app = express();
-const port = 3000;
 
+import { Helper } from "./database_files/authorization";
+import rate_endpoint from "./app_endpoints/rate_endpoint";
+app.use('/', rate_endpoint);
 
-//Include all endpoints here
-import package_rate_endpoint from './app_endpoints/rate_endpoint'
-app.use('/', package_rate_endpoint);
+app.use(bodyParser.urlencoded({ extended: true }));
 
-import router from './app_endpoints/database';
-app.use(router)
-
-//Home Page
 app.get('/', (req, res) => {
-  // Read the HTML content from the HTML file
-  const htmlContent = fs.readFileSync('src/html/index.html', 'utf8');
-  res.send(htmlContent);
+  res.sendFile(path.join(__dirname, 'html', 'login.html'));
 });
 
+app.post('/addUser', (req, res) => {
+  const { username, password } = req.body;
+
+  const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
+  db.query(query, [username, password], (err) => {
+    if (err) throw err;
+
+    res.send('User added successfully');
+  });
+});
+
+app.post('/login', (req, res) => {
+  const { loginUsername, loginPassword } = req.body;
+
+  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+  db.query(query, [loginUsername, loginPassword], (err, results) => {
+    console.log(results.length);
+    if (err) throw err;
+
+    if (results.length === 1) {
+      res.send('Login Successful');
+    } else {
+      res.send('Login Failed');
+    }
+  });
+});
+
+// Start the server
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Demo app is up and listening to port: ${port}`);
+    const helper = new Helper();
+    helper.setEnvVariables();
+    
+  console.log(`Server is running on port ${port}`);
 });
