@@ -7,7 +7,10 @@ const app = express();
 
 import { Helper } from "./database_files/authorization";
 import rate_endpoint from "./app_endpoints/rate_endpoint";
+import reset_endpoint from "./app_endpoints/reset_endpoint";
+
 app.use('/', rate_endpoint);
+app.use('/', reset_endpoint);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 

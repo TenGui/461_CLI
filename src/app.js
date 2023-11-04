@@ -8,7 +8,9 @@ var db = require("./database_files/database_connect").db;
 var app = express();
 var authorization_1 = require("./database_files/authorization");
 var rate_endpoint_1 = require("./app_endpoints/rate_endpoint");
+var reset_endpoint_1 = require("./app_endpoints/reset_endpoint");
 app.use('/', rate_endpoint_1.default);
+app.use('/', reset_endpoint_1.default);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname, 'html', 'login.html'));
