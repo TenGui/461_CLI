@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Helper = void 0;
 var database_connect_1 = require("./database_connect");
+var axios = require('axios');
 var Helper = /** @class */ (function () {
     function Helper() {
-        // Initialize the database connection in the constructor
         this.dbConnection = database_connect_1.db;
     }
     Helper.prototype.setEnvVariables = function () {
@@ -17,9 +17,9 @@ var Helper = /** @class */ (function () {
             var rows = results;
             if (rows.length === 1) {
                 var githubToken = rows[0].value;
-                console.log("Retrieved GitHub token value: ".concat(githubToken));
+                console.log("Retrieved GitHub token value}");
                 process.env.GITHUB_TOKEN = githubToken;
-                console.log("Exported GitHub token as GITHUB_TOKEN: ".concat(process.env.GITHUB_TOKEN));
+                console.log("Exported GitHub token as GITHUB_TOKEN");
             }
             else {
                 console.log("No matching rows found.");

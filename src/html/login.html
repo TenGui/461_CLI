@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add User</title>
+</head>
+<body>
+    <h1>Add User</h1>
+    <form method="POST" action="/addUser">
+        <label for="username">Username:</label>
+        <input type="text" name="username" required><br>
+        <label for="password">Password:</label>
+        <input type="password" name="password" required><br>
+        <button type="submit">Add User</button>
+    </form>
+    <hr>
+    <h1>Login</h1>
+    <form method="POST" action="/login">
+        <label for="loginUsername">Username:</label>
+        <input type="text" name="loginUsername" required><br>
+        <label for="loginPassword">Password:</label>
+        <input type="password" name="loginPassword" required><br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>

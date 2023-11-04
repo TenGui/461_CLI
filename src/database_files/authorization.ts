@@ -6,7 +6,6 @@ class Helper{
   private dbConnection: mysql.Connection;
 
   constructor() {
-    // Initialize the database connection in the constructor
     this.dbConnection = db;
   }
 
