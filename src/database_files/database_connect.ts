@@ -4,9 +4,9 @@ require('dotenv').config();
 const db = mysql.createPool({
     host: process.env.DB_HOST,
     port: 3306,
-    user: "admin",
+    user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: "testdb",
+    database: process.env.DB_DATABASE,
     connectionLimit: 5, // Adjust as needed
 });
 const promisePool = db.promise();
