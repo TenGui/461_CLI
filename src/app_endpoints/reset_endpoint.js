@@ -36,31 +36,55 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.resetDatabase = void 0;
 var express = require('express');
 var app = express();
-// Import necessary modules or functions
-var eval_single_url_1 = require("../utils/eval_single_url");
-app.get('/package/:id/rate', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var URLs, url_file, output, error_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                URLs = ["https://github.com/knex/knex"];
-                url_file = URLs[req.params.id];
-                return [4 /*yield*/, (0, eval_single_url_1.eval_single_file)(url_file)];
-            case 1:
-                output = _a.sent();
-                console.log("test");
-                console.log(output);
-                res.status(200).send(output);
-                return [3 /*break*/, 3];
-            case 2:
-                error_1 = _a.sent();
-                res.status(500).send("The package rating system choked on at least one of the metrics");
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
-        }
+var db = require("../database_files/database_connect").db;
+app.post('/reset', function (req, res) {
+    // Check the X-Authorization header for authentication if needed
+    //TODO: Check authorization key to determine if request is valid
+    resetDatabase(res);
+});
+function resetDatabase(res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var getTableNamesQuery;
+        return __generator(this, function (_a) {
+            getTableNamesQuery = 'SHOW TABLES';
+            db.query(getTableNamesQuery, function (err, results) {
+                if (err) {
+                    console.error('Error retrieving table names:', err);
+                    res.status(500).send('Error resetting the database');
+                }
+                else {
+                    var tableNames = results.map(function (row) { return Object.values(row)[0]; });
+                    var tablesToTruncate_1 = tableNames.filter(function (tableName) { return tableName !== 'github_token'; });
+                    if (tablesToTruncate_1.length === 0) {
+                        console.log('No tables to reset.');
+                        res.sendStatus(200);
+                        return;
+                    }
+                    var completedCount_1 = 0;
+                    tablesToTruncate_1.forEach(function (tableName) {
+                        var truncateTableQuery = "TRUNCATE TABLE ".concat(tableName);
+                        db.query(truncateTableQuery, function (err) {
+                            completedCount_1++;
+                            if (err) {
+                                console.error("Error truncating table ".concat(tableName, ":"), err);
+                            }
+                            else {
+                                console.log("Table ".concat(tableName, " truncated successfully"));
+                            }
+                            if (completedCount_1 === tablesToTruncate_1.length) {
+                                console.log('All tables except for "github_token" truncated successfully');
+                                res.sendStatus(200);
+                            }
+                        });
+                    });
+                }
+            });
+            return [2 /*return*/];
+        });
     });
-}); });
+}
+exports.resetDatabase = resetDatabase;
 exports.default = app;
