@@ -363,15 +363,9 @@ function RegistryReset(xAuthorization) {
     });
 }
 exports.RegistryReset = RegistryReset;
-var authorization_js_1 = require("../database_files/authorization.js");
 function MyPage() {
     return __awaiter(this, void 0, void 0, function () {
-        var tokenManager, newGitHubToken;
         return __generator(this, function (_a) {
-            tokenManager = new authorization_js_1.Helper();
-            newGitHubToken = "testing_github_token1";
-            tokenManager.addNewGitHubToken(newGitHubToken);
-            tokenManager.close_db_connection();
             return [2 /*return*/, path.join(__dirname, '..', 'html', 'login.html')];
         });
     });
