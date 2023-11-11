@@ -2,10 +2,10 @@ import * as mysql from "mysql2";
 require('dotenv').config();
 
 const db = mysql.createPool({
-    host: "publicdb.cvr1hbjvaden.us-east-2.rds.amazonaws.com",
+    host: process.env.DB_HOST,
     port: 3306,
     user: "admin",
-    password: "project461",
+    password: process.env.DB_PASSWORD,
     database: "testdb",
     connectionLimit: 5, // Adjust as needed
 });
