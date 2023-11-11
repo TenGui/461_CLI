@@ -1,5 +1,5 @@
 import * as mysql from "mysql2";
-import { db } from "./database_connect";
+import { db, promisePool } from "./database_connect";
 const axios = require('axios');
 
 class Helper{
