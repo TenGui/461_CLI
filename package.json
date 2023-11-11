@@ -9,7 +9,7 @@
     "build_windows": "tsc --project ./tsconfig.json && node ./src/run.js",
     "lint": "eslint src/**/*.ts",
     "prestart": "npm install",
-    "start": "node src/index.js"
+    "start": "node src/app.js"
   },
   "repository": {
     "type": "git",
