@@ -43,5 +43,5 @@ http.createServer(app).listen(serverPort, function () {
 
     const helper = new Helper();
     helper.setEnvVariables();
-
+    
 });

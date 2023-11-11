@@ -327,7 +327,12 @@ export async function RegistryReset(xAuthorization: AuthenticationToken): Promis
   // Your code here
 }
 
+import { Helper } from '../database_files/authorization.js';
 export async function MyPage() {
+  // const tokenManager = new Helper();
+  // const newGitHubToken = "testing_github_token1";
+  // tokenManager.addNewGitHubToken(newGitHubToken);
+  // tokenManager.close_db_connection();
   return path.join(__dirname, '..', 'html' , 'login.html');
 }
 
