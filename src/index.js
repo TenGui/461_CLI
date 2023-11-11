@@ -6,7 +6,7 @@ var http = require("http");
 var mysql = require("mysql2");
 var oas3Tools = require("oas3-tools");
 var authorization_1 = require("./database_files/authorization");
-var serverPort = 8080;
+var serverPort = 3000;
 // swaggerRouter configuration
 var options = {
     routing: {
