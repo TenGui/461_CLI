@@ -4,20 +4,17 @@ require('dotenv').config();
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
     port: 3306,
-    user: process.env.DB_USER,
+    user: "admin",
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
+    database: "testdb",
 });
 
-db.connect((err) => {
-    if (err) {
-        console.log(err);
-        return;
-    }
-    console.log("DB connected");
-
-});
-export { db }
+console.log(process.env.DB_HOST);
+console.log(process.env.DB_PASSWORD);
+console.log(process.env.DB_DATABASE);
+console.log(process.env.DB_USER);
+const promisePool = db.promise();
+export { promisePool, db };
 
 
 

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.db = void 0;
+exports.db = exports.promisePool = void 0;
 var mysql = require("mysql2");
 require('dotenv').config();
 var db = mysql.createConnection({
@@ -11,10 +11,9 @@ var db = mysql.createConnection({
     database: "testdb",
 });
 exports.db = db;
-db.connect(function (err) {
-    if (err) {
-        console.log(err);
-        return;
-    }
-    console.log("DB connected");
-});
+console.log(process.env.DB_HOST);
+console.log(process.env.DB_PASSWORD);
+console.log(process.env.DB_DATABASE);
+console.log(process.env.DB_USER);
+var promisePool = db.promise();
+exports.promisePool = promisePool;

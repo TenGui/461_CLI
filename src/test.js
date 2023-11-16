@@ -1,15 +1,12 @@
 'use strict';
-
-import * as path from 'path';
-import * as http from 'http';
-import * as mysql from 'mysql2';
-import * as oas3Tools from 'oas3-tools';
-import { Helper } from "./database_files/authorization";
-
-const serverPort: number = 3000;
-
+Object.defineProperty(exports, "__esModule", { value: true });
+var path = require("path");
+var http = require("http");
+var oas3Tools = require("oas3-tools");
+var authorization_1 = require("./database_files/authorization");
+var serverPort = 3001;
 // swaggerRouter configuration
-const options: any =  {
+var options = {
     routing: {
         controllers: path.join(__dirname, './controllers')
     },
@@ -20,7 +17,7 @@ const options: any =  {
         },
         validateRequests: {
             allowUnknownQueryParameters: false
-        }, 
+        },
         validateSecurity: true,
         validateFormats: 'full',
     },
@@ -31,17 +28,12 @@ const options: any =  {
     // swaggerUIts: {},
     // swaggerUI: {}
 };
-
-
-const expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
-const app = expressAppConfig.getApp();
-
+var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
+var app = expressAppConfig.getApp();
 // Initialize the Swagger middleware
 http.createServer(app).listen(serverPort, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
     console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
-
-    const helper = new Helper();
+    var helper = new authorization_1.Helper();
     helper.setEnvVariables();
-    
 });
