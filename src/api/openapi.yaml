@@ -577,7 +577,7 @@ paths:
         "404":
           description: No package found under this regex.
       x-swagger-router-controller: Default
-  /mypage:
+  /:
     get:
       operationId: MyPage
       x-swagger-router-controller: Default
