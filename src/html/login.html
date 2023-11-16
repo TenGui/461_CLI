@@ -22,10 +22,22 @@
         <button type="submit">Login</button>
     </form>
 
-    <form method="DELETE" action="/reset">
-        <button type="submit">Reset</button>
+    <form id="resetForm">
+        <button type="button" onclick="sendDeleteRequest()">Reset</button>
     </form>
     
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function sendDeleteRequest() {
+            axios.delete('/reset', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Authorization': '1' //Make sure we change this line to the JWT token
+                },
+            })
+        }
+    </script>
+
     <h1>Upload a .zip File</h1>
     <input type="file" id="fileInput" accept=".zip">
     <button id="uploadButton">Upload</button>

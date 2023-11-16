@@ -205,11 +205,11 @@ function RegistryReset(req, res, next, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: 
-                // const xAuthorization = req.headers['x-authorization'];
-                return [4 /*yield*/, (0, reset_endpoint_js_1.resetDatabase)(res)];
-                case 1:
+                case 0:
                     // const xAuthorization = req.headers['x-authorization'];
+                    console.log("HERE");
+                    return [4 /*yield*/, (0, reset_endpoint_js_1.resetDatabase)(res)];
+                case 1:
                     _a.sent();
                     return [4 /*yield*/, handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization)];
                 case 2:
