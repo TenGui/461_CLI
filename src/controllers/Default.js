@@ -238,7 +238,7 @@ function addUser(req, res, next) {
                     error_2 = _b.sent();
                     // Handle any errors
                     console.error(error_2);
-                    res.status(500).send('Internal Server Error');
+                    res.status(500).send(error_2);
                     next(error_2);
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
@@ -270,7 +270,7 @@ function loginUser(req, res, next) {
                 case 2:
                     error_3 = _b.sent();
                     console.error(error_3);
-                    res.status(500).send('Internal Server Error');
+                    res.status(500).send(error_3);
                     next(error_3);
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];

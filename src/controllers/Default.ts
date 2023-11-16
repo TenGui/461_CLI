@@ -78,7 +78,7 @@ export async function addUser(req: Request, res: Response, next: NextFunction) {
   } catch (error) {
     // Handle any errors
     console.error(error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send(error);
     next(error);
   }
 }
@@ -99,7 +99,7 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send(error);
     next(error);
   }
 }
