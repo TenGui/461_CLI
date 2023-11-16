@@ -79,6 +79,7 @@ export async function addUser(req: Request, res: Response, next: NextFunction) {
     });
   } catch (error) {
     // Handle any errors
+    res.send(error)
     next(error);
   }
 }
@@ -99,7 +100,7 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
     }
   });
   } catch (error) {
-    // Handle any errors
+    res.send(error)
     next(error);
   }
 }

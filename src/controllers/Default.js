@@ -235,6 +235,7 @@ function addUser(req, res, next) {
             }
             catch (error) {
                 // Handle any errors
+                res.send(error);
                 next(error);
             }
             return [2 /*return*/];
@@ -262,7 +263,7 @@ function loginUser(req, res, next) {
                 });
             }
             catch (error) {
-                // Handle any errors
+                res.send(error);
                 next(error);
             }
             return [2 /*return*/];
