@@ -11,5 +11,9 @@ var db = mysql.createPool({
     database: "testdb",
 });
 exports.db = db;
+console.log(process.env.DB_HOST);
+console.log(process.env.DB_PASSWORD);
+console.log(process.env.DB_DATABASE);
+console.log(process.env.DB_USER);
 var promisePool = db.promise();
 exports.promisePool = promisePool;
