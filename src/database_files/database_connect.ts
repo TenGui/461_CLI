@@ -6,7 +6,7 @@ const db = mysql.createConnection({
     port: 3306,
     user: "admin",
     password: process.env.DB_PASSWORD,
-    database: "testdb"
+    database: "testdb",
 });
 
 const promisePool = db.promise();
