@@ -222,58 +222,66 @@ function RegistryReset(req, res, next, xAuthorization) {
 exports.RegistryReset = RegistryReset;
 function addUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, username, password, query;
+        var _a, username, password, query, error_2;
         return __generator(this, function (_b) {
-            try {
-                _a = req.body, username = _a.username, password = _a.password;
-                query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-                database_connect_1.db.query(query, [username, password], function (err) {
-                    if (err)
-                        throw err;
+            switch (_b.label) {
+                case 0:
+                    _b.trys.push([0, 2, , 3]);
+                    _a = req.body, username = _a.username, password = _a.password;
+                    query = 'INSERT INTO users (username, password) VALUES (?, ?)';
+                    return [4 /*yield*/, database_connect_1.db.promise().query(query, [username, password])];
+                case 1:
+                    _b.sent();
                     res.send('User added successfully');
-                });
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_2 = _b.sent();
+                    // Handle any errors
+                    console.error(error_2);
+                    res.status(500).send('Internal Server Error');
+                    next(error_2);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
-            catch (error) {
-                // Handle any errors
-                res.send(error);
-                next(error);
-            }
-            return [2 /*return*/];
         });
     });
 }
 exports.addUser = addUser;
 function loginUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, loginUsername, loginPassword, query;
+        var _a, loginUsername, loginPassword, query, results, error_3;
         return __generator(this, function (_b) {
-            try {
-                _a = req.body, loginUsername = _a.loginUsername, loginPassword = _a.loginPassword;
-                query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-                database_connect_1.db.query(query, [loginUsername, loginPassword], function (err, results) {
+            switch (_b.label) {
+                case 0:
+                    _b.trys.push([0, 2, , 3]);
+                    _a = req.body, loginUsername = _a.loginUsername, loginPassword = _a.loginPassword;
+                    query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+                    return [4 /*yield*/, database_connect_1.db.promise().query(query, [loginUsername, loginPassword])];
+                case 1:
+                    results = (_b.sent())[0];
                     console.log(results[0]);
-                    if (err)
-                        throw err;
                     if (results[0] == undefined) {
-                        res.send('Login Failed');
+                        res.status(401).send('Login Failed');
                     }
                     else {
                         res.send('Login Successful');
                     }
-                });
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_3 = _b.sent();
+                    console.error(error_3);
+                    res.status(500).send('Internal Server Error');
+                    next(error_3);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
-            catch (error) {
-                res.send(error);
-                next(error);
-            }
-            return [2 /*return*/];
         });
     });
 }
 exports.loginUser = loginUser;
 function MyPage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var filePath, error_2;
+        var filePath, error_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -289,9 +297,9 @@ function MyPage(req, res, next) {
                     });
                     return [3 /*break*/, 3];
                 case 2:
-                    error_2 = _a.sent();
+                    error_4 = _a.sent();
                     // Handle any errors
-                    next(error_2);
+                    next(error_4);
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
             }

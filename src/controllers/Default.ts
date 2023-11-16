@@ -72,14 +72,13 @@ export async function addUser(req: Request, res: Response, next: NextFunction) {
     const { username, password } = req.body;
 
     const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-    db.query(query, [username, password], (err) => {
-      if (err) throw err;
-  
-      res.send('User added successfully');
-    });
+    await db.promise().query(query, [username, password]);
+
+    res.send('User added successfully');
   } catch (error) {
     // Handle any errors
-    res.send(error)
+    console.error(error);
+    res.status(500).send('Internal Server Error');
     next(error);
   }
 }
@@ -88,19 +87,19 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
   try {
     const { loginUsername, loginPassword } = req.body;
 
-  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-  db.query(query, [loginUsername, loginPassword], (err, results) => {
+    const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+    const [results] = await db.promise().query(query, [loginUsername, loginPassword]);
+
     console.log(results[0]);
-    if (err) throw err;
 
     if (results[0] == undefined) {
-      res.send('Login Failed');
+      res.status(401).send('Login Failed');
     } else {
       res.send('Login Successful');
     }
-  });
   } catch (error) {
-    res.send(error)
+    console.error(error);
+    res.status(500).send('Internal Server Error');
     next(error);
   }
 }
