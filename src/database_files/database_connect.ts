@@ -1,7 +1,7 @@
 import * as mysql from "mysql2";
 require('dotenv').config();
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
     host: process.env.DB_HOST,
     port: 3306,
     user: "admin",
