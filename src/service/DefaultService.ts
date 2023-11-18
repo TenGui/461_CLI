@@ -30,13 +30,35 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
     const password = body.Secret.password;
   
 
-    // If credentials are valid, create a JWT
-    if (username === 'example' && password === 'password') {
-      const token = jwt.sign({ username }, 'your-secret-key', { expiresIn: '1h' });
-      return respondWithCode(200, {"Authentication Token": token});
+    //make database access
+
+    const [result, fields] = await promisePool.execute('SELECT * FROM Auth WHERE user = \'' + username + '\'');
+
+    if(result.length == 0) {
+      return respondWithCode(401, "User is not in database");
+    }
+
+    console.log("result: " + JSON.stringify(result));
+    
+
+    // If credentials are valid, create a JWT with permissions that correspond to that of the user
+    console.log("password check: incoming = " + password + " database = "+ result[0].pass);
+    if (password === result[0].pass) {
+
+      //create a jwt that contains relevant user permissions
+      const token = jwt.sign({ 
+        user: username, 
+        pass: result[0].pass, 
+        canSearch: result[0].canSearch,
+        canUpload: result[0].canUpload,
+        canDownload: result[0].canDownload
+      }, 'your-secret-key', { expiresIn: '10h' });
+
+      return respondWithCode(200, "\"bearer "+ token + "\"");
+
     } else {
       console.log("bad password");
-      return respondWithCode(401, "wrong password");
+      return respondWithCode(401, "User exists. Wrong password");
     }
 
   return ''; // You can return the actual value here

@@ -50,21 +50,38 @@ var _a = require("../database_files/database_connect"), db = _a.db, promisePool 
  **/
 function CreateAuthToken(body) {
     return __awaiter(this, void 0, void 0, function () {
-        var username, password, token;
-        return __generator(this, function (_a) {
-            console.log("authentication endpoint hit");
-            username = body.User.name;
-            password = body.Secret.password;
-            // If credentials are valid, create a JWT
-            if (username === 'example' && password === 'password') {
-                token = jwt.sign({ username: username }, 'your-secret-key', { expiresIn: '1h' });
-                return [2 /*return*/, (0, writer_1.respondWithCode)(200, { "Authentication Token": token })];
+        var username, password, _a, result, fields, token;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    console.log("authentication endpoint hit");
+                    username = body.User.name;
+                    password = body.Secret.password;
+                    return [4 /*yield*/, promisePool.execute('SELECT * FROM Auth WHERE user = \'' + username + '\'')];
+                case 1:
+                    _a = _b.sent(), result = _a[0], fields = _a[1];
+                    if (result.length == 0) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User is not in database")];
+                    }
+                    console.log("result: " + JSON.stringify(result));
+                    // If credentials are valid, create a JWT with permissions that correspond to that of the user
+                    console.log("password check: incoming = " + password + " database = " + result[0].pass);
+                    if (password === result[0].pass) {
+                        token = jwt.sign({
+                            user: username,
+                            pass: result[0].pass,
+                            canSearch: result[0].canSearch,
+                            canUpload: result[0].canUpload,
+                            canDownload: result[0].canDownload
+                        }, 'your-secret-key', { expiresIn: '10h' });
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, "\"bearer " + token + "\"")];
+                    }
+                    else {
+                        console.log("bad password");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User exists. Wrong password")];
+                    }
+                    return [2 /*return*/, '']; // You can return the actual value here
             }
-            else {
-                console.log("bad password");
-                return [2 /*return*/, (0, writer_1.respondWithCode)(401, "wrong password")];
-            }
-            return [2 /*return*/, '']; // You can return the actual value here
         });
     });
 }
