@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Files in .zip</title>
+</head>
+<body>
+
+<h1>List Files in .zip</h1>
+
+<input type="file" id="fileInput" accept=".zip">
+<button type="button" onclick="listFiles()">List Files</button>
+
+<ul id="fileList"></ul>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
+<script>
+    function listFiles() {
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert('Please select a .zip file.');
+            return;
+        }
+
+        const zipFile = fileInput.files[0];
+
+        const zipReader = new FileReader();
+
+        zipReader.onload = function (event) {
+            const zip = new JSZip();
+            const zipContent = event.target.result;
+
+            zip.loadAsync(zipContent).then(function (contents) {
+                fileList.innerHTML = ''; // Clear existing list
+
+                contents.forEach(function (relativePath, zipEntry) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = relativePath;
+                    fileList.appendChild(listItem);
+                });
+            });
+        };
+
+        zipReader.readAsArrayBuffer(zipFile);
+    }
+</script>
+
+</body>
+</html>

@@ -62,7 +62,10 @@ export class Upload{
     }
 
     async process(url){
-        await this.check_valid_githubURL(url);
+        const output = await this.check_valid_githubURL(url);
+        if(!output){
+            return false;
+        }
         return {"owner": this.owner, "repo": this.repo, "url": this.url}
     }
 }

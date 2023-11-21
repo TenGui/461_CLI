@@ -114,11 +114,15 @@ var Upload = /** @class */ (function () {
     };
     Upload.prototype.process = function (url) {
         return __awaiter(this, void 0, void 0, function () {
+            var output;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.check_valid_githubURL(url)];
                     case 1:
-                        _a.sent();
+                        output = _a.sent();
+                        if (!output) {
+                            return [2 /*return*/, false];
+                        }
                         return [2 /*return*/, { "owner": this.owner, "repo": this.repo, "url": this.url }];
                 }
             });

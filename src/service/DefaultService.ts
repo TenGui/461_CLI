@@ -131,7 +131,9 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
     if("URL" in body){
       const output = await upload.process(body["URL"])
-
+      if(!output){
+        return respondWithCode(400, {"Error": "Repository does not exists"});
+      }
       Name = output["repo"];
       Content = 'N/A';
       URL = output["url"];

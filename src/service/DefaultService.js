@@ -178,6 +178,9 @@ function PackageCreate(body, xAuthorization) {
                     return [4 /*yield*/, upload.process(body["URL"])];
                 case 1:
                     output_1 = _b.sent();
+                    if (!output_1) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
+                    }
                     Name = output_1["repo"];
                     Content = 'N/A';
                     URL = output_1["url"];

@@ -1,91 +1,131 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Add User</title>
-</head>
-<body>
-    <h1>Add User</h1>
-    <form method="POST" action="/addUser">
-        <label for="username">Username:</label>
-        <input type="text" name="username" required><br>
-        <label for="password">Password:</label>
-        <input type="password" name="password" required><br>
-        <button type="submit">Add User</button>
-    </form>
-    <hr>
-    <h1>Login</h1>
-    <form method="POST" action="/loginUser">
-        <label for="loginUsername">Username:</label>
-        <input type="text" name="loginUsername" required><br>
-        <label for="loginPassword">Password:</label>
-        <input type="password" name="loginPassword" required><br>
-        <button type="submit">Login</button>
-    </form>
+    <head>
+        <title>Add User</title>
+    </head>
+    <body>
+        <h1>Add User</h1>
+        <form method="POST" action="/addUser">
+            <label for="username">Username:</label>
+            <input type="text" name="username" required><br>
+            <label for="password">Password:</label>
+            <input type="password" name="password" required><br>
+            <button type="submit">Add User</button>
+        </form>
+        <hr>
+        <h1>Login</h1>
+        <form method="POST" action="/loginUser">
+            <label for="loginUsername">Username:</label>
+            <input type="text" name="loginUsername" required><br>
+            <label for="loginPassword">Password:</label>
+            <input type="password" name="loginPassword" required><br>
+            <button type="submit">Login</button>
+        </form>
 
-    <hr>
-    <h1>Add package</h1>
-    <form id = "github_Package">
-        <label for="github_url">Github URL:</label>
-        <input type="text" name="github_url" required><br>
-        <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
-    </form>
-    <hr>
+        <hr>
+        <h1>Add package</h1>
+        <form id = "github_Package">
+            <label for="github_url">Github URL:</label>
+            <input type="text" name="github_url" required><br>
+            <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
+        </form>
+        <hr>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        function sendDeleteRequest() {
-            axios.delete('/reset', {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Authorization': '1' // Replace with your JWT token
-                },
-            })
-            .then(response => {
-                console.log(response.data);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        }
+        <h1>Upload a .zip File</h1>
 
-        function sendPackageUpload(event) {
-            event.preventDefault(); // Prevent default form submission behavior
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="fileInput">Select a .zip file:</label>
+            <input type="file" id="fileInput" accept=".zip" required>
+            <button type="button" onclick="uploadFile()">Upload File</button>
+        </form>
+        
+        <p id="uploadStatus"></p>
+        
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        
+        <script>
+            function uploadFile() {
+                const fileInput = document.getElementById('fileInput');
+                const uploadStatus = document.getElementById('uploadStatus');
+        
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                console.log("FILES", fileInput.files[0]);
+                
+                const jsProgram = "if (process.argv.length === 7) {\nconsole.log('Success')\nprocess.exit(0)\n} else {\nconsole.log('Failed')\nprocess.exit(1)\n}\n";
+                const requestBody = {
+                    JSProgram: jsProgram,
+                    Content: ".zip file"
+                };
+                axios.post('/package', requestBody, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Authorization': '1' // Replace with your JWT token
+                    },
+                })
+                .then(response => {
+                    console.log(response.data);
+                    uploadStatus.textContent = "File Uploaded Successfully";
+                })
+                .catch(error => {
+                    console.error(error);
+                    uploadStatus.textContent = error;
+                });
+            }
+        </script>
 
-            const githubUrl = document.querySelector('input[name="github_url"]').value;
 
-            // Example JSProgram string, replace it with the actual value you want to use
-            const jsProgram = "if (process.argv.length === 7) {\nconsole.log('Success')\nprocess.exit(0)\n} else {\nconsole.log('Failed')\nprocess.exit(1)\n}\n";
+        <hr>
+        <br>
+        <form id="resetForm">
+            <button type="button" onclick="sendDeleteRequest()">Reset</button>
+        </form>
 
-            const requestBody = {
-                JSProgram: jsProgram,
-                URL: githubUrl
-            };
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+            function sendDeleteRequest() {
+                axios.delete('/reset', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Authorization': '1' // Replace with your JWT token
+                    },
+                })
+                .then(response => {
+                    console.log(response.data);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            }
 
-            axios.post('/package', requestBody, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Authorization': '1' // Replace with your JWT token
-                },
-            })
-            .then(response => {
-                console.log(response.data);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        }
+            function sendPackageUpload(event) {
+                event.preventDefault(); // Prevent default form submission behavior
 
-        document.getElementById('github_Package').addEventListener('submit', sendPackageUpload);
-    </script>
+                const githubUrl = document.querySelector('input[name="github_url"]').value;
 
-    <h1>Upload a .zip File</h1>
-    <input type="file" id="fileInput" accept=".zip">
-    <button id="uploadButton">Upload .zip package</button>
+                // Example JSProgram string, replace it with the actual value you want to use
+                const jsProgram = "if (process.argv.length === 7) {\nconsole.log('Success')\nprocess.exit(0)\n} else {\nconsole.log('Failed')\nprocess.exit(1)\n}\n";
 
-    <hr>
-    <br>
-    <form id="resetForm">
-        <button type="button" onclick="sendDeleteRequest()">Reset</button>
-    </form>
-</body>
+                const requestBody = {
+                    JSProgram: jsProgram,
+                    URL: githubUrl
+                };
+
+                axios.post('/package', requestBody, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Authorization': '1' // Replace with your JWT token
+                    },
+                })
+                .then(response => {
+                    console.log(response.data);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            }
+
+            document.getElementById('github_Package').addEventListener('submit', sendPackageUpload);
+        </script>
+    </body>
 </html>
