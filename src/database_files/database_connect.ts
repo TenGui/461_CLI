@@ -9,10 +9,6 @@ const db = mysql.createConnection({
     database: "testdb",
 });
 
-console.log(process.env.DB_HOST);
-console.log(process.env.DB_PASSWORD);
-console.log(process.env.DB_DATABASE);
-console.log(process.env.DB_USER);
 const promisePool = db.promise();
 export { promisePool, db };
 

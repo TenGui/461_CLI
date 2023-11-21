@@ -109,17 +109,32 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
  * @param xAuthorization AuthenticationToken 
  * @returns Package
  **/
+import { Upload } from '../app_endpoints/upload_endpoint.js';
 export async function PackageCreate(body: PackageData, xAuthorization: AuthenticationToken) {
   try {
-    const Name: string = "Package_Name11";
-    const Version: string = "1.0.0.8.2";
-    const Content: string = 'LONG_TEXT10';
-    const URL: string = 'LONG_TEXT1234';
-    const JSProgram: string = 'JSPROGRAM325';
-    const DataDescription: string = 'DATA226';
+    var Name: string = "";
+    var Content: string = "";
+    var URL: string = "";
+    var Version:string = "";
+    var JSProgram:any = "";
+    const upload = new Upload()
 
-    // const result = await connection.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
-    const [result, fields] = await promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
+    if("URL" in body){
+      const output = await upload.process(body["URL"])
+
+      Name = output["repo"];
+      Content = 'N/A';
+      URL = output["url"];
+      Version = "1.0.0.8.2";
+      //JSProgram = body["JSProgram"];
+    }
+    
+    const package_exist_check = await upload.check_Package_Existence(Name, Version)
+    if(package_exist_check){
+      return respondWithCode(409, {"Response": "Package exists already"});
+    }
+
+    const [result, fields] = await promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
       Name,
       Version,
       Content,
@@ -127,12 +142,26 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       JSProgram,
     ]);
 
-    //connection.release();
+    const output = {
+      "metadata" : {
+        "Name": Name,
+        "version": Version,
+        "ID": "1"
+      },
+      "data": {
+        "JSProgram": JSProgram
+      }
+    }
+    
+    if("URL" in body){
+      output["data"]["URL"] = URL;
+    }
+    else if("Content" in body){
+      output["data"]["Content"] = Content;
+    }
 
-    console.log(result);
-    console.log(typeof(result));
-    console.log('Stored procedure executed successfully.');
-    return respondWithCode(201, "testing");
+    console.log('Packaged added successfully');
+    return respondWithCode(201, output);
   } catch (error) {
     console.error('Error calling the stored procedure:', error);
     throw error; // Re-throw the error for the caller to handle
@@ -159,6 +188,7 @@ export async function PackageDelete(id: PackageID, xAuthorization: Authenticatio
  **/
 
 import { eval_single_file } from '../utils/eval_single_url.js';
+import { version } from 'isomorphic-git';
 export async function PackageRate(id: PackageID, xAuthorization: AuthenticationToken): Promise<PackageRating> {
   //Modify this section when database is setup
   let URLs = ["https://github.com/knex/knex"];

@@ -151,38 +151,67 @@ exports.PackageByRegExGet = PackageByRegExGet;
  * @param xAuthorization AuthenticationToken
  * @returns Package
  **/
+var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Version, Content, URL_1, JSProgram, DataDescription, _a, result, fields, error_1;
+        var Name, Content, URL, Version, JSProgram, upload, output_1, package_exist_check, _a, result, fields, output, error_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _b.trys.push([0, 2, , 3]);
-                    Name = "Package_Name11";
+                    _b.trys.push([0, 5, , 6]);
+                    Name = "";
+                    Content = "";
+                    URL = "";
+                    Version = "";
+                    JSProgram = "";
+                    upload = new upload_endpoint_js_1.Upload();
+                    if (!("URL" in body)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, upload.process(body["URL"])];
+                case 1:
+                    output_1 = _b.sent();
+                    Name = output_1["repo"];
+                    Content = 'N/A';
+                    URL = output_1["url"];
                     Version = "1.0.0.8.2";
-                    Content = 'LONG_TEXT10';
-                    URL_1 = 'LONG_TEXT1234';
-                    JSProgram = 'JSPROGRAM325';
-                    DataDescription = 'DATA226';
-                    return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
+                    _b.label = 2;
+                case 2: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                case 3:
+                    package_exist_check = _b.sent();
+                    if (package_exist_check) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Response": "Package exists already" })];
+                    }
+                    return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
                             Name,
                             Version,
                             Content,
-                            URL_1,
+                            URL,
                             JSProgram,
                         ])];
-                case 1:
+                case 4:
                     _a = _b.sent(), result = _a[0], fields = _a[1];
-                    //connection.release();
-                    console.log(result);
-                    console.log(typeof (result));
-                    console.log('Stored procedure executed successfully.');
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(201, "testing")];
-                case 2:
+                    output = {
+                        "metadata": {
+                            "Name": Name,
+                            "version": Version,
+                            "ID": "1"
+                        },
+                        "data": {
+                            "JSProgram": JSProgram
+                        }
+                    };
+                    if ("URL" in body) {
+                        output["data"]["URL"] = URL;
+                    }
+                    else if ("Content" in body) {
+                        output["data"]["Content"] = Content;
+                    }
+                    console.log('Packaged added successfully');
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
+                case 5:
                     error_1 = _b.sent();
                     console.error('Error calling the stored procedure:', error_1);
                     throw error_1; // Re-throw the error for the caller to handle
-                case 3: return [2 /*return*/];
+                case 6: return [2 /*return*/];
             }
         });
     });

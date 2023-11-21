@@ -22,10 +22,15 @@
         <button type="submit">Login</button>
     </form>
 
-    <form id="resetForm">
-        <button type="button" onclick="sendDeleteRequest()">Reset</button>
+    <hr>
+    <h1>Add package</h1>
+    <form id = "github_Package">
+        <label for="GitHubURL">Github URL:</label>
+        <input type="text" name="github_url" required><br>
+        <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
     </form>
-    
+    <hr>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         function sendDeleteRequest() {
@@ -36,11 +41,25 @@
                 },
             })
         }
+
+        function sendPackageUpload() {
+            axios.post('/package', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Authorization': '1' //Make sure we change this line to the JWT token
+                },
+            })
+        }
     </script>
 
     <h1>Upload a .zip File</h1>
     <input type="file" id="fileInput" accept=".zip">
-    <button id="uploadButton">Upload</button>
-    
+    <button id="uploadButton">Upload .zip package</button>
+
+    <hr>
+    <br>
+    <form id="resetForm">
+        <button type="button" onclick="sendDeleteRequest()">Reset</button>
+    </form>
 </body>
 </html>
