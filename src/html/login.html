@@ -25,7 +25,7 @@
     <hr>
     <h1>Add package</h1>
     <form id = "github_Package">
-        <label for="GitHubURL">Github URL:</label>
+        <label for="github_url">Github URL:</label>
         <input type="text" name="github_url" required><br>
         <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
     </form>
@@ -37,19 +37,45 @@
             axios.delete('/reset', {
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Authorization': '1' //Make sure we change this line to the JWT token
+                    'X-Authorization': '1' // Replace with your JWT token
                 },
             })
+            .then(response => {
+                console.log(response.data);
+            })
+            .catch(error => {
+                console.error(error);
+            });
         }
 
-        function sendPackageUpload() {
-            axios.post('/package', {
+        function sendPackageUpload(event) {
+            event.preventDefault(); // Prevent default form submission behavior
+
+            const githubUrl = document.querySelector('input[name="github_url"]').value;
+
+            // Example JSProgram string, replace it with the actual value you want to use
+            const jsProgram = "if (process.argv.length === 7) {\nconsole.log('Success')\nprocess.exit(0)\n} else {\nconsole.log('Failed')\nprocess.exit(1)\n}\n";
+
+            const requestBody = {
+                JSProgram: jsProgram,
+                URL: githubUrl
+            };
+
+            axios.post('/package', requestBody, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Authorization': '1' //Make sure we change this line to the JWT token
+                    'X-Authorization': '1' // Replace with your JWT token
                 },
             })
+            .then(response => {
+                console.log(response.data);
+            })
+            .catch(error => {
+                console.error(error);
+            });
         }
+
+        document.getElementById('github_Package').addEventListener('submit', sendPackageUpload);
     </script>
 
     <h1>Upload a .zip File</h1>

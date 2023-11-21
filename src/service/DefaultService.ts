@@ -119,6 +119,16 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     var JSProgram:any = "";
     const upload = new Upload()
 
+    //Check if package is given
+    if("URL" in body && "Content" in body){
+      console.log("Improper form, URL and Content are both set")
+      return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+    }
+    if(!("URL" in body) && !("Content" in body)){
+      console.log("Improper form, URL and Content are both not set")
+      return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
+    }
+
     if("URL" in body){
       const output = await upload.process(body["URL"])
 
@@ -129,9 +139,11 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       //JSProgram = body["JSProgram"];
     }
     
+    //Check if the inserted package already exists
     const package_exist_check = await upload.check_Package_Existence(Name, Version)
     if(package_exist_check){
-      return respondWithCode(409, {"Response": "Package exists already"});
+      console.log("Package exists already");
+      return respondWithCode(409, {"Error": "Package exists already"});
     }
 
     const [result, fields] = await promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
@@ -161,6 +173,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     }
 
     console.log('Packaged added successfully');
+
     return respondWithCode(201, output);
   } catch (error) {
     console.error('Error calling the stored procedure:', error);

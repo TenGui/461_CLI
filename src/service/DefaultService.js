@@ -165,6 +165,15 @@ function PackageCreate(body, xAuthorization) {
                     Version = "";
                     JSProgram = "";
                     upload = new upload_endpoint_js_1.Upload();
+                    //Check if package is given
+                    if ("URL" in body && "Content" in body) {
+                        console.log("Improper form, URL and Content are both set");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
+                    }
+                    if (!("URL" in body) && !("Content" in body)) {
+                        console.log("Improper form, URL and Content are both not set");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
+                    }
                     if (!("URL" in body)) return [3 /*break*/, 2];
                     return [4 /*yield*/, upload.process(body["URL"])];
                 case 1:
@@ -178,7 +187,8 @@ function PackageCreate(body, xAuthorization) {
                 case 3:
                     package_exist_check = _b.sent();
                     if (package_exist_check) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Response": "Package exists already" })];
+                        console.log("Package exists already");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Error": "Package exists already" })];
                     }
                     return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
                             Name,
