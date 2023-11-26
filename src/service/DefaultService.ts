@@ -2,7 +2,7 @@
 
 import { Request, Response } from 'express';
 import { respondWithCode } from '../utils/writer'; // Import the response function
-import type { AuthenticationRequest, AuthenticationToken, PackageName, PackageRegEx, PackageData, PackageMetadata, PackageID, PackageRating, Package, List } from '../utils/types';
+import type { AuthenticationRequest, AuthenticationToken, PackageName, PackageRegEx, PackageData, PackageMetadata, PackageID, PackageRating, Package, List, newUser } from '../utils/types';
 import * as path from 'path';
 import {
   ConnectionOptions,
@@ -383,7 +383,13 @@ export async function MyPage() {
  * userName userName user to be deleted
  * no response value expected for this operation
  **/
-export async function userDelete(xAuthorization: AuthenticationToken,userName) {
+export async function UserDelete(xAuthorization: AuthenticationToken,userName: string) {
+  
+  
+  let queryString: string = 'DELETE FROM Auth WHERE condition user = \''+userName+'\'';
+  await promisePool.execute(queryString);
+  return respondWithCode(200, "Successfully deleted user "+userName);
+  
   return ''
 }
 
@@ -396,8 +402,10 @@ export async function userDelete(xAuthorization: AuthenticationToken,userName) {
  * xAuthorization AuthenticationToken 
  * no response value expected for this operation
  **/
-export async function userPost(body: newUser, xAuthorization: AuthenticationToken) {
-  return '';
+export async function UserPost(body: newUser, xAuthorization: AuthenticationToken) {
+  let queryString: string = 'INSERT INTO Auth VALUES (\''+body.user+'\', \''+ body.pass +'\', '+ body.canSearch +', '+ body.canUpload +', '+ body.canDownload +', '+ body.isAdmin +')';
+  await promisePool.execute(queryString);
+  return respondWithCode(200, "Successfully added user "+body.user);
 }
      
 

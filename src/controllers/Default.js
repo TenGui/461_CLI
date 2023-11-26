@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MyPage = exports.loginUser = exports.addUser = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.PackageByNameDelete = exports.CreateAuthToken = void 0;
+exports.MyPage = exports.loginUser = exports.addUser = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.UserPost = exports.UserDelete = exports.PackageByNameDelete = exports.CreateAuthToken = void 0;
 var Default = require("../service/DefaultService");
 var writer_1 = require("../utils/writer");
 var database_connect_1 = require("../database_files/database_connect");
@@ -96,6 +96,34 @@ function PackageByNameDelete(req, res, next, name, xAuthorization) {
     });
 }
 exports.PackageByNameDelete = PackageByNameDelete;
+function UserDelete(req, res, next, xAuthorization, userName) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.UserDelete, req, res, next, xAuthorization, userName)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.UserDelete = UserDelete;
+;
+function UserPost(req, res, next, body, xAuthorization) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.UserPost, req, res, next, body, xAuthorization)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.UserPost = UserPost;
+;
 function PackageByNameGet(req, res, next, name, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {

@@ -25,6 +25,14 @@ export async function PackageByNameDelete(req: Request, res: Response, next: Nex
   await handleRequestAsync(Default.PackageByNameDelete, req, res, next, name, xAuthorization);
 }
 
+export async function UserDelete (req: Request, res: Response, next: NextFunction, xAuthorization: string, userName: string) {
+  await handleRequestAsync(Default.UserDelete, req, res, next, xAuthorization, userName);
+};
+
+export async function UserPost (req: Request, res: Response, next: NextFunction, body:any, xAuthorization: string) {
+  await handleRequestAsync(Default.UserPost, req, res, next, body, xAuthorization);
+};
+
 export async function PackageByNameGet(req: Request, res: Response, next: NextFunction, name: string, xAuthorization: string) {
   await handleRequestAsync(Default.PackageByNameGet, req, res, next, name, xAuthorization);
 }
@@ -119,6 +127,8 @@ export async function MyPage(req: Request, res: Response, next: NextFunction) {
     next(error);
   }
 }
+
+
 
 // 'use strict';
 

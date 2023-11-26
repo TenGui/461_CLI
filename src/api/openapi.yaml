@@ -601,9 +601,95 @@ paths:
       responses:
         200:
           description: Successful operation.
+  /user:
+    post:
+      x-swagger-router-controller: Default
+      operationId: UserPost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/newUser'
+        required: true
+      responses:
+        "200":
+          description: User successfully added to the system.
+        "400":
+          description: "There is missing field(s) in the newUser/AuthenticationToken\
+            \ or it is formed improperly, or the AuthenticationToken is invalid."
+        "404":
+          description: Your token does not have the proper permission or is invalid.
+      summary: Add a new user to the system.
+      description: Request to add a new user to the system. Requires an admin token.
+      parameters:
+      - name: X-Authorization
+        description: ""
+        schema:
+          $ref: '#/components/schemas/AuthenticationToken'
+        in: header
+        required: true  
+    delete:
+      x-swagger-router-controller: Default
+      responses:
+        "200":
+          description: User successfully removed from the system.
+        "400":
+          description: "There is missing field(s) in the AuthenticationToken\
+            \ or it is formed improperly, or the AuthenticationToken is invalid."
+        "404":
+          description: Your token does not have the proper permission or is invalid.
+      operationId: UserDelete
+      summary: Add a new user to the system.
+      description: Request to add a new user to the system. Requires an admin token.
+      parameters:
+      - name: X-Authorization
+        description: ""
+        schema:
+          $ref: '#/components/schemas/AuthenticationToken'
+        in: header
+        required: true
+      - name: userName
+        description: "user to be deleted"
+        schema:
+          $ref: "#/components/schemas/userName"
+        in: header
+        required: true
 
 components:
   schemas:
+    userName:
+      description: ""
+      type: string
+    newUser:
+      required:
+        - user
+        - pass
+        - canSearch
+        - canUpload
+        - canDownload
+        - isAdmin
+      type: object
+      properties:
+        user:
+          description: username associated with the account
+          type: string
+          example: ece30861defaultadminuser
+        pass:
+          description: password for the new account
+          type: string
+          example: 1234password
+        canSearch:
+          description: Does this user have permission to Search?
+          type: boolean
+        canUpload:
+          description: Does this user have permission to upload?
+          type: boolean
+        canDownload:
+          description: Does this user have permission to download?
+          type: boolean
+        isAdmin:
+          description: Is this user an admin?
+          type: boolean
     Package:
       required:
       - data

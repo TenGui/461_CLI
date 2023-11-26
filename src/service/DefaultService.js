@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MyPage = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.PackageByNameDelete = exports.CreateAuthToken = void 0;
+exports.UserPost = exports.UserDelete = exports.MyPage = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.PackageByNameDelete = exports.CreateAuthToken = void 0;
 var writer_1 = require("../utils/writer"); // Import the response function
 var path = require("path");
 var authHelper = require("../authentication/authenticationHelper");
@@ -98,6 +98,7 @@ function PackageByNameDelete(name, xAuthorization) {
             // Your code here
             console.log("--here is the token: " + xAuthorization);
             console.log("--here is the pacakge name" + name);
+            console.log("This is the dumbest thing in the world ");
             return [2 /*return*/, (0, writer_1.respondWithCode)(200, "gaming")];
         });
     });
@@ -404,3 +405,43 @@ function MyPage() {
     });
 }
 exports.MyPage = MyPage;
+/**
+ * Add a new user to the system.
+ * Request to add a new user to the system. Requires an admin token.
+ *
+ * xAuthorization AuthenticationToken
+ * userName userName user to be deleted
+ * no response value expected for this operation
+ **/
+function UserDelete(xAuthorization, userName) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, ''];
+        });
+    });
+}
+exports.UserDelete = UserDelete;
+/**
+ * Add a new user to the system.
+ * Request to add a new user to the system. Requires an admin token.
+ *
+ * body List
+ * xAuthorization AuthenticationToken
+ * no response value expected for this operation
+ **/
+function UserPost(body, xAuthorization) {
+    return __awaiter(this, void 0, void 0, function () {
+        var queryString;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    queryString = 'INSERT INTO Auth VALUES (\'' + body.user + '\', \'' + body.pass + '\', ' + body.canSearch + ', ' + body.canUpload + ', ' + body.canDownload + ', ' + body.isAdmin + ')';
+                    return [4 /*yield*/, promisePool.execute(queryString)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(200, "Successfully added user " + body.user)];
+            }
+        });
+    });
+}
+exports.UserPost = UserPost;
