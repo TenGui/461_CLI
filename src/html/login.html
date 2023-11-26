@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Add User</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
         <h1>Add User</h1>
@@ -23,27 +24,114 @@
         </form>
 
         <hr>
-        <h1>Add package</h1>
+        <h1>Upload package</h1>
         <form id = "github_Package">
             <label for="github_url">Github URL:</label>
             <input type="text" name="github_url" required><br>
             <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
         </form>
         <hr>
-
-        <h1>Upload a .zip File</h1>
-
-        <form id="uploadForm" enctype="multipart/form-data">
-            <label for="fileInput">Select a .zip file:</label>
-            <input type="file" id="fileInput" accept=".zip" required>
-            <button type="button" onclick="uploadFile()">Upload File</button>
+        
+        <h1>Upload .zip package</h1>
+        <input type="file" id="fileInput" accept=".zip">
+        <button type="button" onclick="listFiles()">List Files</button>
+        
+        <ul id="fileList"></ul>
+        
+        <hr>
+        <br>
+        <form id="resetForm">
+            <button type="button" onclick="sendDeleteRequest()">Reset</button>
         </form>
-        
-        <p id="uploadStatus"></p>
-        
+
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         
         <script>
+            function listFiles() {
+                const fileInput = document.getElementById('fileInput');
+                const fileList = document.getElementById('fileList');
+
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert('Please select a .zip file.');
+                    return;
+                }
+
+                const zipFile = fileInput.files[0];
+                const zipReader = new FileReader();
+
+                zipReader.onload = function (event) {
+                    const zip = new JSZip();
+                    const zipContent = event.target.result;
+
+                    zip.loadAsync(zipContent).then(function (contents) {
+                        fileList.innerHTML = ''; // Clear existing list
+
+                        let packageJsonExists = false;
+                        let packageJsonContent = '';
+
+                        contents.forEach(function (relativePath, zipEntry) {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = relativePath;
+                            fileList.appendChild(listItem);
+
+                            // Check if the file name contains package.json
+                            if (relativePath.includes('package.json')) {
+                                packageJsonExists = true;
+                                zipEntry.async('string').then(function (content) {
+                                    packageJsonContent = content;
+
+                                    // Parse the package.json content
+                                    try {
+                                        const packageJson = JSON.parse(packageJsonContent);
+
+                                        // Extract GitHub repository from the repository key
+                                        const repositoryUrl = packageJson.repository && packageJson.repository.url;
+                                        if (repositoryUrl) {
+                                            var githubRepository = "https://" + repositoryUrl.substring(6,repositoryUrl.length-4);
+                                            const requestBody = {
+                                                JSProgram: "",
+                                                URL: githubRepository
+                                            };
+                                            axios.post('/package', requestBody, {
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-Authorization': '1' // Replace with your JWT token
+                                                },
+                                            })
+                                            .then(response => {
+                                                console.log(response.data);
+                                                uploadStatus.textContent = "File Uploaded Successfully";
+                                            })
+                                            .catch(error => {
+                                                console.error(error);
+                                                uploadStatus.textContent = error;
+                                            });
+                                            alert('GitHub Repository: ' + githubRepository);
+                                        } else {
+                                            alert('GitHub repository not found in package.json.');
+                                        }
+                                    } catch (error) {
+                                        console.error('Error parsing package.json:', error);
+                                        alert('Error parsing package.json.');
+                                    }
+                                });
+                            }
+                        });
+
+                        if (!packageJsonExists) {
+                            alert('package.json not found in the .zip file.');
+                        }
+                    });
+                };
+
+                zipReader.readAsArrayBuffer(zipFile);
+            }
+
+
+
+
             function uploadFile() {
                 const fileInput = document.getElementById('fileInput');
                 const uploadStatus = document.getElementById('uploadStatus');
@@ -72,17 +160,7 @@
                     uploadStatus.textContent = error;
                 });
             }
-        </script>
 
-
-        <hr>
-        <br>
-        <form id="resetForm">
-            <button type="button" onclick="sendDeleteRequest()">Reset</button>
-        </form>
-
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <script>
             function sendDeleteRequest() {
                 axios.delete('/reset', {
                     headers: {

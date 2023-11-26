@@ -60,23 +60,22 @@ function resetDatabase(res) {
                     var tablesToTruncate_1 = tableNames.filter(function (tableName) { return tableName !== 'github_token'; });
                     if (tablesToTruncate_1.length === 0) {
                         console.log('No tables to reset.');
-                        res.sendStatus(200);
                         return;
                     }
                     var completedCount_1 = 0;
                     tablesToTruncate_1.forEach(function (tableName) {
-                        var truncateTableQuery = "TRUNCATE TABLE ".concat(tableName);
+                        var truncateTableQuery = "DELETE FROM ".concat(tableName);
                         db.query(truncateTableQuery, function (err) {
                             completedCount_1++;
                             if (err) {
-                                console.error("Error truncating table ".concat(tableName, ":"), err);
+                                console.error("Error DELETING table ".concat(tableName, ":"), err);
                             }
                             else {
-                                console.log("Table ".concat(tableName, " truncated successfully"));
+                                console.log("Table ".concat(tableName, " deleted successfully"));
                             }
                             if (completedCount_1 === tablesToTruncate_1.length) {
-                                console.log('All tables except for "github_token" truncated successfully');
-                                res.sendStatus(200);
+                                console.log('All tables except for "github_token" deleted successfully');
+                                return;
                             }
                         });
                     });

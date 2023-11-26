@@ -21,24 +21,23 @@ export async function resetDatabase(res) {
 
       if (tablesToTruncate.length === 0) {
         console.log('No tables to reset.');
-        res.sendStatus(200);
         return;
       }
 
       let completedCount = 0;
       tablesToTruncate.forEach(tableName => {
-        const truncateTableQuery = `TRUNCATE TABLE ${tableName}`;
+        const truncateTableQuery = `DELETE FROM ${tableName}`;
         db.query(truncateTableQuery, (err) => {
           completedCount++;
           if (err) {
-            console.error(`Error truncating table ${tableName}:`, err);
+            console.error(`Error DELETING table ${tableName}:`, err);
           } else {
-            console.log(`Table ${tableName} truncated successfully`);
+            console.log(`Table ${tableName} deleted successfully`);
           }
 
           if (completedCount === tablesToTruncate.length) {
-            console.log('All tables except for "github_token" truncated successfully');
-            res.sendStatus(200);
+            console.log('All tables except for "github_token" deleted successfully');
+            return;
           }
         });
       });

@@ -140,6 +140,9 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Version = "1.0.0.8.2";
       //JSProgram = body["JSProgram"];
     }
+    else if("Content" in body){
+      
+    }
     
     //Check if the inserted package already exists
     const package_exist_check = await upload.check_Package_Existence(Name, Version)
