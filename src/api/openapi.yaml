@@ -603,8 +603,6 @@ paths:
           description: Successful operation.
   /user:
     post:
-      x-swagger-router-controller: Default
-      operationId: UserPost
       requestBody:
         content:
           application/json:
@@ -619,6 +617,7 @@ paths:
             \ or it is formed improperly, or the AuthenticationToken is invalid."
         "404":
           description: Your token does not have the proper permission or is invalid.
+      operationId: UserPost
       summary: Add a new user to the system.
       description: Request to add a new user to the system. Requires an admin token.
       parameters:
@@ -627,9 +626,10 @@ paths:
         schema:
           $ref: '#/components/schemas/AuthenticationToken'
         in: header
-        required: true  
-    delete:
+        required: true
       x-swagger-router-controller: Default
+  /user/{userName}:   
+   delete:
       responses:
         "200":
           description: User successfully removed from the system.
@@ -652,8 +652,9 @@ paths:
         description: "user to be deleted"
         schema:
           $ref: "#/components/schemas/userName"
-        in: header
+        in: path
         required: true
+      x-swagger-router-controller: Default
 
 components:
   schemas:

@@ -96,7 +96,7 @@ function PackageByNameDelete(req, res, next, name, xAuthorization) {
     });
 }
 exports.PackageByNameDelete = PackageByNameDelete;
-function UserDelete(req, res, next, xAuthorization, userName) {
+function UserDelete(req, res, next, userName, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -109,7 +109,6 @@ function UserDelete(req, res, next, xAuthorization, userName) {
     });
 }
 exports.UserDelete = UserDelete;
-;
 function UserPost(req, res, next, body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -123,7 +122,6 @@ function UserPost(req, res, next, body, xAuthorization) {
     });
 }
 exports.UserPost = UserPost;
-;
 function PackageByNameGet(req, res, next, name, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {

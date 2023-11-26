@@ -415,8 +415,23 @@ exports.MyPage = MyPage;
  **/
 function UserDelete(xAuthorization, userName) {
     return __awaiter(this, void 0, void 0, function () {
+        var queryString, err_1;
         return __generator(this, function (_a) {
-            return [2 /*return*/, ''];
+            switch (_a.label) {
+                case 0:
+                    queryString = 'DELETE FROM Auth WHERE user=\'' + userName + '\'';
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, promisePool.execute(queryString)];
+                case 2:
+                    _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    err_1 = _a.sent();
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Error happened " + err_1)];
+                case 4: return [2 /*return*/, (0, writer_1.respondWithCode)(200, "Successfully deleted user " + userName)];
+            }
         });
     });
 }

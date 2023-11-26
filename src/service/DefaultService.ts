@@ -383,14 +383,18 @@ export async function MyPage() {
  * userName userName user to be deleted
  * no response value expected for this operation
  **/
-export async function UserDelete(xAuthorization: AuthenticationToken,userName: string) {
+export async function UserDelete(xAuthorization: AuthenticationToken, userName: string) {
   
+  let queryString: string = 'DELETE FROM Auth WHERE user=\''+ userName +'\'';
+  try{
+    await promisePool.execute(queryString);
+  }
+  catch(err){
+    return respondWithCode(400, "Error happened "+ err);
   
-  let queryString: string = 'DELETE FROM Auth WHERE condition user = \''+userName+'\'';
-  await promisePool.execute(queryString);
+  }
   return respondWithCode(200, "Successfully deleted user "+userName);
   
-  return ''
 }
 
 
