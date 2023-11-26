@@ -69,9 +69,7 @@ function CreateAuthToken(req, res, next, body) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    console.log("createAuthToken: default.ts");
-                    return [4 /*yield*/, Default.CreateAuthToken];
+                case 0: return [4 /*yield*/, Default.CreateAuthToken];
                 case 1:
                     _a.sent();
                     return [4 /*yield*/, handleRequestAsync(Default.CreateAuthToken, req, res, next, body)];
@@ -87,7 +85,9 @@ function PackageByNameDelete(req, res, next, name, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageByNameDelete, req, res, next, name, xAuthorization)];
+                case 0:
+                    console.log("createAuthToken: default.ts");
+                    return [4 /*yield*/, handleRequestAsync(Default.PackageByNameDelete, req, res, next, name, xAuthorization)];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];

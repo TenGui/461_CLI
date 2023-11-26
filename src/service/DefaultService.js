@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MyPage = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.PackageByNameDelete = exports.CreateAuthToken = void 0;
 var writer_1 = require("../utils/writer"); // Import the response function
 var path = require("path");
-var jwt = require("jsonwebtoken");
+var authHelper = require("../authentication/authenticationHelper");
 var _a = require("../database_files/database_connect"), db = _a.db, promisePool = _a.promisePool;
 // const queryAsync = util.promisify(pool.query);
 /**
@@ -54,7 +54,6 @@ function CreateAuthToken(body) {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    console.log("authentication endpoint hit");
                     username = body.User.name;
                     password = body.Secret.password;
                     return [4 /*yield*/, promisePool.execute('SELECT * FROM Auth WHERE user = \'' + username + '\'')];
@@ -63,21 +62,21 @@ function CreateAuthToken(body) {
                     if (result.length == 0) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User is not in database")];
                     }
-                    console.log("result: " + JSON.stringify(result));
+                    //console.log("result: " + JSON.stringify(result));
                     // If credentials are valid, create a JWT with permissions that correspond to that of the user
-                    console.log("password check: incoming = " + password + " database = " + result[0].pass);
+                    //console.log("password check: incoming = " + password + " database = "+ result[0].pass);
                     if (password === result[0].pass) {
-                        token = jwt.sign({
+                        token = authHelper.createToken({
                             user: username,
                             pass: result[0].pass,
                             canSearch: result[0].canSearch,
                             canUpload: result[0].canUpload,
                             canDownload: result[0].canDownload
-                        }, 'your-secret-key', { expiresIn: '10h' });
+                        });
                         return [2 /*return*/, (0, writer_1.respondWithCode)(200, "\"bearer " + token + "\"")];
                     }
                     else {
-                        console.log("bad password");
+                        //console.log("bad password");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User exists. Wrong password")];
                     }
                     return [2 /*return*/, '']; // You can return the actual value here
@@ -96,7 +95,10 @@ exports.CreateAuthToken = CreateAuthToken;
 function PackageByNameDelete(name, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            return [2 /*return*/];
+            // Your code here
+            console.log("--here is the token: " + xAuthorization);
+            console.log("--here is the pacakge name" + name);
+            return [2 /*return*/, (0, writer_1.respondWithCode)(200, "gaming")];
         });
     });
 }

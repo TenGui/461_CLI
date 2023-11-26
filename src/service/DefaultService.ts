@@ -11,6 +11,7 @@ import {
   ProcedureCallPacket
 } from 'mysql2/promise';
 import * as jwt from "jsonwebtoken";
+import * as authHelper from '../authentication/authenticationHelper';
 
 const { db, promisePool } = require("../database_files/database_connect");
 
@@ -23,7 +24,7 @@ const { db, promisePool } = require("../database_files/database_connect");
  * @returns AuthenticationToken
  **/
 export async function CreateAuthToken(body: AuthenticationRequest) {
-    console.log("authentication endpoint hit");
+    //console.log("authentication endpoint hit");
   
     // get user credentials
     const username = body.User.name;
@@ -38,26 +39,26 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
       return respondWithCode(401, "User is not in database");
     }
 
-    console.log("result: " + JSON.stringify(result));
+    //console.log("result: " + JSON.stringify(result));
     
 
     // If credentials are valid, create a JWT with permissions that correspond to that of the user
-    console.log("password check: incoming = " + password + " database = "+ result[0].pass);
+    //console.log("password check: incoming = " + password + " database = "+ result[0].pass);
     if (password === result[0].pass) {
 
       //create a jwt that contains relevant user permissions
-      const token = jwt.sign({ 
+      const token = authHelper.createToken({ 
         user: username, 
         pass: result[0].pass, 
         canSearch: result[0].canSearch,
         canUpload: result[0].canUpload,
         canDownload: result[0].canDownload
-      }, 'your-secret-key', { expiresIn: '10h' });
+      });
 
       return respondWithCode(200, "\"bearer "+ token + "\"");
 
     } else {
-      console.log("bad password");
+      //console.log("bad password");
       return respondWithCode(401, "User exists. Wrong password");
     }
 
@@ -71,8 +72,12 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
  * @param name PackageName 
  * @returns void
  **/
-export async function PackageByNameDelete(name: PackageName, xAuthorization: AuthenticationToken, ): Promise<void> {
+export async function PackageByNameDelete(name: PackageName, xAuthorization: AuthenticationToken, ) {
   // Your code here
+  console.log("--here is the token: " + xAuthorization);
+  console.log("--here is the pacakge name" + name);
+  console.log("This is the dumbest thing in the world ");
+  return respondWithCode(200, "gaming");
 }
 
 /**
@@ -370,6 +375,30 @@ export async function MyPage() {
   return path.join(__dirname, '..', 'html' , 'login.html');
 }
 
+/**
+ * Add a new user to the system.
+ * Request to add a new user to the system. Requires an admin token.
+ *
+ * xAuthorization AuthenticationToken 
+ * userName userName user to be deleted
+ * no response value expected for this operation
+ **/
+export async function userDelete(xAuthorization: AuthenticationToken,userName) {
+  return ''
+}
+
+
+/**
+ * Add a new user to the system.
+ * Request to add a new user to the system. Requires an admin token.
+ *
+ * body List 
+ * xAuthorization AuthenticationToken 
+ * no response value expected for this operation
+ **/
+export async function userPost(body: newUser, xAuthorization: AuthenticationToken) {
+  return '';
+}
      
 
 

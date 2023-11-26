@@ -497,7 +497,7 @@ paths:
       summary: Delete all versions of this package.
       operationId: PackageByNameDelete
       parameters:
-      - name: xtest
+      - name: X-Authorization
         in: header
         description: ""
         required: true

@@ -16,12 +16,12 @@ async function handleRequestAsync(fn: Function, req: Request, res: Response, nex
 }
 
 export async function CreateAuthToken(req: Request, res: Response, next: NextFunction, body: any) {
-  console.log("createAuthToken: default.ts");
   await Default.CreateAuthToken;
   await handleRequestAsync(Default.CreateAuthToken, req, res, next, body);
 }
 
 export async function PackageByNameDelete(req: Request, res: Response, next: NextFunction, name: string, xAuthorization: string) {
+  console.log("createAuthToken: default.ts");
   await handleRequestAsync(Default.PackageByNameDelete, req, res, next, name, xAuthorization);
 }
 
