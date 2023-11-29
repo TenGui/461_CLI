@@ -154,11 +154,11 @@ exports.PackageByRegExGet = PackageByRegExGet;
 var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Content, URL, Version, JSProgram, upload, output_1, package_exist_check, _a, result, fields, output, error_1;
+        var Name, Content, URL, Version, JSProgram, upload, output_1, github_link, output_2, package_exist_check, _a, result, fields, output, error_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _b.trys.push([0, 5, , 6]);
+                    _b.trys.push([0, 8, , 9]);
                     Name = "";
                     Content = "";
                     URL = "";
@@ -185,12 +185,31 @@ function PackageCreate(body, xAuthorization) {
                     Content = 'N/A';
                     URL = output_1["url"];
                     Version = "1.0.0.8.2";
-                    _b.label = 2;
-                case 2: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                    return [3 /*break*/, 5];
+                case 2:
+                    if (!("Content" in body)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, upload.decompress_zip_to_github_link(body["Content"])];
                 case 3:
+                    github_link = _b.sent();
+                    if (github_link == "") {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists/Cannot locate package.json file" })];
+                    }
+                    return [4 /*yield*/, upload.process(github_link)];
+                case 4:
+                    output_2 = _b.sent();
+                    if (!output_2) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
+                    }
+                    Name = output_2["repo"];
+                    Content = body["Content"];
+                    URL = 'N/A';
+                    Version = "1.0.0.8.2";
+                    _b.label = 5;
+                case 5: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                case 6:
                     package_exist_check = _b.sent();
                     if (package_exist_check) {
-                        console.log("Package exists already");
+                        console.log("Upload Error: Package exists already");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Error": "Package exists already" })];
                     }
                     return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
@@ -200,7 +219,7 @@ function PackageCreate(body, xAuthorization) {
                             URL,
                             JSProgram,
                         ])];
-                case 4:
+                case 7:
                     _a = _b.sent(), result = _a[0], fields = _a[1];
                     output = {
                         "metadata": {
@@ -220,11 +239,11 @@ function PackageCreate(body, xAuthorization) {
                     }
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
-                case 5:
+                case 8:
                     error_1 = _b.sent();
                     console.error('Error calling the stored procedure:', error_1);
                     throw error_1; // Re-throw the error for the caller to handle
-                case 6: return [2 /*return*/];
+                case 9: return [2 /*return*/];
             }
         });
     });
@@ -251,20 +270,34 @@ exports.PackageDelete = PackageDelete;
  * @param xAuthorization AuthenticationToken
  * @returns PackageRating
  **/
-var eval_single_url_js_1 = require("../utils/eval_single_url.js");
+var rate_endpoint_js_1 = require("../app_endpoints/rate_endpoint.js");
 function PackageRate(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var URLs, url_file, output;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var _a, result, fields, outputURL, output, error_2;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    URLs = ["https://github.com/knex/knex"];
-                    url_file = URLs[id];
-                    return [4 /*yield*/, (0, eval_single_url_js_1.eval_single_file)(url_file)];
+                    _b.trys.push([0, 5, , 6]);
+                    return [4 /*yield*/, promisePool.execute('SELECT URL FROM PackageData WHERE ID = ?', [id])];
                 case 1:
-                    output = _a.sent();
+                    _a = _b.sent(), result = _a[0], fields = _a[1];
+                    if (!(result && result.length > 0)) return [3 /*break*/, 3];
+                    outputURL = result[0].URL;
+                    console.log('Retrieved URL:', outputURL);
+                    return [4 /*yield*/, (0, rate_endpoint_js_1.eval_single_file)(outputURL)];
+                case 2:
+                    output = _b.sent();
                     console.log(output);
                     return [2 /*return*/, output];
+                case 3:
+                    console.error('No result or empty result from GetURLByDataID');
+                    throw new Error('No result or empty result from GetURLByDataID');
+                case 4: return [3 /*break*/, 6];
+                case 5:
+                    error_2 = _b.sent();
+                    console.error('Error calling GetURLByDataID:', error_2);
+                    throw error_2;
+                case 6: return [2 /*return*/];
             }
         });
     });

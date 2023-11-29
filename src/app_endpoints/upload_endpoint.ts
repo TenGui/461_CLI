@@ -3,6 +3,7 @@ import * as path from "path";
 import * as fs from "fs";
 const { Octokit } = require("@octokit/rest");
 import { promisePool } from "../database_files/database_connect";
+import * as unzipper from 'unzipper';
 
 export class Upload{
     private owner;
@@ -61,6 +62,60 @@ export class Upload{
         }
     }
 
+    async decompress_zip_to_github_link(base64): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const base64String = base64;
+    
+            const buffer = Buffer.from(base64String, 'base64');
+    
+            const readableStream = require('stream').Readable.from(buffer);
+            let cleaned_github_link = "";
+    
+            readableStream.pipe(unzipper.Parse())
+                .on('entry', (entry: unzipper.Entry) => {
+                    if (entry.path.endsWith("package.json")) {
+                        console.log('Found package.json in the ZIP file.');
+    
+                        const contentStream = fs.createWriteStream('zip_file_package.json');
+                        entry.pipe(contentStream);
+    
+                        contentStream.on('finish', () => {
+                            // Parse the JSON content
+                            fs.readFile("zip_file_package.json", 'utf-8', (err, data) => {
+                                if (err) {
+                                    reject(err);
+                                    return;
+                                }
+    
+                                try {
+                                    const parsedContent = JSON.parse(data);
+                                    if (parsedContent && parsedContent['repository']) {
+                                        const github_link = parsedContent['repository'].url
+                                        cleaned_github_link = "https://" + github_link.substring(6, github_link.length - 4);
+                                        console.log("Extracted github repo link from ZIP file: ", cleaned_github_link);
+                                    }
+                                    resolve(cleaned_github_link);
+                                } catch (error) {
+                                    console.error('Error parsing JSON content:', error);
+                                    reject(error);
+                                }
+                            });
+                        });
+                    } else {
+                        entry.autodrain();
+                    }
+                })
+                .on('error', (err: Error) => {
+                    console.error('Error checking base64 encoded zip file:', err);
+                    reject(err);
+                })
+                .on('finish', () => {
+                    console.log('base64 ZIP file decoded.');
+                    resolve(cleaned_github_link);
+                });
+        });
+    }
+    
     async process(url){
         const output = await this.check_valid_githubURL(url);
         if(!output){
@@ -70,5 +125,5 @@ export class Upload{
     }
 }
 
-const a = new Upload()
-a.process("https://github.com/davisjam/safe-regex")
+// const a = new Upload()
+// a.process("https://github.com/davisjam/safe-regex")

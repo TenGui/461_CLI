@@ -113,7 +113,7 @@ import { Upload } from '../app_endpoints/upload_endpoint.js';
 export async function PackageCreate(body: PackageData, xAuthorization: AuthenticationToken) {
   try {
     var Name: string = "";
-    var Content: string = "";
+    var Content = "";
     var URL: string = "";
     var Version:string = "";
     var JSProgram:any = "";
@@ -134,6 +134,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       if(!output){
         return respondWithCode(400, {"Error": "Repository does not exists"});
       }
+
       Name = output["repo"];
       Content = 'N/A';
       URL = output["url"];
@@ -141,13 +142,25 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       //JSProgram = body["JSProgram"];
     }
     else if("Content" in body){
-      
+      const github_link = await upload.decompress_zip_to_github_link(body["Content"])
+      if(github_link == ""){
+        return respondWithCode(400, {"Error": "Repository does not exists/Cannot locate package.json file"});
+      }
+
+      const output = await upload.process(github_link);
+      if(!output){
+        return respondWithCode(400, {"Error": "Repository does not exists"});
+      }
+      Name = output["repo"];
+      Content = body["Content"];
+      URL = 'N/A';
+      Version = "1.0.0.8.2";
     }
     
     //Check if the inserted package already exists
     const package_exist_check = await upload.check_Package_Existence(Name, Version)
     if(package_exist_check){
-      console.log("Package exists already");
+      console.log("Upload Error: Package exists already");
       return respondWithCode(409, {"Error": "Package exists already"});
     }
 
@@ -205,16 +218,29 @@ export async function PackageDelete(id: PackageID, xAuthorization: Authenticatio
  * @returns PackageRating
  **/
 
-import { eval_single_file } from '../utils/eval_single_url.js';
-import { version } from 'isomorphic-git';
+import { eval_single_file } from '../app_endpoints/rate_endpoint.js';
 export async function PackageRate(id: PackageID, xAuthorization: AuthenticationToken): Promise<PackageRating> {
-  //Modify this section when database is setup
-  let URLs = ["https://github.com/knex/knex"];
-  const url_file = URLs[id]; // Get the "id" parameter from the URL
+  try {
+    // Call the GetURLByDataID stored procedure
+    const [result, fields] = await promisePool.execute('SELECT URL FROM PackageData WHERE ID = ?', [id]);
 
-  const output = await eval_single_file(url_file);
-  console.log(output);
-  return output;
+    if (result && result.length > 0) {
+      const outputURL = result[0].URL;
+
+      console.log('Retrieved URL:', outputURL);
+
+      const output = await eval_single_file(outputURL);
+      console.log(output);
+
+      return output;
+    } else {
+      console.error('No result or empty result from GetURLByDataID');
+      throw new Error('No result or empty result from GetURLByDataID');
+    }
+  } catch (error) {
+    console.error('Error calling GetURLByDataID:', error);
+    throw error;
+  }
 }
 
 /**

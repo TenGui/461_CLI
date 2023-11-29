@@ -38,8 +38,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Upload = void 0;
 var utils_1 = require("../utils/utils");
+var fs = require("fs");
 var Octokit = require("@octokit/rest").Octokit;
 var database_connect_1 = require("../database_files/database_connect");
+var unzipper = require("unzipper");
 var Upload = /** @class */ (function () {
     function Upload() {
         this.owner = "";
@@ -112,6 +114,59 @@ var Upload = /** @class */ (function () {
             });
         });
     };
+    Upload.prototype.decompress_zip_to_github_link = function (base64) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        var base64String = base64;
+                        var buffer = Buffer.from(base64String, 'base64');
+                        var readableStream = require('stream').Readable.from(buffer);
+                        var cleaned_github_link = "";
+                        readableStream.pipe(unzipper.Parse())
+                            .on('entry', function (entry) {
+                            if (entry.path.endsWith("package.json")) {
+                                console.log('Found package.json in the ZIP file.');
+                                var contentStream = fs.createWriteStream('zip_file_package.json');
+                                entry.pipe(contentStream);
+                                contentStream.on('finish', function () {
+                                    // Parse the JSON content
+                                    fs.readFile("zip_file_package.json", 'utf-8', function (err, data) {
+                                        if (err) {
+                                            reject(err);
+                                            return;
+                                        }
+                                        try {
+                                            var parsedContent = JSON.parse(data);
+                                            if (parsedContent && parsedContent['repository']) {
+                                                var github_link = parsedContent['repository'].url;
+                                                cleaned_github_link = "https://" + github_link.substring(6, github_link.length - 4);
+                                                console.log("Extracted github repo link from ZIP file: ", cleaned_github_link);
+                                            }
+                                            resolve(cleaned_github_link);
+                                        }
+                                        catch (error) {
+                                            console.error('Error parsing JSON content:', error);
+                                            reject(error);
+                                        }
+                                    });
+                                });
+                            }
+                            else {
+                                entry.autodrain();
+                            }
+                        })
+                            .on('error', function (err) {
+                            console.error('Error checking base64 encoded zip file:', err);
+                            reject(err);
+                        })
+                            .on('finish', function () {
+                            console.log('base64 ZIP file decoded.');
+                            resolve(cleaned_github_link);
+                        });
+                    })];
+            });
+        });
+    };
     Upload.prototype.process = function (url) {
         return __awaiter(this, void 0, void 0, function () {
             var output;
@@ -131,5 +186,5 @@ var Upload = /** @class */ (function () {
     return Upload;
 }());
 exports.Upload = Upload;
-var a = new Upload();
-a.process("https://github.com/davisjam/safe-regex");
+// const a = new Upload()
+// a.process("https://github.com/davisjam/safe-regex")
