@@ -86,21 +86,32 @@ export async function PackageByNameGet(name: PackageName, xAuthorization: Authen
  * @returns List
  **/
 export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: AuthenticationToken) {
-  const examples: any = {};
-  examples['application/json'] = [
-    {
-      "Version": "1.2.3",
-      "ID": "ID",
-      "Name": "Name"
-    },
-    {
-      "Version": "1.2.3",
-      "ID": "ID",
-      "Name": "Name"
-    },
-  ];
+  if(!body.RegEx){
+    return respondWithCode(404, {"Error" : "There is missing field(s) in the PackageRegEx"});
+  }
+  const packageName = body.RegEx;
 
-  return examples['application/json'];
+  const query = 'SELECT Name, version FROM PackageMetadata WHERE Name REGEXP ?';
+
+  try {
+    const [rows, fields] = await db.promise().execute(query, [packageName]);
+
+    console.log('Results:', rows);
+
+    if (rows.length > 0) {
+      const matchedPackages = rows.map((pkg: RowDataPacket) => ({
+        name: pkg.Name,
+        version: pkg.version,
+      }));
+      
+      return respondWithCode(200, matchedPackages);
+    } else {
+      return respondWithCode(404, {"Error" : "No package found"});
+    }
+  } catch (error) {
+    console.error(error);
+    return respondWithCode(500, { error: 'Internal Server Error' });
+  }
 }
 
 /**
@@ -109,17 +120,63 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
  * @param xAuthorization AuthenticationToken 
  * @returns Package
  **/
+import { Upload } from '../app_endpoints/upload_endpoint.js';
 export async function PackageCreate(body: PackageData, xAuthorization: AuthenticationToken) {
   try {
-    const Name: string = "Package_Name11";
-    const Version: string = "1.0.0.8.2";
-    const Content: string = 'LONG_TEXT10';
-    const URL: string = 'LONG_TEXT1234';
-    const JSProgram: string = 'JSPROGRAM325';
-    const DataDescription: string = 'DATA226';
+    var Name: string = "";
+    var Content = "";
+    var URL: string = "";
+    var Version:string = "";
+    var JSProgram:any = "";
+    const upload = new Upload()
 
-    // const result = await connection.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
-    const [result, fields] = await promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
+    //Check if package is given
+    if("URL" in body && "Content" in body){
+      console.log("Improper form, URL and Content are both set")
+      return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+    }
+    if(!("URL" in body) && !("Content" in body)){
+      console.log("Improper form, URL and Content are both not set")
+      return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
+    }
+
+    if("URL" in body){
+      const output = await upload.process(body["URL"])
+      if(!output){
+        return respondWithCode(400, {"Error": "Repository does not exists"});
+      }
+
+      Name = output["repo"];
+      Content = 'N/A';
+      URL = output["url"];
+      Version = "1.0.0.8.2";
+      //JSProgram = body["JSProgram"];
+    }
+    else if("Content" in body){
+      const github_link = await upload.decompress_zip_to_github_link(body["Content"])
+      console.log("Inside DefaultService: ", github_link);
+      if(github_link == ""){
+        return respondWithCode(400, {"Error": "Repository does not exists/Cannot locate package.json file"});
+      }
+
+      const output = await upload.process(github_link);
+      if(!output){
+        return respondWithCode(400, {"Error": "Repository does not exists"});
+      }
+      Name = output["repo"];
+      Content = "Content";
+      URL = 'N/A';
+      Version = "1.0.0.8.2";
+    }
+    
+    //Check if the inserted package already exists
+    const package_exist_check = await upload.check_Package_Existence(Name, Version)
+    if(package_exist_check){
+      console.log("Upload Error: Package exists already");
+      return respondWithCode(409, {"Error": "Package exists already"});
+    }
+
+    const [result, fields] = await promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
       Name,
       Version,
       Content,
@@ -127,12 +184,27 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       JSProgram,
     ]);
 
-    //connection.release();
+    const output = {
+      "metadata" : {
+        "Name": Name,
+        "version": Version,
+        "ID": "1"
+      },
+      "data": {
+        "JSProgram": JSProgram
+      }
+    }
+    
+    if("URL" in body){
+      output["data"]["URL"] = URL;
+    }
+    else if("Content" in body){
+      output["data"]["Content"] = Content;
+    }
 
-    console.log(result);
-    console.log(typeof(result));
-    console.log('Stored procedure executed successfully.');
-    return respondWithCode(201, "testing");
+    console.log('Packaged added successfully');
+
+    return respondWithCode(201, output);
   } catch (error) {
     console.error('Error calling the stored procedure:', error);
     throw error; // Re-throw the error for the caller to handle
@@ -172,15 +244,32 @@ export async function PackageDelete(id: PackageID, xAuthorization: Authenticatio
  * @returns PackageRating
  **/
 
-import { eval_single_file } from '../utils/eval_single_url.js';
-export async function PackageRate(id: PackageID, xAuthorization: AuthenticationToken): Promise<PackageRating> {
-  //Modify this section when database is setup
-  let URLs = ["https://github.com/knex/knex"];
-  const url_file = URLs[id]; // Get the "id" parameter from the URL
+import { eval_single_file } from '../app_endpoints/rate_endpoint.js';
+export async function PackageRate(id: PackageID, xAuthorization: AuthenticationToken){
+  try {
+    // Call the GetURLByDataID stored procedure
+    const [result, fields] = await promisePool.execute('SELECT URL FROM PackageData WHERE ID = ?', [id]);
 
-  const output = await eval_single_file(url_file);
-  console.log(output);
-  return output;
+    if (result && result.length > 0) {
+      const outputURL = result[0].URL;
+
+      console.log('Retrieved URL:', outputURL);
+
+      const output = await eval_single_file(outputURL);
+
+      const hasInvalidScore = Object.values(output).some(score => score === -1);
+      if (hasInvalidScore) {
+        return respondWithCode(500, {error: 'The package rating system choked on at least one of the metrics.'});
+      }
+
+      return respondWithCode(200, output);
+      
+    } else {
+      return respondWithCode(404, {error: "Package does not exist."});
+    }
+  } catch (error) {
+    return respondWithCode(500, {error: 'The package rating system choked on at least one of the metrics.'});
+  }
 }
 
 /**
@@ -282,9 +371,11 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
  * @param xAuthorization AuthenticationToken 
  * @returns void
  **/
-export async function RegistryReset(xAuthorization: AuthenticationToken) {
-  // Your code here
+import { resetDatabase } from '../app_endpoints/reset_endpoint.js';
+export async function RegistryReset(xAuthorization: AuthenticationToken): Promise<void> {
+  await resetDatabase();  
 }
+
 
 export async function MyPage() {
   return path.join(__dirname, '..', 'html' , 'login.html');

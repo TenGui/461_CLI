@@ -59,11 +59,8 @@ export async function PackagesList(req: Request, res: Response, next: NextFuncti
   await handleRequestAsync(Default.PackagesList, req, res, next, body, offset, xAuthorization);
 }
 
-import { resetDatabase } from '../app_endpoints/reset_endpoint.js';
 export async function RegistryReset(req: Request, res: Response, next: NextFunction, xAuthorization: string) {
   // const xAuthorization = req.headers['x-authorization'];
-  console.log("HERE");
-  await resetDatabase(res);  
   await handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization);
 }
 
