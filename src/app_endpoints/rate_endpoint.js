@@ -45,9 +45,10 @@ var RampUpRunner = require("../url_list/rampUpMetric/rampUpRunner");
 var RespMaintRunner = require("../url_list/respMaintMetric/respMaintRunner");
 var CorrectnessRunner = require("../url_list/correctnessMetric/correctnessRunner");
 var PR_Runner = require("../url_list/PR_metric/pull_request");
+var Version_Pin_runner = require("../url_list/versionPinningMetric/versionPinning");
 function eval_single_file(urlstr) {
     return __awaiter(this, void 0, void 0, function () {
-        var url, limiter, licenseScore, rampUpScore, busFactorScore, maintainerScore, correctnessScore, pull_request_score, multipliers, adjustedScores, overallScore, output;
+        var url, limiter, licenseScore, rampUpScore, busFactorScore, maintainerScore, correctnessScore, pull_request_score, version_pinning_score, multipliers, adjustedScores, overallScore;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -80,13 +81,17 @@ function eval_single_file(urlstr) {
                     return [4 /*yield*/, PR_Runner.getPRscore(url)];
                 case 9:
                     pull_request_score = _a.sent();
+                    return [4 /*yield*/, Version_Pin_runner.get_version_pin_score(url)];
+                case 10:
+                    version_pinning_score = _a.sent();
                     multipliers = {
                         license: 1,
-                        rampUp: 0.15,
+                        rampUp: 0.10,
                         busFactor: 0.2,
                         maintainer: 0.2,
-                        correctness: 0.25,
+                        correctness: 0.2,
                         pull_request: 0.2,
+                        version_pin: 0.1
                     };
                     adjustedScores = {
                         licenseScore: licenseScore,
@@ -95,6 +100,7 @@ function eval_single_file(urlstr) {
                         maintainerScore: maintainerScore,
                         correctnessScore: correctnessScore,
                         pullrequestScore: pull_request_score,
+                        VersionPinScore: version_pinning_score
                     };
                     Object.entries(adjustedScores).forEach(function (_a) {
                         var key = _a[0], score = _a[1];
@@ -107,11 +113,19 @@ function eval_single_file(urlstr) {
                         multipliers.maintainer * maintainerScore +
                         multipliers.correctness * correctnessScore +
                         multipliers.pull_request * pull_request_score +
+                        multipliers.version_pin * version_pinning_score +
                         Number.EPSILON) *
                         100000) / 100000;
-                    output = "{\"URL\": \"".concat(urlstr, "\", \"NET_SCORE\": ").concat(overallScore, ", \"RAMP_UP_SCORE\": ").concat(adjustedScores.rampUpScore, ", \"CORRECTNESS_SCORE\": ").concat(adjustedScores.correctnessScore, ", \"BUS_FACTOR_SCORE\": ").concat(adjustedScores.busFactorScore, ", \"RESPONSIVE_MAINTAINER_SCORE\": ").concat(adjustedScores.maintainerScore, ", \"LICENSE_SCORE\": ").concat(adjustedScores.licenseScore, ", \"PullRequest\": ").concat(adjustedScores.pullrequestScore, "}");
-                    //console.log(output);
-                    return [2 /*return*/, output];
+                    return [2 /*return*/, {
+                            NetScore: overallScore,
+                            RampUp: adjustedScores.rampUpScore,
+                            Correctness: adjustedScores.correctnessScore,
+                            BusFactor: adjustedScores.busFactorScore,
+                            ResponsiveMaintainer: adjustedScores.maintainerScore,
+                            LicenseScore: adjustedScores.licenseScore,
+                            PullRequest: adjustedScores.pullrequestScore,
+                            GoodPinningPractice: adjustedScores.VersionPinScore
+                        }];
             }
         });
     });

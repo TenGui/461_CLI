@@ -164,22 +164,39 @@ exports.PackageByNameGet = PackageByNameGet;
  **/
 function PackageByRegExGet(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var examples;
-        return __generator(this, function (_a) {
-            examples = {};
-            examples['application/json'] = [
-                {
-                    "Version": "1.2.3",
-                    "ID": "ID",
-                    "Name": "Name"
-                },
-                {
-                    "Version": "1.2.3",
-                    "ID": "ID",
-                    "Name": "Name"
-                },
-            ];
-            return [2 /*return*/, examples['application/json']];
+        var packageName, query, _a, rows, fields, matchedPackages, error_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    if (!body.RegEx) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "There is missing field(s) in the PackageRegEx" })];
+                    }
+                    packageName = body.RegEx;
+                    query = 'SELECT Name, version FROM PackageMetadata WHERE Name REGEXP ?';
+                    _b.label = 1;
+                case 1:
+                    _b.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, db.promise().execute(query, [packageName])];
+                case 2:
+                    _a = _b.sent(), rows = _a[0], fields = _a[1];
+                    console.log('Results:', rows);
+                    if (rows.length > 0) {
+                        matchedPackages = rows.map(function (pkg) { return ({
+                            name: pkg.Name,
+                            version: pkg.version,
+                        }); });
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, matchedPackages)];
+                    }
+                    else {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "No package found" })];
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_1 = _b.sent();
+                    console.error(error_1);
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
+                case 4: return [2 /*return*/];
+            }
         });
     });
 }
@@ -190,38 +207,100 @@ exports.PackageByRegExGet = PackageByRegExGet;
  * @param xAuthorization AuthenticationToken
  * @returns Package
  **/
+var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Version, Content, URL_1, JSProgram, DataDescription, _a, result, fields, error_1;
+        var Name, Content, URL, Version, JSProgram, upload, output_1, github_link, output_2, package_exist_check, _a, result, fields, output, error_2;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _b.trys.push([0, 2, , 3]);
-                    Name = "Package_Name11";
+                    _b.trys.push([0, 8, , 9]);
+                    Name = "";
+                    Content = "";
+                    URL = "";
+                    Version = "";
+                    JSProgram = "";
+                    upload = new upload_endpoint_js_1.Upload();
+                    //Check if package is given
+                    if ("URL" in body && "Content" in body) {
+                        console.log("Improper form, URL and Content are both set");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
+                    }
+                    if (!("URL" in body) && !("Content" in body)) {
+                        console.log("Improper form, URL and Content are both not set");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
+                    }
+                    if (!("URL" in body)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, upload.process(body["URL"])];
+                case 1:
+                    output_1 = _b.sent();
+                    if (!output_1) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
+                    }
+                    Name = output_1["repo"];
+                    Content = 'N/A';
+                    URL = output_1["url"];
                     Version = "1.0.0.8.2";
-                    Content = 'LONG_TEXT10';
-                    URL_1 = 'LONG_TEXT1234';
-                    JSProgram = 'JSPROGRAM325';
-                    DataDescription = 'DATA226';
-                    return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
+                    return [3 /*break*/, 5];
+                case 2:
+                    if (!("Content" in body)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, upload.decompress_zip_to_github_link(body["Content"])];
+                case 3:
+                    github_link = _b.sent();
+                    console.log("Inside DefaultService: ", github_link);
+                    if (github_link == "") {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists/Cannot locate package.json file" })];
+                    }
+                    return [4 /*yield*/, upload.process(github_link)];
+                case 4:
+                    output_2 = _b.sent();
+                    if (!output_2) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
+                    }
+                    Name = output_2["repo"];
+                    Content = "Content";
+                    URL = 'N/A';
+                    Version = "1.0.0.8.2";
+                    _b.label = 5;
+                case 5: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                case 6:
+                    package_exist_check = _b.sent();
+                    if (package_exist_check) {
+                        console.log("Upload Error: Package exists already");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Error": "Package exists already" })];
+                    }
+                    return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
                             Name,
                             Version,
                             Content,
-                            URL_1,
+                            URL,
                             JSProgram,
                         ])];
-                case 1:
+                case 7:
                     _a = _b.sent(), result = _a[0], fields = _a[1];
-                    //connection.release();
-                    console.log(result);
-                    console.log(typeof (result));
-                    console.log('Stored procedure executed successfully.');
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(201, "testing")];
-                case 2:
-                    error_1 = _b.sent();
-                    console.error('Error calling the stored procedure:', error_1);
-                    throw error_1; // Re-throw the error for the caller to handle
-                case 3: return [2 /*return*/];
+                    output = {
+                        "metadata": {
+                            "Name": Name,
+                            "version": Version,
+                            "ID": "1"
+                        },
+                        "data": {
+                            "JSProgram": JSProgram
+                        }
+                    };
+                    if ("URL" in body) {
+                        output["data"]["URL"] = URL;
+                    }
+                    else if ("Content" in body) {
+                        output["data"]["Content"] = Content;
+                    }
+                    console.log('Packaged added successfully');
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
+                case 8:
+                    error_2 = _b.sent();
+                    console.error('Error calling the stored procedure:', error_2);
+                    throw error_2; // Re-throw the error for the caller to handle
+                case 9: return [2 /*return*/];
             }
         });
     });
@@ -248,20 +327,34 @@ exports.PackageDelete = PackageDelete;
  * @param xAuthorization AuthenticationToken
  * @returns PackageRating
  **/
-var eval_single_url_js_1 = require("../utils/eval_single_url.js");
+var rate_endpoint_js_1 = require("../app_endpoints/rate_endpoint.js");
 function PackageRate(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var URLs, url_file, output;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var _a, result, fields, outputURL, output, hasInvalidScore, error_3;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    URLs = ["https://github.com/knex/knex"];
-                    url_file = URLs[id];
-                    return [4 /*yield*/, (0, eval_single_url_js_1.eval_single_file)(url_file)];
+                    _b.trys.push([0, 5, , 6]);
+                    return [4 /*yield*/, promisePool.execute('SELECT URL FROM PackageData WHERE ID = ?', [id])];
                 case 1:
-                    output = _a.sent();
-                    console.log(output);
-                    return [2 /*return*/, output];
+                    _a = _b.sent(), result = _a[0], fields = _a[1];
+                    if (!(result && result.length > 0)) return [3 /*break*/, 3];
+                    outputURL = result[0].URL;
+                    console.log('Retrieved URL:', outputURL);
+                    return [4 /*yield*/, (0, rate_endpoint_js_1.eval_single_file)(outputURL)];
+                case 2:
+                    output = _b.sent();
+                    hasInvalidScore = Object.values(output).some(function (score) { return score === -1; });
+                    if (hasInvalidScore) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
+                    }
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(200, output)];
+                case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: "Package does not exist." })];
+                case 4: return [3 /*break*/, 6];
+                case 5:
+                    error_3 = _b.sent();
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
+                case 6: return [2 /*return*/];
             }
         });
     });
@@ -394,10 +487,16 @@ exports.PackagesList = PackagesList;
  * @param xAuthorization AuthenticationToken
  * @returns void
  **/
+var reset_endpoint_js_1 = require("../app_endpoints/reset_endpoint.js");
 function RegistryReset(xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, (0, reset_endpoint_js_1.resetDatabase)()];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
         });
     });
 }

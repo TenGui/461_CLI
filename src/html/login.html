@@ -1,46 +1,271 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Add User</title>
-</head>
-<body>
-    <h1>Add User</h1>
-    <form method="POST" action="/addUser">
-        <label for="username">Username:</label>
-        <input type="text" name="username" required><br>
-        <label for="password">Password:</label>
-        <input type="password" name="password" required><br>
-        <button type="submit">Add User</button>
-    </form>
-    <hr>
-    <h1>Login</h1>
-    <form method="POST" action="/loginUser">
-        <label for="loginUsername">Username:</label>
-        <input type="text" name="loginUsername" required><br>
-        <label for="loginPassword">Password:</label>
-        <input type="password" name="loginPassword" required><br>
-        <button type="submit">Login</button>
-    </form>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>Add User</h1>
+        <form method="POST" action="/addUser">
+            <label for="username">Username:</label>
+            <input type="text" name="username" required><br>
+            <label for="password">Password:</label>
+            <input type="password" name="password" required><br>
+            <button type="submit">Add User</button>
+        </form>
+        <hr>
+        <h1>Login</h1>
+        <form method="POST" action="/loginUser">
+            <label for="loginUsername">Username:</label>
+            <input type="text" name="loginUsername" required><br>
+            <label for="loginPassword">Password:</label>
+            <input type="password" name="loginPassword" required><br>
+            <button type="submit">Login</button>
+        </form>
 
-    <form id="resetForm">
-        <button type="button" onclick="sendDeleteRequest()">Reset</button>
-    </form>
-    
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        function sendDeleteRequest() {
-            axios.delete('/reset', {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Authorization': '1' //Make sure we change this line to the JWT token
-                },
-            })
-        }
-    </script>
+        <hr>
+        <h1>Upload package</h1>
+        <form id = "github_Package">
+            <label for="github_url">Github URL:</label>
+            <input type="text" name="github_url" required><br>
+            <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
+        </form>
+        <hr>
+        
+        <h1>Upload .zip package</h1>
+        <input type="file" id="fileInput" accept=".zip">
+        <button type="button" onclick="listFiles()">List Files</button>
+        
+        <ul id="fileList"></ul>
+        
+        <hr>
 
-    <h1>Upload a .zip File</h1>
-    <input type="file" id="fileInput" accept=".zip">
-    <button id="uploadButton">Upload</button>
-    
-</body>
+        <h1>Delete Package by Name</h1>
+        <form method="POST" action="/PackageByNameDelete">
+            <label for="packageNameToDelete">Package Name:</label>
+            <input type="text" name="packageNameToDelete" required><br>
+            <button type="submit">Delete Package</button>
+        </form>
+
+        <hr>
+
+        <h1>Search Package By Regex</h1>
+        <form>
+            <label for="regex">Search Regex:</label>
+            <input type="text" id="packageName" name="Regex" required><br>
+            <button type="button" onclick="packageRegex()">search RegEx</button>
+        </form>
+
+        <div id="resultContainer"></div>
+
+        <hr>
+        <br>
+
+        <form id="resetForm">
+            <button type="button" onclick="sendDeleteRequest()">Reset</button>
+        </form>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+        
+        <script>
+            async function packageRegex() {
+                const packageName = document.getElementById('packageName').value;
+                try {
+                    const response = await fetch('/package/byRegEx', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Authorization': '1'
+                        },
+                        body: JSON.stringify({
+                            RegEx: packageName,
+                        }),
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        displayResult(result);
+                    } else {
+                        console.error('Failed to fetch data:', response.status, response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error during fetch:', error);
+                }
+            }
+            
+            function displayResult(result) {
+                const resultContainer = document.getElementById('resultContainer');
+                resultContainer.innerHTML = '';
+
+                if (result.length > 0) {
+                    const ul = document.createElement('ul');
+                    result.forEach(pkg => {
+                        const li = document.createElement('li');
+                        li.textContent = `Name: ${pkg.name}, Version: ${pkg.version}`;
+                        ul.appendChild(li);
+                    });
+                    resultContainer.appendChild(ul);
+                } else {
+                    resultContainer.textContent = 'No matching packages found.';
+                }
+            }
+
+            function listFiles() {
+                const fileInput = document.getElementById('fileInput');
+                const fileList = document.getElementById('fileList');
+
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert('Please select a .zip file.');
+                    return;
+                }
+
+                const zipFile = fileInput.files[0];
+                const zipReader = new FileReader();
+
+                zipReader.onload = function (event) {
+                    const zip = new JSZip();
+                    const zipContent = event.target.result;
+
+                    zip.loadAsync(zipContent).then(function (contents) {
+                        fileList.innerHTML = ''; // Clear existing list
+
+                        let packageJsonExists = false;
+                        let packageJsonContent = '';
+
+                        contents.forEach(function (relativePath, zipEntry) {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = relativePath;
+                            fileList.appendChild(listItem);
+
+                            // Check if the file name contains package.json
+                            if (relativePath.includes('package.json')) {
+                                packageJsonExists = true;
+                                zipEntry.async('string').then(function (content) {
+                                    packageJsonContent = content;
+
+                                    // Parse the package.json content
+                                    try {
+                                        const packageJson = JSON.parse(packageJsonContent);
+
+                                        // Extract GitHub repository from the repository key
+                                        const repositoryUrl = packageJson.repository && packageJson.repository.url;
+                                        if (repositoryUrl) {
+                                            var githubRepository = "https://" + repositoryUrl.substring(6,repositoryUrl.length-4);
+                                            const requestBody = {
+                                                JSProgram: "",
+                                                URL: githubRepository
+                                            };
+                                            axios.post('/package', requestBody, {
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-Authorization': '1' // Replace with your JWT token
+                                                },
+                                            })
+                                            .then(response => {
+                                                console.log(response.data);
+                                                uploadStatus.textContent = "File Uploaded Successfully";
+                                            })
+                                            .catch(error => {
+                                                console.error(error);
+                                                uploadStatus.textContent = error;
+                                            });
+                                            alert('GitHub Repository: ' + githubRepository);
+                                        } else {
+                                            alert('GitHub repository not found in package.json.');
+                                        }
+                                    } catch (error) {
+                                        console.error('Error parsing package.json:', error);
+                                        alert('Error parsing package.json.');
+                                    }
+                                });
+                            }
+                        });
+
+                        if (!packageJsonExists) {
+                            alert('package.json not found in the .zip file.');
+                        }
+                    });
+                };
+
+                zipReader.readAsArrayBuffer(zipFile);
+            }
+
+
+
+
+            function uploadFile() {
+                const fileInput = document.getElementById('fileInput');
+                const uploadStatus = document.getElementById('uploadStatus');
+        
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                console.log("FILES", fileInput.files[0]);
+                
+                const jsProgram = "if (process.argv.length === 7) {\nconsole.log('Success')\nprocess.exit(0)\n} else {\nconsole.log('Failed')\nprocess.exit(1)\n}\n";
+                const requestBody = {
+                    JSProgram: jsProgram,
+                    Content: ".zip file"
+                };
+                axios.post('/package', requestBody, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Authorization': '1' // Replace with your JWT token
+                    },
+                })
+                .then(response => {
+                    console.log(response.data);
+                    uploadStatus.textContent = "File Uploaded Successfully";
+                })
+                .catch(error => {
+                    console.error(error);
+                    uploadStatus.textContent = error;
+                });
+            }
+
+            function sendDeleteRequest() {
+                axios.delete('/reset', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Authorization': '1' // Replace with your JWT token
+                    },
+                })
+                .then(response => {
+                    console.log(response.data);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            }
+
+            function sendPackageUpload(event) {
+                event.preventDefault(); // Prevent default form submission behavior
+
+                const githubUrl = document.querySelector('input[name="github_url"]').value;
+
+                // Example JSProgram string, replace it with the actual value you want to use
+                const jsProgram = "if (process.argv.length === 7) {\nconsole.log('Success')\nprocess.exit(0)\n} else {\nconsole.log('Failed')\nprocess.exit(1)\n}\n";
+
+                const requestBody = {
+                    JSProgram: jsProgram,
+                    URL: githubUrl
+                };
+
+                axios.post('/package', requestBody, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Authorization': '1' // Replace with your JWT token
+                    },
+                })
+                .then(response => {
+                    console.log(response.data);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            }
+
+            document.getElementById('github_Package').addEventListener('submit', sendPackageUpload);
+        </script>
+    </body>
 </html>

@@ -52,6 +52,7 @@
     "oas3-tools-cors": "^2.3.5",
     "promise-any": "^0.2.0",
     "swagger-tools": "^0.10.1",
-    "tsc": "^2.0.4"
+    "tsc": "^2.0.4",
+    "unzipper": "^0.10.14"
   }
 }

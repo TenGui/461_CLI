@@ -92,11 +92,9 @@ export async function PackagesList(req: Request, res: Response, next: NextFuncti
   await handleRequestAsync(Default.PackagesList, req, res, next, body, offset, req.header('X-Authorization'));
 }
 
-import { resetDatabase } from '../app_endpoints/reset_endpoint.js';
 export async function RegistryReset(req: Request, res: Response, next: NextFunction, xAuthorization: string) {
   // const xAuthorization = req.headers['x-authorization'];
-  await resetDatabase(res);  
-  await handleRequestAsync(Default.RegistryReset, req, res, next, req.header('X-Authorization'));
+  await handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization);
 }
 
 export async function addUser(req: Request, res: Response, next: NextFunction) {

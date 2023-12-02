@@ -2,17 +2,13 @@ import * as mysql from "mysql2";
 require('dotenv').config();
 
 const db = mysql.createConnection({
-    host: process.env.DB_HOST,
+    host: "publicdb.cvr1hbjvaden.us-east-2.rds.amazonaws.com",
     port: 3306,
-    user: "root",
-    password: process.env.DB_PASSWORD,
+    user: "admin",
+    password: "project461",
     database: "testdb",
 });
 
-console.log(process.env.DB_HOST);
-console.log(process.env.DB_PASSWORD);
-console.log(process.env.DB_DATABASE);
-console.log(process.env.DB_USER);
 const promisePool = db.promise();
 export { promisePool, db };
 

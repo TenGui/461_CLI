@@ -250,7 +250,6 @@ function PackagesList(req, res, next, body, offset, xAuthorization) {
     });
 }
 exports.PackagesList = PackagesList;
-var reset_endpoint_js_1 = require("../app_endpoints/reset_endpoint.js");
 function RegistryReset(req, res, next, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
