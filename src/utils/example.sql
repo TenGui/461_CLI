@@ -1,68 +1,69 @@
 -- CREATE DATABASE IF NOT EXISTS mydb;
--- USE mydb;
-
--- Create PackageMetadata table
-CREATE TABLE PackageMetadata (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    Name VARCHAR(255) NOT NULL,
-    Version VARCHAR(20) NOT NULL,
-    UNIQUE (Name, Version)
-);
-
--- Create PackageData table
-CREATE TABLE PackageData (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    Content LONGTEXT,
-    URL VARCHAR(255),
-    JSProgram LONGTEXT
-);
+USE mydb;
 
 -- Create Package table with foreign keys to PackageMetadata and PackageData
 CREATE TABLE Package (
-    PackageID INT AUTO_INCREMENT PRIMARY KEY,
-    MetadataID INT,
-    DataID INT,
-    FOREIGN KEY (MetadataID) REFERENCES PackageMetadata (ID) ON DELETE CASCADE,
-    FOREIGN KEY (DataID) REFERENCES PackageData (ID) ON DELETE CASCADE
+    PackageID INT AUTO_INCREMENT PRIMARY KEY
 ) ENGINE=InnoDB;
 
+-- Create PackageMetadata table
+CREATE TABLE PackageMetadata (
+    ID INT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Version VARCHAR(20) NOT NULL,
+    UNIQUE (Name, Version),
+    FOREIGN KEY (ID) REFERENCES Package(PackageID) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Create PackageData table
+CREATE TABLE PackageData (
+    ID INT PRIMARY KEY,
+    Content LONGTEXT,
+    URL VARCHAR(255),
+    JSProgram LONGTEXT,
+    FOREIGN KEY (ID) REFERENCES Package(PackageID) ON DELETE CASCADE
+) ENGINE=InnoDB;
 -- Drop the existing procedure if it exists
 DROP PROCEDURE IF EXISTS InsertPackage;
 
 DELIMITER //
-CREATE PROCEDURE InsertPackage(IN Name VARCHAR(255), IN Version VARCHAR(20), IN Content LONGTEXT, IN URL VARCHAR(255), IN JSProgram LONGTEXT, OUT response INT)
+CREATE PROCEDURE InsertPackage(
+    IN Name VARCHAR(255),
+    IN Version VARCHAR(20),
+    IN Content LONGTEXT,
+    IN URL VARCHAR(255),
+    IN JSProgram LONGTEXT
+)
 BEGIN
-  DECLARE metadata_id INT;
-  DECLARE data_id INT;
   DECLARE package_id INT;
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    ROLLBACK;
-    -- You can log the error or take other actions here if needed.
-  END;
 
+--   DECLARE duplicate_error CONDITION FOR SQLSTATE '23000'; -- Specific SQLSTATE for duplicate entry
+--   DECLARE EXIT HANDLER FOR duplicate_error
+  DECLARE EXIT HANDLER FOR 1062
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Duplicate entry occurred';
+    END;
+    
   START TRANSACTION;
 
-  -- Insert data into PackageMetadata
-  INSERT INTO PackageMetadata (Name, Version)
-  VALUES (Name, Version);
+  INSERT INTO Package ()
+  VALUES();
 
-  -- Retrieve the generated PackageMetadata ID
-  SET metadata_id = LAST_INSERT_ID();
+  SET package_id = LAST_INSERT_ID();
+
+  -- Insert data into PackageMetadata
+  INSERT INTO PackageMetadata (ID, Name, Version)
+  VALUES (package_id, Name, Version);
 
   -- Insert data into PackageData
-  INSERT INTO PackageData (Content, JSProgram, URL)
-  VALUES (Content, JSProgram, URL);
-
-  -- Retrieve the generated PackageData ID
-  SET data_id = LAST_INSERT_ID();
-
-  -- If both INSERT statements were successful, insert data into Package
-  INSERT INTO Package (MetadataID, DataID)
-  VALUES (metadata_id, data_id);
+  INSERT INTO PackageData (ID, Content, JSProgram, URL)
+  VALUES (package_id, Content, JSProgram, URL);
 
   COMMIT;
 END;
+
 //
 DELIMITER ;
 
@@ -72,70 +73,73 @@ DROP PROCEDURE IF EXISTS GetPackage;
 DELIMITER //
 CREATE PROCEDURE GetPackage(IN PackageID INT)
 BEGIN
-    -- DECLARE v_JSON JSON; -- Declare a variable to store the JSON object
-
-    -- -- Select data and metadata and store them in the v_JSON variable
-    -- SELECT 
-    --     JSON_OBJECT(
-    --         'metadata', JSON_OBJECT(
-    --             'Name', pm.Name,
-    --             'Version', pm.Version,
-    --             'ID', pm.ID
-    --         ),
-    --         'data', JSON_OBJECT(
-    --             'Content', pd.Content,
-    --             'URL', CAST(pd.URL AS CHAR),
-    --             'JSProgram', pd.JSProgram
-    --         )
-    --     )
-    -- INTO v_JSON -- Store the JSON object in the variable
-    -- FROM Package AS p
-    -- JOIN PackageMetadata AS pm ON p.MetadataID = pm.ID
-    -- JOIN PackageData AS pd ON p.DataID = pd.ID
-    -- WHERE p.PackageID = PackageID;
-
-    -- -- Select the JSON object from the variable to return it
-    -- SELECT v_JSON;
-    -- SELECT PM.*, PD.*
-    -- FROM Package AS P
-    -- JOIN PackageMetadata AS PM ON P.MetadataID = PM.ID
-    -- JOIN PackageData AS PD ON P.DataID = PD.ID
-    -- WHERE P.PackageID = PackageID;
-    SELECT
+    SELECT 
         JSON_OBJECT(
-            'metadata', JSON_OBJECT(
-            'Name', PM.Name,
-            'Version', PM.Version,
-            'ID', PM.ID
-            ),
-            'data', JSON_OBJECT(
-            'Content', PD.Content,
-            'URL', PD.URL,
-            'JSProgram', PD.JSProgram
-            )
-        ) as result
-    FROM Package AS P
-    JOIN PackageMetadata AS PM ON P.MetadataID = PM.ID
-    JOIN PackageData AS PD ON P.DataID = PD.ID
-    WHERE P.PackageID = PackageID;
-
-
+            'Name', pm.Name,
+            'Version', pm.Version,
+            'ID', pm.ID
+        ) as metadata,
+        JSON_OBJECT(
+            'Content', pd.Content,
+            'URL', pd.URL,
+            'JSProgram', pd.JSProgram
+        ) as data
+    FROM Package AS p
+    JOIN PackageMetadata AS pm ON p.PackageID = pm.ID
+    JOIN PackageData AS pd ON p.PackageID = pd.ID
+    WHERE p.PackageID = PackageID;
 END;
 // 
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS PackageDelete;
+
 DELIMITER //
-CREATE PROCEDURE GetURLByDataID(IN p_DataID INT, OUT p_URL VARCHAR(255))
+
+CREATE PROCEDURE PackageDelete(IN p_PackageID INT)
 BEGIN
-    DECLARE v_URL VARCHAR(255);
+    -- Delete from Package (and cascade to PackageMetadata and PackageData)
+    DELETE FROM Package
+    WHERE PackageID = p_PackageID;
+END;
 
-    -- Select URL from PackageData where ID equals p_DataID
-    SELECT URL INTO v_URL
-    FROM PackageData
-    WHERE ID = p_DataID;
+//
+DELIMITER ;
 
-    -- Set the output parameter with the retrieved URL
-    SET p_URL = v_URL;
+DROP PROCEDURE IF EXISTS PackageUpdate;
+DELIMITER //
+CREATE PROCEDURE PackageUpdate(
+    IN p_ID INT,
+    IN p_Name VARCHAR(255),
+    IN p_Version VARCHAR(20),
+    IN p_Content LONGTEXT,
+    IN p_URL VARCHAR(255),
+    IN p_JSProgram LONGTEXT
+)
+BEGIN
+    -- Check if the record exists in PackageMetadata
+    DECLARE record_exists INT;
+
+    SELECT COUNT(*) INTO record_exists
+    FROM PackageMetadata
+    WHERE ID = p_ID AND Name = p_Name AND Version = p_Version;
+
+    SELECT record_exists as updateSuccess;
+
+    -- If the record exists, update PackageData
+    IF record_exists > 0 THEN
+        UPDATE PackageData
+        SET Content = p_Content,
+            URL = p_URL,
+            JSProgram = p_JSProgram
+        WHERE ID = p_ID;
+    -- ELSE
+    --     -- Handle the case where the record does not exist (optional)
+    --     -- You may choose to raise an error, log a message, etc.
+    --     -- This depends on your specific requirements.
+    --     SIGNAL SQLSTATE '45000'
+    --         SET MESSAGE_TEXT = 'Record not found in PackageMetadata';
+    END IF;
 END;
 //
 DELIMITER ;
