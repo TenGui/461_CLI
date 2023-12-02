@@ -86,21 +86,32 @@ export async function PackageByNameGet(name: PackageName, xAuthorization: Authen
  * @returns List
  **/
 export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: AuthenticationToken) {
-  const examples: any = {};
-  examples['application/json'] = [
-    {
-      "Version": "1.2.3",
-      "ID": "ID",
-      "Name": "Name"
-    },
-    {
-      "Version": "1.2.3",
-      "ID": "ID",
-      "Name": "Name"
-    },
-  ];
+  if(!body.RegEx){
+    return respondWithCode(404, {"Error" : "There is missing field(s) in the PackageRegEx"});
+  }
+  const packageName = body.RegEx;
 
-  return examples['application/json'];
+  const query = 'SELECT Name, version FROM PackageMetadata WHERE Name REGEXP ?';
+
+  try {
+    const [rows, fields] = await db.promise().execute(query, [packageName]);
+
+    console.log('Results:', rows);
+
+    if (rows.length > 0) {
+      const matchedPackages = rows.map((pkg: RowDataPacket) => ({
+        name: pkg.Name,
+        version: pkg.version,
+      }));
+      
+      return respondWithCode(200, matchedPackages);
+    } else {
+      return respondWithCode(404, {"Error" : "No package found"});
+    }
+  } catch (error) {
+    console.error(error);
+    return respondWithCode(500, { error: 'Internal Server Error' });
+  }
 }
 
 /**
@@ -153,7 +164,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         return respondWithCode(400, {"Error": "Repository does not exists"});
       }
       Name = output["repo"];
-      Content = body["Content"];
+      Content = "Content";
       URL = 'N/A';
       Version = "1.0.0.8.2";
     }
