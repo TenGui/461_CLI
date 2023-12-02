@@ -4,10 +4,10 @@ exports.db = exports.promisePool = void 0;
 var mysql = require("mysql2");
 require('dotenv').config();
 var db = mysql.createConnection({
-    host: process.env.DB_HOST,
+    host: "publicdb.cvr1hbjvaden.us-east-2.rds.amazonaws.com",
     port: 3306,
     user: "admin",
-    password: process.env.DB_PASSWORD,
+    password: 'project461',
     database: "testdb",
 });
 exports.db = db;
