@@ -4,7 +4,7 @@ var path = require("path");
 var http = require("http");
 var oas3Tools = require("oas3-tools");
 var authorization_1 = require("./database_files/authorization");
-var serverPort = 3000;
+var serverPort = 3001;
 // swaggerRouter configuration
 var options = {
     routing: {

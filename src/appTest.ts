@@ -6,7 +6,7 @@ import * as mysql from 'mysql2';
 import * as oas3Tools from 'oas3-tools';
 import { Helper } from "./database_files/authorization";
 
-const serverPort: number = 3000;
+const serverPort: number = 3001;
 
 // swaggerRouter configuration
 const options: any =  {
