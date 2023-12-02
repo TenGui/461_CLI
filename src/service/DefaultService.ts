@@ -21,7 +21,7 @@ const { db, promisePool } = require("../database_files/database_connect");
  * @param body AuthenticationRequest 
  * @returns AuthenticationToken
  **/
-export async function CreateAuthToken(body: AuthenticationRequest): Promise<AuthenticationToken> {
+export async function CreateAuthToken(body: AuthenticationRequest) {
   return ''; // You can return the actual value here
 }
 
@@ -32,7 +32,7 @@ export async function CreateAuthToken(body: AuthenticationRequest): Promise<Auth
  * @param name PackageName 
  * @returns void
  **/
-export async function PackageByNameDelete(name: PackageName, xAuthorization: AuthenticationToken, ): Promise<void> {
+export async function PackageByNameDelete(name: PackageName, xAuthorization: AuthenticationToken, ) {
   // Your code here
 }
 
@@ -147,8 +147,22 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
  * @param id PackageID Package ID
  * @returns void
  **/
-export async function PackageDelete(id: PackageID, xAuthorization: AuthenticationToken): Promise<void> {
-  // Your code here
+export async function PackageDelete(id: PackageID, xAuthorization: AuthenticationToken) {
+  try {
+    const [result, fields] = await promisePool.execute<ProcedureCallPacket<ResultSetHeader>>('CALL PackageDelete(?)', [
+      id
+    ]);
+    
+    if(result.affectedRows == 1) {
+      return respondWithCode(200)
+    }
+    else {
+      return respondWithCode(404);
+    }
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
 }
 
 /**
@@ -178,102 +192,28 @@ export async function PackageRate(id: PackageID, xAuthorization: AuthenticationT
  * @returns Package
  **/
 export async function PackageRetrieve(id: PackageID, xAuthorization: AuthenticationToken) {
-  const examples: any = {};
-  examples['application/json'] = {
-    "metadata": {
-      "Version": "1.2.3",
-      "ID": "ID",
-      "Name": "Name",
-    },
-    "data": {
-      "Content": "Content",
-      "JSProgram": "JSProgram",
-      "URL": "URL",
-    },
-  };
-
   try{
-    let connection: any;
-    
-    // // Create a Promise to wrap the pool.getConnection call
-    // const getConnectionPromise = new Promise((resolve, reject) => {
-    //   pool.getConnection((err, conn) => {
-    //     if (err) {
-    //       reject(err);
-    //     } else {
-    //       connection = conn;
-    //       resolve(1);
-    //     }
-    //   });
-    // });
 
-    // // Wait for the connection to be established
-    // await getConnectionPromise;
+    // interface test extends RowDataPacket {
+    //   ID: JSON;
+    // }
 
+    const [results] = await promisePool.execute<ProcedureCallPacket<RowDataPacket[]>>('CALL GetPackage(?)', [
+      id,
+    ]);
 
-    interface test extends RowDataPacket {
-      ID: string;
-      Name: string;
+    console.log(results)
+
+    if(results[0].length == 0) {
+      return respondWithCode(404);
     }
-
-    // const [results, fields] = await promisePool.execute<ProcedureCallPacket<test[]>>(
-    //   'SELECT PM.*, PD.* FROM Package AS P JOIN PackageMetadata AS PM ON P.MetadataID = PM.ID JOIN PackageData AS PD ON P.DataID = PD.ID WHERE P.PackageID = ?',
-    //   [id]
-    // );
-
-    // const [results] = await promisePool.execute<ProcedureCallPacket<test[]>>('CALL GetPackage(?)', [
-    //   id,
-    // ]);
-
-    const isResultSetHeader = (data: unknown): data is ResultSetHeader => {
-      if (!data || typeof data !== 'object') return false;
-    
-      const keys = [
-        'fieldCount',
-        'affectedRows',
-        'insertId',
-        'info',
-        'serverStatus',
-        'warningStatus',
-        'changedRows',
-      ];
-    
-      return keys.every((key) => key in data);
-    };
-    
-    // results.forEach((users) => {
-    //   if (isResultSetHeader(users)) {
-    //     console.log('----------------');
-    //     console.log('Affected Rows:', users.affectedRows);
-    //   } else {  
-    //     users.forEach((user) => {
-    //       console.log('----------------');
-    //       console.log('id:  ', user.ID);
-    //       console.log('name:', user.Name);
-    //       console.log('URL: ', user.URL);
-    //     });
-    //   }
-    // });
-
-
-    // const [results, fields] = await promisePool.execute<test[]>('SELECT * FROM Package', []);
-
-    // const response = (results[0][0] as { response: YourResponseType }).response;
-    // console.log(typeof(results));
-    // console.log(results[0][0].v_JSON);
-    // const selectResult: RowDataPacket[] = results[0] as RowDataPacket[];
-
-  //   console.log(results);
-  //   // console.log(fields);
-
-
-  //   return respondWithCode(200, results[0][0]);
+    else {
+      return respondWithCode(200, results[0][0]);
+    }
   } catch (error) {
     console.error('Error calling the stored procedure:', error);
     throw error; // Re-throw the error for the caller to handle
   }
-
-  return examples['application/json'];
 }
 
 /**
@@ -285,8 +225,27 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
  * @param xAuthorization AuthenticationToken 
  * @returns void
  **/
-export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken): Promise<void> {
+export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
   // Your code here
+  try {
+    const [results] = await promisePool.execute<ProcedureCallPacket<RowDataPacket[]>>('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
+      id,
+      body.metadata.Name,
+      body.metadata.Version,
+      body.data.Content,
+      body.data.URL,
+      body.data.JSProgram
+    ]); 
+  
+    if(results[0][0].updateSuccess == 0) {
+      return respondWithCode(404);
+    } else {
+      return respondWithCode(200);
+    }
+   
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 /**
@@ -323,7 +282,7 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
  * @param xAuthorization AuthenticationToken 
  * @returns void
  **/
-export async function RegistryReset(xAuthorization: AuthenticationToken): Promise<void> {
+export async function RegistryReset(xAuthorization: AuthenticationToken) {
   // Your code here
 }
 

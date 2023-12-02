@@ -8,7 +8,7 @@ class ResponsePayload {
     }
   }
   
-export function respondWithCode(code: number, payload: any): ResponsePayload {
+export function respondWithCode(code: number, payload?: any): ResponsePayload {
   return new ResponsePayload(code, payload);
 }
 
