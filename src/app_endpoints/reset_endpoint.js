@@ -40,48 +40,44 @@ exports.resetDatabase = void 0;
 var express = require('express');
 var app = express();
 var db = require("../database_files/database_connect").db;
-app.post('/reset', function (req, res) {
-    // Check the X-Authorization header for authentication if needed
-    //TODO: Check authorization key to determine if request is valid
-    resetDatabase(res);
-});
-function resetDatabase(res) {
+function resetDatabase() {
     return __awaiter(this, void 0, void 0, function () {
-        var getTableNamesQuery;
         return __generator(this, function (_a) {
-            getTableNamesQuery = 'SHOW TABLES';
-            db.query(getTableNamesQuery, function (err, results) {
-                if (err) {
-                    console.error('Error retrieving table names:', err);
-                    res.status(500).send('Error resetting the database');
-                }
-                else {
-                    var tableNames = results.map(function (row) { return Object.values(row)[0]; });
-                    var tablesToTruncate_1 = tableNames.filter(function (tableName) { return tableName !== 'github_token'; });
-                    if (tablesToTruncate_1.length === 0) {
-                        console.log('No tables to reset.');
-                        return;
-                    }
-                    var completedCount_1 = 0;
-                    tablesToTruncate_1.forEach(function (tableName) {
-                        var truncateTableQuery = "DELETE FROM ".concat(tableName);
-                        db.query(truncateTableQuery, function (err) {
-                            completedCount_1++;
-                            if (err) {
-                                console.error("Error DELETING table ".concat(tableName, ":"), err);
+            return [2 /*return*/, new Promise(function (resolve, reject) {
+                    var getTableNamesQuery = 'SHOW TABLES';
+                    db.query(getTableNamesQuery, function (err, results) {
+                        if (err) {
+                            console.error('Error retrieving table names:', err);
+                            reject(-1);
+                        }
+                        else {
+                            var tableNames = results.map(function (row) { return Object.values(row)[0]; });
+                            var tablesToTruncate_1 = tableNames.filter(function (tableName) { return tableName !== 'github_token'; });
+                            if (tablesToTruncate_1.length === 0) {
+                                console.log('No tables to reset.');
+                                resolve(1);
                             }
-                            else {
-                                console.log("Table ".concat(tableName, " deleted successfully"));
-                            }
-                            if (completedCount_1 === tablesToTruncate_1.length) {
-                                console.log('All tables except for "github_token" deleted successfully');
-                                return;
-                            }
-                        });
+                            var completedCount_1 = 0;
+                            tablesToTruncate_1.forEach(function (tableName) {
+                                var truncateTableQuery = "DELETE FROM ".concat(tableName);
+                                db.query(truncateTableQuery, function (err) {
+                                    completedCount_1++;
+                                    if (err) {
+                                        console.error("Error DELETING table ".concat(tableName, ":"), err);
+                                        reject(-1);
+                                    }
+                                    else {
+                                        console.log("Table ".concat(tableName, " deleted successfully"));
+                                    }
+                                    if (completedCount_1 === tablesToTruncate_1.length) {
+                                        console.log('All tables except for "github_token" deleted successfully');
+                                        resolve(1);
+                                    }
+                                });
+                            });
+                        }
                     });
-                }
-            });
-            return [2 /*return*/];
+                })];
         });
     });
 }

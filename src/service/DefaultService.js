@@ -273,7 +273,7 @@ exports.PackageDelete = PackageDelete;
 var rate_endpoint_js_1 = require("../app_endpoints/rate_endpoint.js");
 function PackageRate(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, result, fields, outputURL, output, error_2;
+        var _a, result, fields, outputURL, output, hasInvalidScore, error_2;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -287,16 +287,16 @@ function PackageRate(id, xAuthorization) {
                     return [4 /*yield*/, (0, rate_endpoint_js_1.eval_single_file)(outputURL)];
                 case 2:
                     output = _b.sent();
-                    console.log(output);
-                    return [2 /*return*/, output];
-                case 3:
-                    console.error('No result or empty result from GetURLByDataID');
-                    throw new Error('No result or empty result from GetURLByDataID');
+                    hasInvalidScore = Object.values(output).some(function (score) { return score === -1; });
+                    if (hasInvalidScore) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
+                    }
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(200, output)];
+                case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: "Package does not exist." })];
                 case 4: return [3 /*break*/, 6];
                 case 5:
                     error_2 = _b.sent();
-                    console.error('Error calling GetURLByDataID:', error_2);
-                    throw error_2;
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
                 case 6: return [2 /*return*/];
             }
         });
@@ -430,10 +430,16 @@ exports.PackagesList = PackagesList;
  * @param xAuthorization AuthenticationToken
  * @returns void
  **/
+var reset_endpoint_js_1 = require("../app_endpoints/reset_endpoint.js");
 function RegistryReset(xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, (0, reset_endpoint_js_1.resetDatabase)()];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
         });
     });
 }

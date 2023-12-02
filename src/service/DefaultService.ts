@@ -219,7 +219,7 @@ export async function PackageDelete(id: PackageID, xAuthorization: Authenticatio
  **/
 
 import { eval_single_file } from '../app_endpoints/rate_endpoint.js';
-export async function PackageRate(id: PackageID, xAuthorization: AuthenticationToken): Promise<PackageRating> {
+export async function PackageRate(id: PackageID, xAuthorization: AuthenticationToken){
   try {
     // Call the GetURLByDataID stored procedure
     const [result, fields] = await promisePool.execute('SELECT URL FROM PackageData WHERE ID = ?', [id]);
@@ -230,16 +230,19 @@ export async function PackageRate(id: PackageID, xAuthorization: AuthenticationT
       console.log('Retrieved URL:', outputURL);
 
       const output = await eval_single_file(outputURL);
-      console.log(output);
 
-      return output;
+      const hasInvalidScore = Object.values(output).some(score => score === -1);
+      if (hasInvalidScore) {
+        return respondWithCode(500, {error: 'The package rating system choked on at least one of the metrics.'});
+      }
+
+      return respondWithCode(200, output);
+      
     } else {
-      console.error('No result or empty result from GetURLByDataID');
-      throw new Error('No result or empty result from GetURLByDataID');
+      return respondWithCode(404, {error: "Package does not exist."});
     }
   } catch (error) {
-    console.error('Error calling GetURLByDataID:', error);
-    throw error;
+    return respondWithCode(500, {error: 'The package rating system choked on at least one of the metrics.'});
   }
 }
 
@@ -397,9 +400,11 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
  * @param xAuthorization AuthenticationToken 
  * @returns void
  **/
+import { resetDatabase } from '../app_endpoints/reset_endpoint.js';
 export async function RegistryReset(xAuthorization: AuthenticationToken): Promise<void> {
-  // Your code here
+  await resetDatabase();  
 }
+
 
 export async function MyPage() {
   return path.join(__dirname, '..', 'html' , 'login.html');

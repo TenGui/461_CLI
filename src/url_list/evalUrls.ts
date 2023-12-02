@@ -50,7 +50,7 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
       url
     );
 
-    const versionPinningScore: number = await versionPinningRunner.getScore(
+    const versionPinningScore: number = await versionPinningRunner.get_version_pin_score(
       url
     );
     

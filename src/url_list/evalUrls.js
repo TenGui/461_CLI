@@ -28,7 +28,7 @@ async function eval_file(filepath = "URL_FILE_PATH") {
         const maintainerScore = await RespMaintRunner.getRespMaintScore(url);
         const correctnessScore = await CorrectnessRunner.getCorrectness(url);
         const pull_request_score = await PR_Runner.getPRscore(url);
-        const versionPinningScore = await versionPinningRunner.getScore(url);
+        const versionPinningScore = await versionPinningRunner.get_version_pin_score(url);
         const multipliers = {
             license: 1,
             rampUp: 0.15,
