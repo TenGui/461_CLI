@@ -56,9 +56,13 @@ function CreateAuthToken(body) {
                 case 0:
                     username = body.User.name;
                     password = body.Secret.password;
-                    return [4 /*yield*/, promisePool.execute('SELECT * FROM Auth WHERE user = \'' + username + '\'')];
+                    //make database access
+                    console.log("about to run execute");
+                    return [4 /*yield*/, promisePool.execute('SELECT * FROM Auth WHERE user = ?', [username])];
                 case 1:
                     _a = _b.sent(), result = _a[0], fields = _a[1];
+                    //console.log("result at service: " + JSON.stringify(result));
+                    //console.log("fields at service: " + JSON.stringify(fields));
                     if (result.length == 0) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User is not in database")];
                     }
@@ -420,15 +424,15 @@ function UserDelete(userName, xAuthorization) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    console.log("end function isAdmin: " + xAuthorization["isAdmin"]);
+                    //console.log("end function isAdmin: " + xAuthorization["isAdmin"]);
                     if (xAuthorization["isAdmin"] != 1 && userName != xAuthorization["user"]) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Your token is valid, but you do not have proper permissions")];
                     }
-                    queryString = 'DELETE FROM Auth WHERE user=\'' + userName + '\'';
+                    queryString = 'DELETE FROM Auth WHERE user=?';
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, promisePool.execute(queryString)];
+                    return [4 /*yield*/, promisePool.execute(queryString, [userName])];
                 case 2:
                     _a.sent();
                     return [3 /*break*/, 4];
@@ -458,8 +462,8 @@ function UserPost(body, xAuthorization) {
                     if (xAuthorization["isAdmin"] != 1) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Your token is valid, but you do not have proper permissions")];
                     }
-                    queryString = 'INSERT INTO Auth VALUES (\'' + body.user + '\', \'' + body.pass + '\', ' + body.canSearch + ', ' + body.canUpload + ', ' + body.canDownload + ', ' + body.isAdmin + ')';
-                    return [4 /*yield*/, promisePool.execute(queryString)];
+                    queryString = 'INSERT INTO Auth VALUES (?,?,?,?,?,?)';
+                    return [4 /*yield*/, promisePool.execute(queryString, [body.user, body.pass, body.canSearch, body.canUpload, body.canDownload, body.isAdmin])];
                 case 1:
                     _a.sent();
                     return [2 /*return*/, (0, writer_1.respondWithCode)(200, "Successfully added user " + body.user)];

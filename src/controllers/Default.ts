@@ -11,7 +11,7 @@ import { respondWithCode } from '../utils/writer';
 async function handleRequestAsync(fn: Function, req: Request, res: Response, next: NextFunction, ...args: any[]) {
   
   //Check if the token is valid. If the token is invalid, send error response. If not, pass json body to the service
-  console.log("request path: " + req.path);
+  //console.log("request path: " + req.path);
   if(req.path != "/authenticate") {
     //console.log("First arg:" + req.header('X-Authorization'));
     let tokenOut = validateToken(req.header('X-Authorization'));

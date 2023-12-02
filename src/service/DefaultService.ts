@@ -32,9 +32,11 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
   
 
     //make database access
+    console.log("about to run execute")
 
-    const [result, fields] = await promisePool.execute('SELECT * FROM Auth WHERE user = \'' + username + '\'');
-
+    const [result, fields] = await promisePool.execute('SELECT * FROM Auth WHERE user = ?', [username]);
+    //console.log("result at service: " + JSON.stringify(result));
+    //console.log("fields at service: " + JSON.stringify(fields));
     if(result.length == 0) {
       return respondWithCode(401, "User is not in database");
     }
@@ -385,13 +387,14 @@ export async function MyPage() {
  * no response value expected for this operation
  **/
 export async function UserDelete(userName: string, xAuthorization: AuthenticationToken) {
-  console.log("end function isAdmin: " + xAuthorization["isAdmin"]);
+  //console.log("end function isAdmin: " + xAuthorization["isAdmin"]);
   if(xAuthorization["isAdmin"] != 1 && userName != xAuthorization["user"]){
     return respondWithCode(400, "Your token is valid, but you do not have proper permissions");
   }
-  let queryString: string = 'DELETE FROM Auth WHERE user=\''+ userName +'\'';
+
+  let queryString: string = 'DELETE FROM Auth WHERE user=?';
   try{
-    await promisePool.execute(queryString);
+    await promisePool.execute(queryString, [userName]);
   }
   catch(err){
     return respondWithCode(400, "Error happened "+ err);
@@ -414,8 +417,10 @@ export async function UserPost(body: newUser, xAuthorization: AuthenticationToke
   if(xAuthorization["isAdmin"] != 1){
     return respondWithCode(400, "Your token is valid, but you do not have proper permissions");
   }
-  let queryString: string = 'INSERT INTO Auth VALUES (\''+body.user+'\', \''+ body.pass +'\', '+ body.canSearch +', '+ body.canUpload +', '+ body.canDownload +', '+ body.isAdmin +')';
-  await promisePool.execute(queryString);
+  //let queryString: string = 'INSERT INTO Auth VALUES (\''+body.user+'\', \''+ body.pass +'\', '+ body.canSearch +', '+ body.canUpload +', '+ body.canDownload +', '+ body.isAdmin +')';
+  
+  let queryString: string = 'INSERT INTO Auth VALUES (?,?,?,?,?,?)';
+  await promisePool.execute(queryString, [body.user, body.pass, body.canSearch, body.canUpload, body.canDownload, body.isAdmin]);
   return respondWithCode(200, "Successfully added user "+body.user);
 }
      
