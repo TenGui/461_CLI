@@ -191,6 +191,7 @@ function PackageCreate(body, xAuthorization) {
                     return [4 /*yield*/, upload.decompress_zip_to_github_link(body["Content"])];
                 case 3:
                     github_link = _b.sent();
+                    console.log("Inside DefaultService: ", github_link);
                     if (github_link == "") {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists/Cannot locate package.json file" })];
                     }

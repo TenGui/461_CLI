@@ -94,6 +94,7 @@ export class Upload{
                                         console.log("Extracted github repo link from ZIP file: ", cleaned_github_link);
                                         resolve(cleaned_github_link);
                                     }
+                                    resolve(cleaned_github_link);
                                 } catch (error) {
                                     console.error('Error parsing JSON content:', error);
                                     reject(error);

@@ -143,6 +143,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     }
     else if("Content" in body){
       const github_link = await upload.decompress_zip_to_github_link(body["Content"])
+      console.log("Inside DefaultService: ", github_link);
       if(github_link == ""){
         return respondWithCode(400, {"Error": "Repository does not exists/Cannot locate package.json file"});
       }
