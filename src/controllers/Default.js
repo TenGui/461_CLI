@@ -200,19 +200,15 @@ function PackagesList(req, res, next, body, offset, xAuthorization) {
     });
 }
 exports.PackagesList = PackagesList;
-var reset_endpoint_js_1 = require("../app_endpoints/reset_endpoint.js");
 function RegistryReset(req, res, next, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    // const xAuthorization = req.headers['x-authorization'];
-                    console.log("HERE");
-                    return [4 /*yield*/, (0, reset_endpoint_js_1.resetDatabase)(res)];
+                case 0: 
+                // const xAuthorization = req.headers['x-authorization'];
+                return [4 /*yield*/, handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization)];
                 case 1:
-                    _a.sent();
-                    return [4 /*yield*/, handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization)];
-                case 2:
+                    // const xAuthorization = req.headers['x-authorization'];
                     _a.sent();
                     return [2 /*return*/];
             }

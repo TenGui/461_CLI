@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 
 
-export async function getScore(url:string[]): Promise<number>{
+export async function get_version_pin_score(url:string[]): Promise<number>{
     //set up the url string Formatting
     //let splitURL:string[] = url.split("/");    
     //const GITHUB_TOKEN = 'YOUR_PAT';
