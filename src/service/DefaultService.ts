@@ -317,6 +317,15 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
 export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
   // Your code here
   try {
+    if("URL" in body && "Content" in body){
+      console.log("Improper form, URL and Content are both set")
+      return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+    }
+    if(!("URL" in body) && !("Content" in body)){
+      console.log("Improper form, URL and Content are both not set")
+      return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
+    }
+    
     const [results] = await promisePool.execute<ProcedureCallPacket<RowDataPacket[]>>('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
       id,
       body.metadata.Name,

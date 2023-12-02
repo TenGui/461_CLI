@@ -143,19 +143,3 @@ BEGIN
 END;
 //
 DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE GetURLByDataID(IN p_DataID INT, OUT p_URL VARCHAR(255))
-BEGIN
-    DECLARE v_URL VARCHAR(255);
-
-    -- Select URL from PackageData where ID equals p_DataID
-    SELECT URL INTO v_URL
-    FROM PackageData
-    WHERE ID = p_DataID;
-
-    -- Set the output parameter with the retrieved URL
-    SET p_URL = v_URL;
-END;
-//
-DELIMITER ;
