@@ -141,9 +141,14 @@ var Upload = /** @class */ (function () {
                                                 var github_link = parsedContent['repository'].url;
                                                 cleaned_github_link = "https://" + github_link.substring(6, github_link.length - 4);
                                                 console.log("Extracted github repo link from ZIP file: ", cleaned_github_link);
+                                            }
+                                            console.log('base64 ZIP file decoded.');
+                                            if (cleaned_github_link) {
                                                 resolve(cleaned_github_link);
                                             }
-                                            resolve(cleaned_github_link);
+                                            else {
+                                                reject(new Error('GitHub link not found in the ZIP file.'));
+                                            }
                                         }
                                         catch (error) {
                                             console.error('Error parsing JSON content:', error);
@@ -159,10 +164,6 @@ var Upload = /** @class */ (function () {
                             .on('error', function (err) {
                             console.error('Error checking base64 encoded zip file:', err);
                             reject(err);
-                        })
-                            .on('finish', function () {
-                            console.log('base64 ZIP file decoded.');
-                            resolve(cleaned_github_link);
                         });
                     })];
             });
