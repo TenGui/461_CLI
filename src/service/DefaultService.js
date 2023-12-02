@@ -64,12 +64,35 @@ exports.CreateAuthToken = CreateAuthToken;
  **/
 function PackageByNameDelete(name, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
+        var query, results, error_1;
         return __generator(this, function (_a) {
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    query = 'DELETE FROM PackageMetadata WHERE Name = ?';
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, db.promise().execute(query, [name])];
+                case 2:
+                    results = (_a.sent())[0];
+                    if (results.affectedRows > 0) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, { success: 'Package deleted successfully' })];
+                    }
+                    else {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: 'No package found with the specified name' })];
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_1 = _a.sent();
+                    console.error(error_1);
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
+                case 4: return [2 /*return*/];
+            }
         });
     });
 }
 exports.PackageByNameDelete = PackageByNameDelete;
+// Your code here
 /**
  * Return the history of this package (all versions).
  *
@@ -125,7 +148,7 @@ exports.PackageByNameGet = PackageByNameGet;
  **/
 function PackageByRegExGet(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var packageName, query, _a, rows, fields, matchedPackages, error_1;
+        var packageName, query, _a, rows, fields, matchedPackages, error_2;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -153,8 +176,8 @@ function PackageByRegExGet(body, xAuthorization) {
                     }
                     return [3 /*break*/, 4];
                 case 3:
-                    error_1 = _b.sent();
-                    console.error(error_1);
+                    error_2 = _b.sent();
+                    console.error(error_2);
                     return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
                 case 4: return [2 /*return*/];
             }
@@ -171,7 +194,7 @@ exports.PackageByRegExGet = PackageByRegExGet;
 var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Content, URL, Version, JSProgram, upload, output_1, github_link, output_2, package_exist_check, _a, result, fields, output, error_2;
+        var Name, Content, URL, Version, JSProgram, upload, output_1, github_link, output_2, package_exist_check, _a, result, fields, output, error_3;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -258,9 +281,9 @@ function PackageCreate(body, xAuthorization) {
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
                 case 8:
-                    error_2 = _b.sent();
-                    console.error('Error calling the stored procedure:', error_2);
-                    throw error_2; // Re-throw the error for the caller to handle
+                    error_3 = _b.sent();
+                    console.error('Error calling the stored procedure:', error_3);
+                    throw error_3; // Re-throw the error for the caller to handle
                 case 9: return [2 /*return*/];
             }
         });
@@ -291,7 +314,7 @@ exports.PackageDelete = PackageDelete;
 var rate_endpoint_js_1 = require("../app_endpoints/rate_endpoint.js");
 function PackageRate(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, result, fields, outputURL, output, hasInvalidScore, error_3;
+        var _a, result, fields, outputURL, output, hasInvalidScore, error_4;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -313,7 +336,7 @@ function PackageRate(id, xAuthorization) {
                 case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: "Package does not exist." })];
                 case 4: return [3 /*break*/, 6];
                 case 5:
-                    error_3 = _b.sent();
+                    error_4 = _b.sent();
                     return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
                 case 6: return [2 /*return*/];
             }
