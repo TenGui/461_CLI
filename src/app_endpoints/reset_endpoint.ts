@@ -38,6 +38,8 @@ export async function resetDatabase(): Promise<number> {
         });
       }
     });
+    let queryString: string = 'INSERT INTO Auth VALUES (?,?,?,?,?,?)';
+    db.execute(queryString, ["ece30861defaultadminuser", "correcthorsebatterystaple123(!__+@**(A;DROP TABLE packages", 1, 1, 1, 1]);
   });
 }
 
