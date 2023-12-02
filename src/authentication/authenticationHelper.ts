@@ -8,24 +8,15 @@ export function createToken(payload){
     return jwt.sign(payload, secret, { expiresIn: '10h' });
 }
 
-export function validateToken(token: string){
+export function validateToken(token){
     let decodedToken: any;
     try {
         decodedToken = jwt.verify(token, secret);
     } 
     catch(err) {
-        console.error(err);
-        return err;
+        //console.error(err);
+        return {"success":-1, "token": null};
     }
-    return decodedToken;
-}
-//Takes a validated jsonwebtoken and a json with only the required permissions set to true
-//ie: if you wanted to require on "canSearch" json = {canSearch: true}
-export function checkPerms(validatedToken, requiredPerms) {
-    for (let key in requiredPerms){
-        if(validatedToken[key] == false)
-            return 0;
-    }
-        return 1;
+    return {"success":1, "token": decodedToken};
 }
 

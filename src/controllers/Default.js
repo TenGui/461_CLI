@@ -40,27 +40,46 @@ exports.MyPage = exports.loginUser = exports.addUser = exports.RegistryReset = e
 var Default = require("../service/DefaultService");
 var writer_1 = require("../utils/writer");
 var database_connect_1 = require("../database_files/database_connect");
+var authenticationHelper_1 = require("../authentication/authenticationHelper");
 function handleRequestAsync(fn, req, res, next) {
     var args = [];
     for (var _i = 4; _i < arguments.length; _i++) {
         args[_i - 4] = arguments[_i];
     }
     return __awaiter(this, void 0, void 0, function () {
-        var response, error_1;
+        var tokenOut, response, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, fn.apply(void 0, args)];
+                    //Check if the token is valid. If the token is invalid, send error response. If not, pass json body to the service
+                    console.log("request path: " + req.path);
+                    if (req.path != "/authenticate") {
+                        tokenOut = (0, authenticationHelper_1.validateToken)(req.header('X-Authorization'));
+                        if (tokenOut["success"] != 1) {
+                            return [2 /*return*/, res.status(400).send("Bad Token")];
+                        }
+                        //if the token is valid, replace the token string in the args with it's json body
+                        args.pop();
+                        args.push(tokenOut["token"]);
+                        // console.log("popped arg: " + args.pop())
+                        // console.log(JSON.stringify(tokenOut["token"]));
+                        // console.log("length before push: " + args.length)
+                        // console.log("length after push: " + args.push(tokenOut["token"]));
+                        // console.log("")
+                    }
+                    _a.label = 1;
                 case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, fn.apply(void 0, args)];
+                case 2:
                     response = _a.sent();
                     (0, writer_1.writeJson)(res, response);
-                    return [3 /*break*/, 3];
-                case 2:
+                    return [3 /*break*/, 4];
+                case 3:
                     error_1 = _a.sent();
                     (0, writer_1.writeJson)(res, error_1);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
             }
         });
     });
@@ -100,7 +119,7 @@ function UserDelete(req, res, next, userName, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, handleRequestAsync(Default.UserDelete, req, res, next, xAuthorization, userName)];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.UserDelete, req, res, next, userName, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -113,7 +132,7 @@ function UserPost(req, res, next, body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, handleRequestAsync(Default.UserPost, req, res, next, body, xAuthorization)];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.UserPost, req, res, next, body, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -126,7 +145,7 @@ function PackageByNameGet(req, res, next, name, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageByNameGet, req, res, next, name, xAuthorization)];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageByNameGet, req, res, next, name, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -139,7 +158,7 @@ function PackageByRegExGet(req, res, next, body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageByRegExGet, req, res, next, body, xAuthorization)];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageByRegExGet, req, res, next, body, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -152,7 +171,7 @@ function PackageCreate(req, res, next, body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageCreate, req, res, next, body, xAuthorization)];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageCreate, req, res, next, body, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -165,7 +184,7 @@ function PackageDelete(req, res, next, id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageDelete, req, res, next, id, xAuthorization)];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageDelete, req, res, next, id, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -178,7 +197,7 @@ function PackageRate(req, res, next, id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageRate, req, res, next, id, xAuthorization)];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageRate, req, res, next, id, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -191,7 +210,7 @@ function PackageRetrieve(req, res, next, id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageRetrieve, req, res, next, id, xAuthorization)];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageRetrieve, req, res, next, id, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -209,7 +228,7 @@ function PackageUpdate(req, res, next, body, id, xAuthorization) {
                     console.log(id);
                     console.log(xAuthorization);
                     console.log(req);
-                    return [4 /*yield*/, handleRequestAsync(Default.PackageUpdate, req, res, next, body, id, xAuthorization)];
+                    return [4 /*yield*/, handleRequestAsync(Default.PackageUpdate, req, res, next, body, id, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -222,7 +241,7 @@ function PackagesList(req, res, next, body, offset, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackagesList, req, res, next, body, offset, xAuthorization)];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackagesList, req, res, next, body, offset, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -242,7 +261,7 @@ function RegistryReset(req, res, next, xAuthorization) {
                 case 1:
                     // const xAuthorization = req.headers['x-authorization'];
                     _a.sent();
-                    return [4 /*yield*/, handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization)];
+                    return [4 /*yield*/, handleRequestAsync(Default.RegistryReset, req, res, next, req.header('X-Authorization'))];
                 case 2:
                     _a.sent();
                     return [2 /*return*/];

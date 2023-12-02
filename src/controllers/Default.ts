@@ -5,8 +5,31 @@ import * as Default from '../service/DefaultService';
 import { writeJson } from '../utils/writer';
 import { db } from '../database_files/database_connect';
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import {validateToken} from '../authentication/authenticationHelper';
+import { respondWithCode } from '../utils/writer';
 
 async function handleRequestAsync(fn: Function, req: Request, res: Response, next: NextFunction, ...args: any[]) {
+  
+  //Check if the token is valid. If the token is invalid, send error response. If not, pass json body to the service
+  console.log("request path: " + req.path);
+  if(req.path != "/authenticate") {
+    //console.log("First arg:" + req.header('X-Authorization'));
+    let tokenOut = validateToken(req.header('X-Authorization'));
+
+    if(tokenOut["success"] != 1) {
+        return res.status(400).send("Bad Token");
+    }
+    //if the token is valid, replace the token string in the args with it's json body
+    args.pop();
+    args.push(tokenOut["token"]);
+
+    // console.log("popped arg: " + args.pop())
+    // console.log(JSON.stringify(tokenOut["token"]));
+    // console.log("length before push: " + args.length)
+    // console.log("length after push: " + args.push(tokenOut["token"]));
+    // console.log("")
+  }
+
   try {
     const response = await fn(...args);
     writeJson(res, response);
@@ -26,35 +49,35 @@ export async function PackageByNameDelete(req: Request, res: Response, next: Nex
 }
 
 export async function UserDelete (req: Request, res: Response, next: NextFunction, userName: string, xAuthorization: string) {
-  await handleRequestAsync(Default.UserDelete, req, res, next, xAuthorization, userName);
+  await handleRequestAsync(Default.UserDelete, req, res, next, userName, req.header('X-Authorization'));
 }
 
 export async function UserPost (req: Request, res: Response, next: NextFunction, body:any, xAuthorization: string) {
-  await handleRequestAsync(Default.UserPost, req, res, next, body, xAuthorization);
+  await handleRequestAsync(Default.UserPost, req, res, next, body, req.header('X-Authorization'));
 }
 
 export async function PackageByNameGet(req: Request, res: Response, next: NextFunction, name: string, xAuthorization: string) {
-  await handleRequestAsync(Default.PackageByNameGet, req, res, next, name, xAuthorization);
+  await handleRequestAsync(Default.PackageByNameGet, req, res, next, name, req.header('X-Authorization'));
 }
 
 export async function PackageByRegExGet(req: Request, res: Response, next: NextFunction, body: any, xAuthorization: string) {
-  await handleRequestAsync(Default.PackageByRegExGet, req, res, next, body, xAuthorization);
+  await handleRequestAsync(Default.PackageByRegExGet, req, res, next, body, req.header('X-Authorization'));
 }
 
 export async function PackageCreate(req: Request, res: Response, next: NextFunction, body: any, xAuthorization: string) {
-  await handleRequestAsync(Default.PackageCreate, req, res, next, body, xAuthorization);
+  await handleRequestAsync(Default.PackageCreate, req, res, next, body, req.header('X-Authorization'));
 }
 
 export async function PackageDelete(req: Request, res: Response, next: NextFunction, id: string, xAuthorization: string,) {
-  await handleRequestAsync(Default.PackageDelete, req, res, next, id, xAuthorization);
+  await handleRequestAsync(Default.PackageDelete, req, res, next, id, req.header('X-Authorization'));
 }
 
 export async function PackageRate(req: Request, res: Response, next: NextFunction, id: string, xAuthorization: string) {
-  await handleRequestAsync(Default.PackageRate, req, res, next, id, xAuthorization);
+  await handleRequestAsync(Default.PackageRate, req, res, next, id, req.header('X-Authorization'));
 }
 
 export async function PackageRetrieve(req: Request, res: Response, next: NextFunction, id: string, xAuthorization: string) {
-  await handleRequestAsync(Default.PackageRetrieve, req, res, next, id, xAuthorization);
+  await handleRequestAsync(Default.PackageRetrieve, req, res, next, id, req.header('X-Authorization'));
 }
 
 export async function PackageUpdate(req: Request, res: Response, next: NextFunction, body: any, id: string, xAuthorization: string) {
@@ -62,18 +85,18 @@ export async function PackageUpdate(req: Request, res: Response, next: NextFunct
   console.log(id);
   console.log(xAuthorization);
   console.log(req);
-  await handleRequestAsync(Default.PackageUpdate, req, res, next, body, id, xAuthorization);
+  await handleRequestAsync(Default.PackageUpdate, req, res, next, body, id, req.header('X-Authorization'));
 }
 
 export async function PackagesList(req: Request, res: Response, next: NextFunction, body: any, offset: string, xAuthorization: string) {
-  await handleRequestAsync(Default.PackagesList, req, res, next, body, offset, xAuthorization);
+  await handleRequestAsync(Default.PackagesList, req, res, next, body, offset, req.header('X-Authorization'));
 }
 
 import { resetDatabase } from '../app_endpoints/reset_endpoint.js';
 export async function RegistryReset(req: Request, res: Response, next: NextFunction, xAuthorization: string) {
   // const xAuthorization = req.headers['x-authorization'];
   await resetDatabase(res);  
-  await handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization);
+  await handleRequestAsync(Default.RegistryReset, req, res, next, req.header('X-Authorization'));
 }
 
 export async function addUser(req: Request, res: Response, next: NextFunction) {

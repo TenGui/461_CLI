@@ -49,7 +49,8 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
       //create a jwt that contains relevant user permissions
       const token = authHelper.createToken({ 
         user: username, 
-        pass: result[0].pass, 
+        pass: result[0].pass,
+        isAdmin: result[0].isAdmin, 
         canSearch: result[0].canSearch,
         canUpload: result[0].canUpload,
         canDownload: result[0].canDownload
@@ -383,8 +384,11 @@ export async function MyPage() {
  * userName userName user to be deleted
  * no response value expected for this operation
  **/
-export async function UserDelete(xAuthorization: AuthenticationToken, userName: string) {
-  
+export async function UserDelete(userName: string, xAuthorization: AuthenticationToken) {
+  console.log("end function isAdmin: " + xAuthorization["isAdmin"]);
+  if(xAuthorization["isAdmin"] != 1 && userName != xAuthorization["user"]){
+    return respondWithCode(400, "Your token is valid, but you do not have proper permissions");
+  }
   let queryString: string = 'DELETE FROM Auth WHERE user=\''+ userName +'\'';
   try{
     await promisePool.execute(queryString);
@@ -407,6 +411,9 @@ export async function UserDelete(xAuthorization: AuthenticationToken, userName: 
  * no response value expected for this operation
  **/
 export async function UserPost(body: newUser, xAuthorization: AuthenticationToken) {
+  if(xAuthorization["isAdmin"] != 1){
+    return respondWithCode(400, "Your token is valid, but you do not have proper permissions");
+  }
   let queryString: string = 'INSERT INTO Auth VALUES (\''+body.user+'\', \''+ body.pass +'\', '+ body.canSearch +', '+ body.canUpload +', '+ body.canDownload +', '+ body.isAdmin +')';
   await promisePool.execute(queryString);
   return respondWithCode(200, "Successfully added user "+body.user);

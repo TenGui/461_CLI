@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkPerms = exports.validateToken = exports.createToken = void 0;
+exports.validateToken = exports.createToken = void 0;
 var jwt = require("jsonwebtoken");
 require('dotenv').config();
 var secret = process.env.SECRET;
@@ -15,19 +15,9 @@ function validateToken(token) {
         decodedToken = jwt.verify(token, secret);
     }
     catch (err) {
-        console.error(err);
-        return err;
+        //console.error(err);
+        return { "success": -1, "token": null };
     }
-    return decodedToken;
+    return { "success": 1, "token": decodedToken };
 }
 exports.validateToken = validateToken;
-//Takes a validated jsonwebtoken and a json with only the required permissions set to true
-//ie: if you wanted to require on "canSearch" json = {canSearch: true}
-function checkPerms(validatedToken, requiredPerms) {
-    for (var key in requiredPerms) {
-        if (validatedToken[key] == false)
-            return 0;
-    }
-    return 1;
-}
-exports.checkPerms = checkPerms;

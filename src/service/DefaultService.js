@@ -69,6 +69,7 @@ function CreateAuthToken(body) {
                         token = authHelper.createToken({
                             user: username,
                             pass: result[0].pass,
+                            isAdmin: result[0].isAdmin,
                             canSearch: result[0].canSearch,
                             canUpload: result[0].canUpload,
                             canDownload: result[0].canDownload
@@ -413,12 +414,16 @@ exports.MyPage = MyPage;
  * userName userName user to be deleted
  * no response value expected for this operation
  **/
-function UserDelete(xAuthorization, userName) {
+function UserDelete(userName, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         var queryString, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    console.log("end function isAdmin: " + xAuthorization["isAdmin"]);
+                    if (xAuthorization["isAdmin"] != 1 && userName != xAuthorization["user"]) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Your token is valid, but you do not have proper permissions")];
+                    }
                     queryString = 'DELETE FROM Auth WHERE user=\'' + userName + '\'';
                     _a.label = 1;
                 case 1:
@@ -450,6 +455,9 @@ function UserPost(body, xAuthorization) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    if (xAuthorization["isAdmin"] != 1) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Your token is valid, but you do not have proper permissions")];
+                    }
                     queryString = 'INSERT INTO Auth VALUES (\'' + body.user + '\', \'' + body.pass + '\', ' + body.canSearch + ', ' + body.canUpload + ', ' + body.canDownload + ', ' + body.isAdmin + ')';
                     return [4 /*yield*/, promisePool.execute(queryString)];
                 case 1:
