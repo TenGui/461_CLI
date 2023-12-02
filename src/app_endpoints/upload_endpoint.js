@@ -141,8 +141,8 @@ var Upload = /** @class */ (function () {
                                                 var github_link = parsedContent['repository'].url;
                                                 cleaned_github_link = "https://" + github_link.substring(6, github_link.length - 4);
                                                 console.log("Extracted github repo link from ZIP file: ", cleaned_github_link);
+                                                resolve(cleaned_github_link);
                                             }
-                                            resolve(cleaned_github_link);
                                         }
                                         catch (error) {
                                             console.error('Error parsing JSON content:', error);
