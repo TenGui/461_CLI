@@ -60,7 +60,7 @@ BEGIN
   -- If both INSERT statements were successful, insert data into Package
   INSERT INTO Package (MetadataID, DataID)
   VALUES (metadata_id, data_id);
-
+    
   COMMIT;
 END;
 //
@@ -124,6 +124,7 @@ END;
 // 
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS GetURLByDataID;
 DELIMITER //
 CREATE PROCEDURE GetURLByDataID(IN p_DataID INT, OUT p_URL VARCHAR(255))
 BEGIN
@@ -139,3 +140,28 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS GetIdVersionMapForPackage;
+DELIMITER //
+-- return a map of ids to versions for a given package
+CREATE PROCEDURE GetIdVersionMapForPackage(IN packagename VARCHAR(255))
+BEGIN
+    SELECT ID AS 'id', Version AS 'version'
+    FROM PackageMetadata
+    WHERE Name = packagename;
+END;
+//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS GetBasicMetadata;
+DELIMITER //
+-- return a map of ids to versions for a given package
+CREATE PROCEDURE GetBasicMetadata(IN id INT)
+BEGIN
+    SELECT Version, ID, Name
+    FROM PackageMetadata
+    WHERE ID = id;
+END;
+//
+DELIMITER ;
+

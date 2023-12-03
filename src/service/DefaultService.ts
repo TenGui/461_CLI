@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { respondWithCode } from '../utils/writer'; // Import the response function
 import type { AuthenticationRequest, AuthenticationToken, PackageName, PackageRegEx, PackageData, PackageMetadata, PackageID, PackageRating, Package, List } from '../utils/types';
 import * as path from 'path';
+import { satisfies } from 'compare-versions';
 import {
   ConnectionOptions,
   ResultSetHeader,
@@ -138,7 +139,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Name = output["repo"];
       Content = 'N/A';
       URL = output["url"];
-      Version = "1.0.0.8.2";
+      Version = "1.0.5";
       //JSProgram = body["JSProgram"];
     }
     else if("Content" in body){
@@ -376,21 +377,76 @@ export async function PackageUpdate(body: Package, id: PackageID, xAuthorization
  * @returns List
  **/
 export async function PackagesList(body: List<PackageMetadata>, offset: string, xAuthorization: AuthenticationToken) {
-  const examples: any = {};
-  examples['application/json'] = [
-    {
-      "Version": "1.2.3",
-      "ID": "ID",
-      "Name": "Name",
-    },
-    {
-      "Version": "1.2.3",
-      "ID": "ID",
-      "Name": "Name",
-    },
-  ];
+  var response: any = {'application/json' : []};
 
-  return examples['application/json'];
+  for (const query of body) {
+    var Name: string = query["Name"];
+    var VersionRange: string = query["Version"];
+    var lower: string; //Inclusive lower bound
+    var upper: string; //NonInclusive upper bound
+
+    if (Name == "*") {
+      const [result, fields] = await promisePool.execute('SELECT Version, ID, Name FROM PackageMetadata', []);
+      const table = result;
+      console.log(result, table);
+      if (result.length > 500) {
+        return respondWithCode(413, "Too many packages");
+      }
+      for (let row = 0; row < result.length; row++) {
+        response['application/json'].push(result[row]);
+      }
+    } else {
+      if (VersionRange.includes("-")) { // specific range
+        lower = VersionRange.split("-")[0];
+        upper = VersionRange.split("-")[1];
+        var nextPatch: number = parseInt(upper.split(".")[2]) + 1;
+        upper = upper.substring(0, upper.length-1) + nextPatch.toString();
+      } else if (VersionRange.includes("^")) { // [2.3.1 - 3.0.0)
+        lower = VersionRange.substring(1, VersionRange.length);
+        var splitVersion: string[] = lower.split(".");
+        splitVersion[0] = (parseInt(splitVersion[0]) + 1).toString();
+        splitVersion[1] = "0";
+        splitVersion[2] = "0";
+        upper = splitVersion.join(".");
+      } else if (VersionRange.includes("~")) { // [2.3.1 - 2.4.0)
+        lower = VersionRange.substring(1, VersionRange.length);
+        var splitVersion: string[] = lower.split(".");
+        splitVersion[1] = (parseInt(splitVersion[1]) + 1).toString();
+        splitVersion[2] = "0";
+        upper = splitVersion.join(".");
+      } else { //Exact
+        lower = VersionRange;
+        var splitVersion: string[] = lower.split(".");
+        splitVersion[2] = (parseInt(splitVersion[2]) + 1).toString();
+        upper = splitVersion.join(".");
+      }
+    }
+
+    const [result, fields] = await promisePool.execute('CALL GetIdVersionMapForPackage(?)', [Name]);
+    const table = result[0];
+    if (table.length > 500){
+      return respondWithCode(413, "Too many packages");
+    }
+    var idsInRange: number[] = [];
+
+    for (let row = 0; row < table.length; row++) {
+      const range : string = lower + " - " + upper;
+
+      if (satisfies(table[row]["version"], range)) {
+        idsInRange.push(table[row]["id"]);
+      }
+    }
+
+    for (const id of idsInRange) {
+      const [result, fields] = await promisePool.execute('CALL GetBasicMetadata(?)', [id]);
+      const basicMetadata = result[0][0];
+      response['application/json'].push(basicMetadata);
+      //console.log("\n\nRESPONSE: ", response);
+    }
+  }
+
+  //console.log("\n\nRETURNED RESPONSE: ", response);
+  return respondWithCode(200, response['application/json']);
 }
 
 /**
@@ -401,6 +457,7 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
  * @returns void
  **/
 import { resetDatabase } from '../app_endpoints/reset_endpoint.js';
+import { version } from 'yargs';
 export async function RegistryReset(xAuthorization: AuthenticationToken): Promise<void> {
   await resetDatabase();  
 }
