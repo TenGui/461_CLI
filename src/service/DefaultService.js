@@ -99,16 +99,35 @@ exports.CreateAuthToken = CreateAuthToken;
  **/
 function PackageByNameDelete(name, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
+        var query, results, error_1;
         return __generator(this, function (_a) {
-            // Your code here
-            console.log("--here is the token: " + xAuthorization);
-            console.log("--here is the pacakge name" + name);
-            console.log("This is the dumbest thing in the world ");
-            return [2 /*return*/, (0, writer_1.respondWithCode)(200, "gaming")];
+            switch (_a.label) {
+                case 0:
+                    query = 'DELETE FROM PackageMetadata WHERE Name = ?';
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, db.promise().execute(query, [name])];
+                case 2:
+                    results = (_a.sent())[0];
+                    if (results.affectedRows > 0) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, { success: 'Package deleted successfully' })];
+                    }
+                    else {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: 'No package found with the specified name' })];
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_1 = _a.sent();
+                    console.error(error_1);
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
+                case 4: return [2 /*return*/];
+            }
         });
     });
 }
 exports.PackageByNameDelete = PackageByNameDelete;
+// Your code here
 /**
  * Return the history of this package (all versions).
  *
@@ -164,7 +183,7 @@ exports.PackageByNameGet = PackageByNameGet;
  **/
 function PackageByRegExGet(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var packageName, query, _a, rows, fields, matchedPackages, error_1;
+        var packageName, query, _a, rows, fields, matchedPackages, error_2;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -192,8 +211,8 @@ function PackageByRegExGet(body, xAuthorization) {
                     }
                     return [3 /*break*/, 4];
                 case 3:
-                    error_1 = _b.sent();
-                    console.error(error_1);
+                    error_2 = _b.sent();
+                    console.error(error_2);
                     return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
                 case 4: return [2 /*return*/];
             }
@@ -210,7 +229,7 @@ exports.PackageByRegExGet = PackageByRegExGet;
 var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Content, URL, Version, JSProgram, upload, output_1, github_link, output_2, package_exist_check, _a, result, fields, output, error_2;
+        var Name, Content, URL, Version, JSProgram, upload, output_1, github_link, output_2, package_exist_check, _a, result, fields, output, error_3;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -297,9 +316,9 @@ function PackageCreate(body, xAuthorization) {
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
                 case 8:
-                    error_2 = _b.sent();
-                    console.error('Error calling the stored procedure:', error_2);
-                    throw error_2; // Re-throw the error for the caller to handle
+                    error_3 = _b.sent();
+                    console.error('Error calling the stored procedure:', error_3);
+                    throw error_3; // Re-throw the error for the caller to handle
                 case 9: return [2 /*return*/];
             }
         });
@@ -315,8 +334,29 @@ exports.PackageCreate = PackageCreate;
  **/
 function PackageDelete(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/];
+        var _a, result, fields, error_4;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _b.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, promisePool.execute('CALL PackageDelete(?)', [
+                            id
+                        ])];
+                case 1:
+                    _a = _b.sent(), result = _a[0], fields = _a[1];
+                    if (result.affectedRows == 1) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200)];
+                    }
+                    else {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
+                    }
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_4 = _b.sent();
+                    console.log(error_4);
+                    throw error_4;
+                case 3: return [2 /*return*/];
+            }
         });
     });
 }
@@ -330,7 +370,7 @@ exports.PackageDelete = PackageDelete;
 var rate_endpoint_js_1 = require("../app_endpoints/rate_endpoint.js");
 function PackageRate(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, result, fields, outputURL, output, hasInvalidScore, error_3;
+        var _a, result, fields, outputURL, output, hasInvalidScore, error_5;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -352,7 +392,7 @@ function PackageRate(id, xAuthorization) {
                 case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: "Package does not exist." })];
                 case 4: return [3 /*break*/, 6];
                 case 5:
-                    error_3 = _b.sent();
+                    error_5 = _b.sent();
                     return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
                 case 6: return [2 /*return*/];
             }
@@ -370,64 +410,30 @@ exports.PackageRate = PackageRate;
  **/
 function PackageRetrieve(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var examples, connection, isResultSetHeader;
+        var results, error_6;
         return __generator(this, function (_a) {
-            examples = {};
-            examples['application/json'] = {
-                "metadata": {
-                    "Version": "1.2.3",
-                    "ID": "ID",
-                    "Name": "Name",
-                },
-                "data": {
-                    "Content": "Content",
-                    "JSProgram": "JSProgram",
-                    "URL": "URL",
-                },
-            };
-            try {
-                connection = void 0;
-                isResultSetHeader = function (data) {
-                    if (!data || typeof data !== 'object')
-                        return false;
-                    var keys = [
-                        'fieldCount',
-                        'affectedRows',
-                        'insertId',
-                        'info',
-                        'serverStatus',
-                        'warningStatus',
-                        'changedRows',
-                    ];
-                    return keys.every(function (key) { return key in data; });
-                };
-                // results.forEach((users) => {
-                //   if (isResultSetHeader(users)) {
-                //     console.log('----------------');
-                //     console.log('Affected Rows:', users.affectedRows);
-                //   } else {  
-                //     users.forEach((user) => {
-                //       console.log('----------------');
-                //       console.log('id:  ', user.ID);
-                //       console.log('name:', user.Name);
-                //       console.log('URL: ', user.URL);
-                //     });
-                //   }
-                // });
-                // const [results, fields] = await promisePool.execute<test[]>('SELECT * FROM Package', []);
-                // const response = (results[0][0] as { response: YourResponseType }).response;
-                // console.log(typeof(results));
-                // console.log(results[0][0].v_JSON);
-                // const selectResult: RowDataPacket[] = results[0] as RowDataPacket[];
-                //   console.log(results);
-                //   // console.log(fields);
-                //   return respondWithCode(200, results[0][0]);
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, promisePool.execute('CALL GetPackage(?)', [
+                            id,
+                        ])];
+                case 1:
+                    results = (_a.sent())[0];
+                    console.log(results);
+                    if (results[0].length == 0) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
+                    }
+                    else {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, results[0][0])];
+                    }
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_6 = _a.sent();
+                    console.error('Error calling the stored procedure:', error_6);
+                    throw error_6; // Re-throw the error for the caller to handle
+                case 3: return [2 /*return*/];
             }
-            catch (error) {
-                console.error('Error calling the stored procedure:', error);
-                throw error; // Re-throw the error for the caller to handle
-            }
-            return [2 /*return*/, examples['application/json']];
         });
     });
 }
@@ -443,8 +449,42 @@ exports.PackageRetrieve = PackageRetrieve;
  **/
 function PackageUpdate(body, id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
+        var results, error_7;
         return __generator(this, function (_a) {
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    if ("URL" in body && "Content" in body) {
+                        console.log("Improper form, URL and Content are both set");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
+                    }
+                    if (!("URL" in body) && !("Content" in body)) {
+                        console.log("Improper form, URL and Content are both not set");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
+                    }
+                    return [4 /*yield*/, promisePool.execute('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
+                            id,
+                            body.metadata.Name,
+                            body.metadata.Version,
+                            body.data.Content,
+                            body.data.URL,
+                            body.data.JSProgram
+                        ])];
+                case 1:
+                    results = (_a.sent())[0];
+                    if (results[0][0].updateSuccess == 0) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
+                    }
+                    else {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200)];
+                    }
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_7 = _a.sent();
+                    console.log(error_7);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
         });
     });
 }

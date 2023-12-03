@@ -75,13 +75,33 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
  * @param name PackageName 
  * @returns void
  **/
-export async function PackageByNameDelete(name: PackageName, xAuthorization: AuthenticationToken, ) {
-  // Your code here
-  console.log("--here is the token: " + xAuthorization);
-  console.log("--here is the pacakge name" + name);
-  console.log("This is the dumbest thing in the world ");
-  return respondWithCode(200, "gaming");
+
+export async function PackageByNameDelete(name: PackageName, xAuthorization: AuthenticationToken, ){
+
+
+  const query = 'DELETE FROM PackageMetadata WHERE Name = ?';
+
+  try {
+    const [results] = await db.promise().execute(query, [name]);
+
+    if (results.affectedRows > 0) {
+      return respondWithCode(200, {success: 'Package deleted successfully'});
+    } else {
+      return respondWithCode(404, { error: 'No package found with the specified name' });
+    }
+  } catch (error) {
+    console.error(error);
+    return respondWithCode(500, { error: 'Internal Server Error' });
+  }
 }
+
+
+
+  
+
+  
+  // Your code here
+
 
 /**
  * Return the history of this package (all versions).
