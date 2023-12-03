@@ -288,7 +288,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
  **/
 export async function PackageDelete(id: PackageID, xAuthorization: AuthenticationToken) {
   try {
-    const [result, fields] = await promisePool.execute<ProcedureCallPacket<ResultSetHeader>>('CALL PackageDelete(?)', [
+    const [result, fields] = await promisePool.execute('CALL PackageDelete(?)', [
       id
     ]);
     
@@ -354,7 +354,7 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
     //   ID: JSON;
     // }
 
-    const [results] = await promisePool.execute<ProcedureCallPacket<RowDataPacket[]>>('CALL GetPackage(?)', [
+    const [results] = await promisePool.execute('CALL GetPackage(?)', [
       id,
     ]);
 
@@ -393,7 +393,7 @@ export async function PackageUpdate(body: Package, id: PackageID, xAuthorization
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
     }
     
-    const [results] = await promisePool.execute<ProcedureCallPacket<RowDataPacket[]>>('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
+    const [results] = await promisePool.execute('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
       id,
       body.metadata.Name,
       body.metadata.Version,
