@@ -33,24 +33,42 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
  * @returns void
  **/
 
-export async function PackageByNameDelete(name: PackageName, xAuthorization: AuthenticationToken, ){
 
 
-  const query = 'DELETE FROM PackageMetadata WHERE Name = ?';
+export async function PackageByNameGet(name: PackageName, xAuthorization: AuthenticationToken) {
+  var query = 'SELECT * FROM PackageMetadata WHERE Name = ?';
 
   try {
-    const [results] = await db.promise().execute(query, [name]);
+    const [rows, fields] = await db.promise().execute(query, [name]);
 
-    if (results.affectedRows > 0) {
-      return respondWithCode(200, {success: 'Package deleted successfully'});
+    console.log('Results:', rows);
+
+    if (rows.length > 0) {
+      // Construct an array of packages in the desired format
+      const output = rows.map((pkg: RowDataPacket) => ({
+        User: {
+          name: 'Pranav',
+          isAdmin: true
+        },
+        Date: pkg.date_column.toISOString(),
+        PackageMetadata: {
+          Name: pkg.Name,
+          Version: pkg.version,
+          ID: pkg.id
+        },
+        Action: 'DOWNLOAD'
+      }));
+      
+      return respondWithCode(200, output);
     } else {
-      return respondWithCode(404, { error: 'No package found with the specified name' });
+      return respondWithCode(404, {"Error" : "No package found"});
     }
   } catch (error) {
     console.error(error);
     return respondWithCode(500, { error: 'Internal Server Error' });
   }
 }
+
 
 
 
@@ -67,39 +85,9 @@ export async function PackageByNameDelete(name: PackageName, xAuthorization: Aut
  * @param xAuthorization AuthenticationToken 
  * @returns List
  **/
-export async function PackageByNameGet(name: PackageName, xAuthorization: AuthenticationToken) {
-  const examples: any = {};
-  examples['application/json'] = [
-    {
-      "Action": "CREATE",
-      "User": {
-        "name": "Alfalfa",
-        "isAdmin": true
-      },
-      "PackageMetadata": {
-        "Version": "1.2.3",
-        "ID": "ID",
-        "Name": "Name"
-      },
-      "Date": "2023-03-23T23:11:15Z"
-    },
-    {
-      "Action": "CREATE",
-      "User": {
-        "name": "Alfalfa",
-        "isAdmin": true
-      },
-      "PackageMetadata": {
-        "Version": "1.2.3",
-        "ID": "ID",
-        "Name": "Name"
-      },
-      "Date": "2023-03-23T23:11:15Z"
-    },
-  ];
 
-  return examples['application/json'];
-}
+  
+
 
 /**
  * Get any packages fitting the regular expression.
@@ -245,21 +233,20 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
  **/
 export async function PackageDelete(id: PackageID, xAuthorization: AuthenticationToken) {
   try {
-    const [result, fields] = await promisePool.execute<ProcedureCallPacket<ResultSetHeader>>('CALL PackageDelete(?)', [
-      id
-    ]);
+    const [result, fields] = await (promisePool.execute as any)('CALL PackageDelete(?)', [id]);
     
-    if(result.affectedRows == 1) {
-      return respondWithCode(200)
-    }
-    else {
+    if (result.affectedRows === 1) {
+      return respondWithCode(200);
+    } else {
       return respondWithCode(404);
     }
   } catch (error) {
-    console.log(error)
-    throw error
+    console.log(error);
+    throw error;
   }
 }
+
+
 
 /**
  *
@@ -305,29 +292,25 @@ export async function PackageRate(id: PackageID, xAuthorization: AuthenticationT
  * @returns Package
  **/
 export async function PackageRetrieve(id: PackageID, xAuthorization: AuthenticationToken) {
-  try{
+  try {
+    const query = 'CALL GetPackage(?)';
+    const values: [PackageID] = [id];
 
-    // interface test extends RowDataPacket {
-    //   ID: JSON;
-    // }
+    const [results] = await (promisePool.execute as any)(query, values);
 
-    const [results] = await promisePool.execute<ProcedureCallPacket<RowDataPacket[]>>('CALL GetPackage(?)', [
-      id,
-    ]);
+    console.log(results);
 
-    console.log(results)
-
-    if(results[0].length == 0) {
+    if (results[0].length === 0) {
       return respondWithCode(404);
-    }
-    else {
+    } else {
       return respondWithCode(200, results[0][0]);
     }
   } catch (error) {
     console.error('Error calling the stored procedure:', error);
-    throw error; // Re-throw the error for the caller to handle
+    throw error;
   }
 }
+
 
 /**
  * Update this content of the package.
@@ -339,36 +322,36 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
  * @returns void
  **/
 export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
-  // Your code here
   try {
-    if("URL" in body && "Content" in body){
-      console.log("Improper form, URL and Content are both set")
+    if ("URL" in body && "Content" in body) {
+      console.log("Improper form, URL and Content are both set");
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
     }
-    if(!("URL" in body) && !("Content" in body)){
-      console.log("Improper form, URL and Content are both not set")
+    if (!("URL" in body) && !("Content" in body)) {
+      console.log("Improper form, URL and Content are both not set");
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
     }
-    
-    const [results] = await promisePool.execute<ProcedureCallPacket<RowDataPacket[]>>('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
+
+    const [results] = await (promisePool.execute as any)('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
       id,
       body.metadata.Name,
       body.metadata.Version,
       body.data.Content,
       body.data.URL,
       body.data.JSProgram
-    ]); 
-  
-    if(results[0][0].updateSuccess == 0) {
+    ]);
+
+    if (results[0][0].updateSuccess == 0) {
       return respondWithCode(404);
     } else {
       return respondWithCode(200);
     }
-   
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    throw error;
   }
 }
+
 
 /**
  * Get the packages from the registry.

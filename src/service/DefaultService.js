@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MyPage = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.PackageByNameDelete = exports.CreateAuthToken = void 0;
+exports.MyPage = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.CreateAuthToken = void 0;
 var writer_1 = require("../utils/writer"); // Import the response function
 var path = require("path");
 var _a = require("../database_files/database_connect"), db = _a.db, promisePool = _a.promisePool;
@@ -62,28 +62,42 @@ exports.CreateAuthToken = CreateAuthToken;
  * @param name PackageName
  * @returns void
  **/
-function PackageByNameDelete(name, xAuthorization) {
+function PackageByNameGet(name, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var query, results, error_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var query, _a, rows, fields, output, error_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    query = 'DELETE FROM PackageMetadata WHERE Name = ?';
-                    _a.label = 1;
+                    query = 'SELECT * FROM PackageMetadata WHERE Name = ?';
+                    _b.label = 1;
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
+                    _b.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, db.promise().execute(query, [name])];
                 case 2:
-                    results = (_a.sent())[0];
-                    if (results.affectedRows > 0) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, { success: 'Package deleted successfully' })];
+                    _a = _b.sent(), rows = _a[0], fields = _a[1];
+                    console.log('Results:', rows);
+                    if (rows.length > 0) {
+                        output = rows.map(function (pkg) { return ({
+                            User: {
+                                name: 'Pranav',
+                                isAdmin: true
+                            },
+                            Date: pkg.date_column.toISOString(),
+                            PackageMetadata: {
+                                Name: pkg.Name,
+                                Version: pkg.version,
+                                ID: pkg.id
+                            },
+                            Action: 'DOWNLOAD'
+                        }); });
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, output)];
                     }
                     else {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: 'No package found with the specified name' })];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "No package found" })];
                     }
                     return [3 /*break*/, 4];
                 case 3:
-                    error_1 = _a.sent();
+                    error_1 = _b.sent();
                     console.error(error_1);
                     return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
                 case 4: return [2 /*return*/];
@@ -91,7 +105,7 @@ function PackageByNameDelete(name, xAuthorization) {
         });
     });
 }
-exports.PackageByNameDelete = PackageByNameDelete;
+exports.PackageByNameGet = PackageByNameGet;
 // Your code here
 /**
  * Return the history of this package (all versions).
@@ -100,44 +114,6 @@ exports.PackageByNameDelete = PackageByNameDelete;
  * @param xAuthorization AuthenticationToken
  * @returns List
  **/
-function PackageByNameGet(name, xAuthorization) {
-    return __awaiter(this, void 0, void 0, function () {
-        var examples;
-        return __generator(this, function (_a) {
-            examples = {};
-            examples['application/json'] = [
-                {
-                    "Action": "CREATE",
-                    "User": {
-                        "name": "Alfalfa",
-                        "isAdmin": true
-                    },
-                    "PackageMetadata": {
-                        "Version": "1.2.3",
-                        "ID": "ID",
-                        "Name": "Name"
-                    },
-                    "Date": "2023-03-23T23:11:15Z"
-                },
-                {
-                    "Action": "CREATE",
-                    "User": {
-                        "name": "Alfalfa",
-                        "isAdmin": true
-                    },
-                    "PackageMetadata": {
-                        "Version": "1.2.3",
-                        "ID": "ID",
-                        "Name": "Name"
-                    },
-                    "Date": "2023-03-23T23:11:15Z"
-                },
-            ];
-            return [2 /*return*/, examples['application/json']];
-        });
-    });
-}
-exports.PackageByNameGet = PackageByNameGet;
 /**
  * Get any packages fitting the regular expression.
  * Search for a package using a regular expression over package names and READMEs. This is similar to search by name.
@@ -299,8 +275,27 @@ exports.PackageCreate = PackageCreate;
  **/
 function PackageDelete(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/];
+        var _a, result, fields, error_4;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _b.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, promisePool.execute('CALL PackageDelete(?)', [id])];
+                case 1:
+                    _a = _b.sent(), result = _a[0], fields = _a[1];
+                    if (result.affectedRows === 1) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200)];
+                    }
+                    else {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
+                    }
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_4 = _b.sent();
+                    console.log(error_4);
+                    throw error_4;
+                case 3: return [2 /*return*/];
+            }
         });
     });
 }
@@ -314,7 +309,7 @@ exports.PackageDelete = PackageDelete;
 var rate_endpoint_js_1 = require("../app_endpoints/rate_endpoint.js");
 function PackageRate(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, result, fields, outputURL, output, hasInvalidScore, error_4;
+        var _a, result, fields, outputURL, output, hasInvalidScore, error_5;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -336,7 +331,7 @@ function PackageRate(id, xAuthorization) {
                 case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: "Package does not exist." })];
                 case 4: return [3 /*break*/, 6];
                 case 5:
-                    error_4 = _b.sent();
+                    error_5 = _b.sent();
                     return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
                 case 6: return [2 /*return*/];
             }
@@ -354,64 +349,30 @@ exports.PackageRate = PackageRate;
  **/
 function PackageRetrieve(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var examples, connection, isResultSetHeader;
+        var query, values, results, error_6;
         return __generator(this, function (_a) {
-            examples = {};
-            examples['application/json'] = {
-                "metadata": {
-                    "Version": "1.2.3",
-                    "ID": "ID",
-                    "Name": "Name",
-                },
-                "data": {
-                    "Content": "Content",
-                    "JSProgram": "JSProgram",
-                    "URL": "URL",
-                },
-            };
-            try {
-                connection = void 0;
-                isResultSetHeader = function (data) {
-                    if (!data || typeof data !== 'object')
-                        return false;
-                    var keys = [
-                        'fieldCount',
-                        'affectedRows',
-                        'insertId',
-                        'info',
-                        'serverStatus',
-                        'warningStatus',
-                        'changedRows',
-                    ];
-                    return keys.every(function (key) { return key in data; });
-                };
-                // results.forEach((users) => {
-                //   if (isResultSetHeader(users)) {
-                //     console.log('----------------');
-                //     console.log('Affected Rows:', users.affectedRows);
-                //   } else {  
-                //     users.forEach((user) => {
-                //       console.log('----------------');
-                //       console.log('id:  ', user.ID);
-                //       console.log('name:', user.Name);
-                //       console.log('URL: ', user.URL);
-                //     });
-                //   }
-                // });
-                // const [results, fields] = await promisePool.execute<test[]>('SELECT * FROM Package', []);
-                // const response = (results[0][0] as { response: YourResponseType }).response;
-                // console.log(typeof(results));
-                // console.log(results[0][0].v_JSON);
-                // const selectResult: RowDataPacket[] = results[0] as RowDataPacket[];
-                //   console.log(results);
-                //   // console.log(fields);
-                //   return respondWithCode(200, results[0][0]);
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    query = 'CALL GetPackage(?)';
+                    values = [id];
+                    return [4 /*yield*/, promisePool.execute(query, values)];
+                case 1:
+                    results = (_a.sent())[0];
+                    console.log(results);
+                    if (results[0].length === 0) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
+                    }
+                    else {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, results[0][0])];
+                    }
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_6 = _a.sent();
+                    console.error('Error calling the stored procedure:', error_6);
+                    throw error_6;
+                case 3: return [2 /*return*/];
             }
-            catch (error) {
-                console.error('Error calling the stored procedure:', error);
-                throw error; // Re-throw the error for the caller to handle
-            }
-            return [2 /*return*/, examples['application/json']];
         });
     });
 }
@@ -427,8 +388,42 @@ exports.PackageRetrieve = PackageRetrieve;
  **/
 function PackageUpdate(body, id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
+        var results, error_7;
         return __generator(this, function (_a) {
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    if ("URL" in body && "Content" in body) {
+                        console.log("Improper form, URL and Content are both set");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
+                    }
+                    if (!("URL" in body) && !("Content" in body)) {
+                        console.log("Improper form, URL and Content are both not set");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
+                    }
+                    return [4 /*yield*/, promisePool.execute('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
+                            id,
+                            body.metadata.Name,
+                            body.metadata.Version,
+                            body.data.Content,
+                            body.data.URL,
+                            body.data.JSProgram
+                        ])];
+                case 1:
+                    results = (_a.sent())[0];
+                    if (results[0][0].updateSuccess == 0) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
+                    }
+                    else {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200)];
+                    }
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_7 = _a.sent();
+                    console.log(error_7);
+                    throw error_7;
+                case 3: return [2 /*return*/];
+            }
         });
     });
 }
