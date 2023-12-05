@@ -8,14 +8,19 @@ import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import {validateToken} from '../authentication/authenticationHelper';
 import { respondWithCode } from '../utils/writer';
 
+let globalToken = "";
+
 async function handleRequestAsync(fn: Function, req: Request, res: Response, next: NextFunction, ...args: any[]) {
   
   //Check if the token is valid. If the token is invalid, send error response. If not, pass json body to the service
   //console.log("request path: " + req.path);
   if(req.path != "/authenticate") {
     //console.log("First arg:" + req.header('X-Authorization'));
-    let tokenOut = validateToken(req.header('X-Authorization'));
+    console.log("token", globalToken);
 
+    let tokenOut = validateToken(globalToken);
+
+    console.log("tokenout", tokenOut);
     if(tokenOut["success"] != 1) {
         return res.status(400).send("Bad Token");
     }
@@ -33,6 +38,9 @@ async function handleRequestAsync(fn: Function, req: Request, res: Response, nex
   try {
     const response = await fn(...args);
     writeJson(res, response);
+    if(req.path == "/reset"){
+      globalToken = "";
+    }
   } catch (error) {
     writeJson(res, error);
   }
@@ -44,7 +52,6 @@ export async function CreateAuthToken(req: Request, res: Response, next: NextFun
 }
 
 export async function PackageByNameDelete(req: Request, res: Response, next: NextFunction, name: string, xAuthorization: string) {
-  console.log("createAuthToken: default.ts");
   await handleRequestAsync(Default.PackageByNameDelete, req, res, next, name, xAuthorization);
 }
 
@@ -101,8 +108,8 @@ export async function addUser(req: Request, res: Response, next: NextFunction) {
   try {
     const { username, password } = req.body;
 
-    const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-    db.query(query, [username, password], (err) => {
+    const query = 'INSERT INTO Auth (user, pass, canSearch, canUpload, canDownload, isAdmin) VALUES (?, ?, ?, ?, ?, ?)';
+    db.query(query, [username, password, true, true, true, true], (err) => {
       if (err) throw err;
   
       res.send('User added successfully');
@@ -113,21 +120,44 @@ export async function addUser(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+import axios from 'axios';
 export async function loginUser(req: Request, res: Response, next: NextFunction) {
   try {
     const { loginUsername, loginPassword } = req.body;
 
-  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-  db.query(query, [loginUsername, loginPassword], (err, results) => {
-    console.log(results[0]);
-    if (err) throw err;
+    const query = 'SELECT * FROM Auth WHERE user = ? AND pass = ?';
+    db.query(query, [loginUsername, loginPassword], async (err, results) => {
+      console.log(results[0]);
+      if (err) throw err;
 
-    if (results[0] == undefined) {
-      res.send('Login Failed');
-    } else {
-      res.send('Login Successful');
-    }
-  });
+      if (results[0] === undefined) {
+        res.send('Login Failed');
+      } else {
+        const adminJson = {
+          "User": {
+            "name": results[0].user,
+            "isAdmin": true
+          },
+          "Secret": {
+            "password": results[0].pass
+          }
+        };
+
+        try {
+          const serverUrl = process.env.SERVER_URL || 'http://localhost:3000';
+          const authenticateResponse = await axios.put(`${serverUrl}/authenticate`, adminJson);
+
+          console.log(authenticateResponse.data);
+
+          const token = authenticateResponse.data;
+          globalToken = token;
+          res.send('Login Successful');
+        } catch (authenticateError) {
+          console.error('Error in /authenticate:', authenticateError.message);
+          res.status(500).send('Internal Server Error');
+        }
+      }
+    });
   } catch (error) {
     // Handle any errors
     next(error);
