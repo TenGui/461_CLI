@@ -163,3 +163,28 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS GetIdVersionMapForPackage;
+DELIMITER //
+-- return a map of ids to versions for a given package
+CREATE PROCEDURE GetIdVersionMapForPackage(IN packagename VARCHAR(255))
+BEGIN
+    SELECT ID AS 'id', Version AS 'version'
+    FROM PackageMetadata
+    WHERE Name = packagename;
+END;
+//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS GetBasicMetadata;
+DELIMITER //
+-- return a map of ids to versions for a given package
+CREATE PROCEDURE GetBasicMetadata(IN id INT)
+BEGIN
+    SELECT Version, ID, Name
+    FROM PackageMetadata
+    WHERE ID = id;
+END;
+//
+DELIMITER ;
+
