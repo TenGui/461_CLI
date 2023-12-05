@@ -2,7 +2,7 @@ import { error } from "console";
 import * as jwt from "jsonwebtoken";
 
 let secret = "mysecret";
-let AuthEnable = 1;
+let AuthEnable = "1";
 
 if(secret == null) {
     throw "The \"SECRET\" parameter for JWTs was not found in the env file"
