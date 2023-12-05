@@ -32,7 +32,6 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
   
 
     //make database access
-    console.log("about to run execute")
 
     const [result, fields] = await promisePool.execute('SELECT * FROM Auth WHERE user = ?', [username]);
     //console.log("result at service: " + JSON.stringify(result));

@@ -2,10 +2,10 @@ import * as mysql from "mysql2";
 require('dotenv').config();
 
 const db = mysql.createConnection({
-    host: "publicdb.cvr1hbjvaden.us-east-2.rds.amazonaws.com",
+    host: "10.0.0.57",
     port: 3306,
-    user: "admin",
-    password: "project461",
+    user: "root",
+    password: "AbCd1234",
     database: "testdb",
 });
 

@@ -52,6 +52,7 @@
     "promise-any": "^0.2.0",
     "swagger-tools": "^0.10.1",
     "tsc": "^2.0.4",
-    "unzipper": "^0.10.14"
+    "unzipper": "^0.10.14",
+    "uuid": "^9.0.1"
   }
 }
