@@ -149,7 +149,7 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
 
           console.log(authenticateResponse.data);
 
-          const token = authenticateResponse.data["X-Authentication"];
+          const token = authenticateResponse.data;
           globalToken = token;
           res.send('Login Successful');
         } catch (authenticateError) {

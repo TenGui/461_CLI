@@ -331,7 +331,7 @@ function loginUser(req, res, next) {
                             case 3:
                                 authenticateResponse = _a.sent();
                                 console.log(authenticateResponse.data);
-                                token = authenticateResponse.data["X-Authentication"];
+                                token = authenticateResponse.data;
                                 globalToken = token;
                                 res.send('Login Successful');
                                 return [3 /*break*/, 5];
