@@ -575,18 +575,18 @@ export async function UserPost(body: newUser, xAuthorization: AuthenticationToke
 // }
 
 
-// /**
-//  * Delete all versions of this package.
-//  *
-//  * @param xAuthorization AuthenticationToken 
-//  * @param name PackageName 
-//  * @returns void
-//  **/
-// export function PackageByNameDelete(xAuthorization: AuthenticationToken, name: PackageName) {
-//   return new Promise(function(resolve, reject) {
-//     // resolve();
-//   });
-// }
+/**
+ * Delete all versions of this package.
+ *
+ * @param xAuthorization AuthenticationToken 
+ * @param name PackageName 
+ * @returns void
+ **/
+export function PackageByNameDelete(xAuthorization: AuthenticationToken, name: PackageName) {
+  return new Promise(function(resolve, reject) {
+    // resolve();
+  });
+}
 
 // /**
 //  * Return the history of this package (all versions).
