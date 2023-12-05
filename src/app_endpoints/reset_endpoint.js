@@ -77,6 +77,8 @@ function resetDatabase() {
                             });
                         }
                     });
+                    var queryString = 'INSERT INTO Auth VALUES (?,?,?,?,?,?)';
+                    db.execute(queryString, ["ece30861defaultadminuser", "correcthorsebatterystaple123(!__+@**(A;DROP TABLE packages", 1, 1, 1, 1]);
                 })];
         });
     });
