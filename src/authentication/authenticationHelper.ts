@@ -1,15 +1,13 @@
 import { error } from "console";
 import * as jwt from "jsonwebtoken";
 
-let secret = process.env.SECRET;
-let AuthEnable = process.env.AUTH_ENABLE;
+let secret = "mysecret";
+let AuthEnable = 1;
 
 if(secret == null) {
-    console.log("SECRET", process.env.SECRET);
     throw "The \"SECRET\" parameter for JWTs was not found in the env file"
 }
 if(AuthEnable == null) {
-    console.log("AuthENBABLE", process.env.AUTH_ENABLE);
     throw "The \"AUTH_ENABLE\" parameter is not set in the .env file"
 }
 
