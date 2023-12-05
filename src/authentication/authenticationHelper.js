@@ -2,13 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateToken = exports.createToken = void 0;
 var jwt = require("jsonwebtoken");
-require('dotenv').config();
 var secret = process.env.SECRET;
 var AuthEnable = process.env.AUTH_ENABLE;
 if (secret == null) {
+    console.log("SECRET", process.env.SECRET);
     throw "The \"SECRET\" parameter for JWTs was not found in the env file";
 }
 if (AuthEnable == null) {
+    console.log("AuthENBABLE", process.env.AUTH_ENABLE);
     throw "The \"AUTH_ENABLE\" parameter is not set in the .env file";
 }
 function createToken(payload) {
