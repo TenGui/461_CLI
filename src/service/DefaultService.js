@@ -56,8 +56,6 @@ function CreateAuthToken(body) {
                 case 0:
                     username = body.User.name;
                     password = body.Secret.password;
-                    //make database access
-                    console.log("about to run execute");
                     return [4 /*yield*/, promisePool.execute('SELECT * FROM Auth WHERE user = ?', [username])];
                 case 1:
                     _a = _b.sent(), result = _a[0], fields = _a[1];
