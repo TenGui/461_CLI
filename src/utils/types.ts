@@ -16,6 +16,16 @@ export type User = {
   isAdmin: boolean;
 };
 
+export type newUser = {
+      "user": string,
+      "pass": string,
+      "canSearch": boolean,
+      "canUpload": boolean,
+      "canDownload": boolean,
+      "isAdmin": boolean
+};
+
+
 export type UserAuthenticationInfo = {
   password: string;
 };

@@ -1,6 +1,26 @@
 -- CREATE DATABASE IF NOT EXISTS mydb;
 USE mydb;
 
+-- Create auth table with user authentication info
+CREATE TABLE Auth (
+    user varchar(32),
+    pass varchar(64), 
+    canSearch BOOL, 
+    canUpload BOOL, 
+    canDownload BOOL, 
+    isAdmin BOOL
+) ENGINE=InnoDB;
+
+--add default user
+-- INSERT INTO Auth VALUES (
+--     "ece30861defaultadminuser",
+--     "correcthorsebatterystaple123(!__+@**(A;DROP TABLE packages",
+--     1,
+--     1,
+--     1,
+--     1
+-- ) ENGINE=InnoDB;
+
 -- Create Package table with foreign keys to PackageMetadata and PackageData
 CREATE TABLE Package (
     PackageID INT AUTO_INCREMENT PRIMARY KEY

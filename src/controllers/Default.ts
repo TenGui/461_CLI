@@ -5,8 +5,31 @@ import * as Default from '../service/DefaultService';
 import { writeJson } from '../utils/writer';
 import { db } from '../database_files/database_connect';
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import {validateToken} from '../authentication/authenticationHelper';
+import { respondWithCode } from '../utils/writer';
 
 async function handleRequestAsync(fn: Function, req: Request, res: Response, next: NextFunction, ...args: any[]) {
+  
+  //Check if the token is valid. If the token is invalid, send error response. If not, pass json body to the service
+  //console.log("request path: " + req.path);
+  if(req.path != "/authenticate") {
+    //console.log("First arg:" + req.header('X-Authorization'));
+    let tokenOut = validateToken(req.header('X-Authorization'));
+
+    if(tokenOut["success"] != 1) {
+        return res.status(400).send("Bad Token");
+    }
+    //if the token is valid, replace the token string in the args with it's json body
+    args.pop();
+    args.push(tokenOut["token"]);
+
+    // console.log("popped arg: " + args.pop())
+    // console.log(JSON.stringify(tokenOut["token"]));
+    // console.log("length before push: " + args.length)
+    // console.log("length after push: " + args.push(tokenOut["token"]));
+    // console.log("")
+  }
+
   try {
     const response = await fn(...args);
     writeJson(res, response);
@@ -16,35 +39,45 @@ async function handleRequestAsync(fn: Function, req: Request, res: Response, nex
 }
 
 export async function CreateAuthToken(req: Request, res: Response, next: NextFunction, body: any) {
+  await Default.CreateAuthToken;
   await handleRequestAsync(Default.CreateAuthToken, req, res, next, body);
 }
 
 export async function PackageByNameDelete(req: Request, res: Response, next: NextFunction, name: string, xAuthorization: string) {
+  console.log("createAuthToken: default.ts");
   await handleRequestAsync(Default.PackageByNameDelete, req, res, next, name, xAuthorization);
 }
 
+export async function UserDelete (req: Request, res: Response, next: NextFunction, userName: string, xAuthorization: string) {
+  await handleRequestAsync(Default.UserDelete, req, res, next, userName, req.header('X-Authorization'));
+}
+
+export async function UserPost (req: Request, res: Response, next: NextFunction, body:any, xAuthorization: string) {
+  await handleRequestAsync(Default.UserPost, req, res, next, body, req.header('X-Authorization'));
+}
+
 export async function PackageByNameGet(req: Request, res: Response, next: NextFunction, name: string, xAuthorization: string) {
-  await handleRequestAsync(Default.PackageByNameGet, req, res, next, name, xAuthorization);
+  await handleRequestAsync(Default.PackageByNameGet, req, res, next, name, req.header('X-Authorization'));
 }
 
 export async function PackageByRegExGet(req: Request, res: Response, next: NextFunction, body: any, xAuthorization: string) {
-  await handleRequestAsync(Default.PackageByRegExGet, req, res, next, body, xAuthorization);
+  await handleRequestAsync(Default.PackageByRegExGet, req, res, next, body, req.header('X-Authorization'));
 }
 
 export async function PackageCreate(req: Request, res: Response, next: NextFunction, body: any, xAuthorization: string) {
-  await handleRequestAsync(Default.PackageCreate, req, res, next, body, xAuthorization);
+  await handleRequestAsync(Default.PackageCreate, req, res, next, body, req.header('X-Authorization'));
 }
 
 export async function PackageDelete(req: Request, res: Response, next: NextFunction, id: string, xAuthorization: string,) {
-  await handleRequestAsync(Default.PackageDelete, req, res, next, id, xAuthorization);
+  await handleRequestAsync(Default.PackageDelete, req, res, next, id, req.header('X-Authorization'));
 }
 
 export async function PackageRate(req: Request, res: Response, next: NextFunction, id: string, xAuthorization: string) {
-  await handleRequestAsync(Default.PackageRate, req, res, next, id, xAuthorization);
+  await handleRequestAsync(Default.PackageRate, req, res, next, id, req.header('X-Authorization'));
 }
 
 export async function PackageRetrieve(req: Request, res: Response, next: NextFunction, id: string, xAuthorization: string) {
-  await handleRequestAsync(Default.PackageRetrieve, req, res, next, id, xAuthorization);
+  await handleRequestAsync(Default.PackageRetrieve, req, res, next, id, req.header('X-Authorization'));
 }
 
 export async function PackageUpdate(req: Request, res: Response, next: NextFunction, body: any, id: string, xAuthorization: string) {
@@ -52,11 +85,11 @@ export async function PackageUpdate(req: Request, res: Response, next: NextFunct
   console.log(id);
   console.log(xAuthorization);
   console.log(req);
-  await handleRequestAsync(Default.PackageUpdate, req, res, next, body, id, xAuthorization);
+  await handleRequestAsync(Default.PackageUpdate, req, res, next, body, id, req.header('X-Authorization'));
 }
 
 export async function PackagesList(req: Request, res: Response, next: NextFunction, body: any, offset: string, xAuthorization: string) {
-  await handleRequestAsync(Default.PackagesList, req, res, next, body, offset, xAuthorization);
+  await handleRequestAsync(Default.PackagesList, req, res, next, body, offset, req.header('X-Authorization'));
 }
 
 export async function RegistryReset(req: Request, res: Response, next: NextFunction, xAuthorization: string) {
@@ -69,13 +102,13 @@ export async function addUser(req: Request, res: Response, next: NextFunction) {
     const { username, password } = req.body;
 
     const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-    await db.promise().query(query, [username, password]);
-
-    res.send('User added successfully');
+    db.query(query, [username, password], (err) => {
+      if (err) throw err;
+  
+      res.send('User added successfully');
+    });
   } catch (error) {
     // Handle any errors
-    console.error(error);
-    res.status(500).send(error);
     next(error);
   }
 }
@@ -84,19 +117,19 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
   try {
     const { loginUsername, loginPassword } = req.body;
 
-    const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    const [results] = await db.promise().query(query, [loginUsername, loginPassword]);
-
+  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+  db.query(query, [loginUsername, loginPassword], (err, results) => {
     console.log(results[0]);
+    if (err) throw err;
 
     if (results[0] == undefined) {
-      res.status(401).send('Login Failed');
+      res.send('Login Failed');
     } else {
       res.send('Login Successful');
     }
+  });
   } catch (error) {
-    console.error(error);
-    res.status(500).send(error);
+    // Handle any errors
     next(error);
   }
 }
@@ -115,6 +148,8 @@ export async function MyPage(req: Request, res: Response, next: NextFunction) {
     next(error);
   }
 }
+
+
 
 // 'use strict';
 

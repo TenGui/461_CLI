@@ -2,7 +2,7 @@
 
 import { Request, Response } from 'express';
 import { respondWithCode } from '../utils/writer'; // Import the response function
-import type { AuthenticationRequest, AuthenticationToken, PackageName, PackageRegEx, PackageData, PackageMetadata, PackageID, PackageRating, Package, List } from '../utils/types';
+import type { AuthenticationRequest, AuthenticationToken, PackageName, PackageRegEx, PackageData, PackageMetadata, PackageID, PackageRating, Package, List, newUser } from '../utils/types';
 import * as path from 'path';
 import {
   ConnectionOptions,
@@ -10,6 +10,8 @@ import {
   RowDataPacket,
   ProcedureCallPacket
 } from 'mysql2/promise';
+import * as jwt from "jsonwebtoken";
+import * as authHelper from '../authentication/authenticationHelper';
 
 const { db, promisePool } = require("../database_files/database_connect");
 
@@ -22,6 +24,46 @@ const { db, promisePool } = require("../database_files/database_connect");
  * @returns AuthenticationToken
  **/
 export async function CreateAuthToken(body: AuthenticationRequest) {
+    //console.log("authentication endpoint hit");
+  
+    // get user credentials
+    const username = body.User.name;
+    const password = body.Secret.password;
+  
+
+    //make database access
+
+    const [result, fields] = await promisePool.execute('SELECT * FROM Auth WHERE user = ?', [username]);
+    //console.log("result at service: " + JSON.stringify(result));
+    //console.log("fields at service: " + JSON.stringify(fields));
+    if(result.length == 0) {
+      return respondWithCode(401, "User is not in database");
+    }
+
+    //console.log("result: " + JSON.stringify(result));
+    
+
+    // If credentials are valid, create a JWT with permissions that correspond to that of the user
+    //console.log("password check: incoming = " + password + " database = "+ result[0].pass);
+    if (password === result[0].pass) {
+
+      //create a jwt that contains relevant user permissions
+      const token = authHelper.createToken({ 
+        user: username, 
+        pass: result[0].pass,
+        isAdmin: result[0].isAdmin, 
+        canSearch: result[0].canSearch,
+        canUpload: result[0].canUpload,
+        canDownload: result[0].canDownload
+      });
+
+      return respondWithCode(200, "\"bearer "+ token + "\"");
+
+    } else {
+      //console.log("bad password");
+      return respondWithCode(401, "User exists. Wrong password");
+    }
+
   return ''; // You can return the actual value here
 }
 
@@ -233,7 +275,9 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
  **/
 export async function PackageDelete(id: PackageID, xAuthorization: AuthenticationToken) {
   try {
+
     const [result, fields] = await (promisePool.execute as any)('CALL PackageDelete(?)', [id]);
+
     
     if (result.affectedRows === 1) {
       return respondWithCode(200);
@@ -298,6 +342,7 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
 
     const [results] = await (promisePool.execute as any)(query, values);
 
+
     console.log(results);
 
     if (results[0].length === 0) {
@@ -332,7 +377,9 @@ export async function PackageUpdate(body: Package, id: PackageID, xAuthorization
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
     }
 
+
     const [results] = await (promisePool.execute as any)('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
+
       id,
       body.metadata.Name,
       body.metadata.Version,
@@ -397,6 +444,51 @@ export async function MyPage() {
   return path.join(__dirname, '..', 'html' , 'login.html');
 }
 
+/**
+ * Add a new user to the system.
+ * Request to add a new user to the system. Requires an admin token.
+ *
+ * xAuthorization AuthenticationToken 
+ * userName userName user to be deleted
+ * no response value expected for this operation
+ **/
+export async function UserDelete(userName: string, xAuthorization: AuthenticationToken) {
+  //console.log("end function isAdmin: " + xAuthorization["isAdmin"]);
+  if(xAuthorization["isAdmin"] != 1 && userName != xAuthorization["user"]){
+    return respondWithCode(400, "Your token is valid, but you do not have proper permissions");
+  }
+
+  let queryString: string = 'DELETE FROM Auth WHERE user=?';
+  try{
+    await promisePool.execute(queryString, [userName]);
+  }
+  catch(err){
+    return respondWithCode(400, "Error happened "+ err);
+  
+  }
+  return respondWithCode(200, "Successfully deleted user "+userName);
+  
+}
+
+
+/**
+ * Add a new user to the system.
+ * Request to add a new user to the system. Requires an admin token.
+ *
+ * body List 
+ * xAuthorization AuthenticationToken 
+ * no response value expected for this operation
+ **/
+export async function UserPost(body: newUser, xAuthorization: AuthenticationToken) {
+  if(xAuthorization["isAdmin"] != 1){
+    return respondWithCode(400, "Your token is valid, but you do not have proper permissions");
+  }
+  //let queryString: string = 'INSERT INTO Auth VALUES (\''+body.user+'\', \''+ body.pass +'\', '+ body.canSearch +', '+ body.canUpload +', '+ body.canDownload +', '+ body.isAdmin +')';
+  
+  let queryString: string = 'INSERT INTO Auth VALUES (?,?,?,?,?,?)';
+  await promisePool.execute(queryString, [body.user, body.pass, body.canSearch, body.canUpload, body.canDownload, body.isAdmin]);
+  return respondWithCode(200, "Successfully added user "+body.user);
+}
      
 
 

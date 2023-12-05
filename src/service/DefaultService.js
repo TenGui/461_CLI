@@ -36,9 +36,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+
 exports.MyPage = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.CreateAuthToken = void 0;
+
 var writer_1 = require("../utils/writer"); // Import the response function
 var path = require("path");
+var authHelper = require("../authentication/authenticationHelper");
 var _a = require("../database_files/database_connect"), db = _a.db, promisePool = _a.promisePool;
 // const queryAsync = util.promisify(pool.query);
 /**
@@ -49,8 +52,40 @@ var _a = require("../database_files/database_connect"), db = _a.db, promisePool 
  **/
 function CreateAuthToken(body) {
     return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/, '']; // You can return the actual value here
+        var username, password, _a, result, fields, token;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    username = body.User.name;
+                    password = body.Secret.password;
+                    return [4 /*yield*/, promisePool.execute('SELECT * FROM Auth WHERE user = ?', [username])];
+                case 1:
+                    _a = _b.sent(), result = _a[0], fields = _a[1];
+                    //console.log("result at service: " + JSON.stringify(result));
+                    //console.log("fields at service: " + JSON.stringify(fields));
+                    if (result.length == 0) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User is not in database")];
+                    }
+                    //console.log("result: " + JSON.stringify(result));
+                    // If credentials are valid, create a JWT with permissions that correspond to that of the user
+                    //console.log("password check: incoming = " + password + " database = "+ result[0].pass);
+                    if (password === result[0].pass) {
+                        token = authHelper.createToken({
+                            user: username,
+                            pass: result[0].pass,
+                            isAdmin: result[0].isAdmin,
+                            canSearch: result[0].canSearch,
+                            canUpload: result[0].canUpload,
+                            canDownload: result[0].canDownload
+                        });
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, "\"bearer " + token + "\"")];
+                    }
+                    else {
+                        //console.log("bad password");
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User exists. Wrong password")];
+                    }
+                    return [2 /*return*/, '']; // You can return the actual value here
+            }
         });
     });
 }
@@ -280,10 +315,12 @@ function PackageDelete(id, xAuthorization) {
             switch (_b.label) {
                 case 0:
                     _b.trys.push([0, 2, , 3]);
+
                     return [4 /*yield*/, promisePool.execute('CALL PackageDelete(?)', [id])];
                 case 1:
                     _a = _b.sent(), result = _a[0], fields = _a[1];
                     if (result.affectedRows === 1) {
+                      
                         return [2 /*return*/, (0, writer_1.respondWithCode)(200)];
                     }
                     else {
@@ -349,11 +386,15 @@ exports.PackageRate = PackageRate;
  **/
 function PackageRetrieve(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
+
         var query, values, results, error_6;
+
+
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+
                     query = 'CALL GetPackage(?)';
                     values = [id];
                     return [4 /*yield*/, promisePool.execute(query, values)];
@@ -361,6 +402,8 @@ function PackageRetrieve(id, xAuthorization) {
                     results = (_a.sent())[0];
                     console.log(results);
                     if (results[0].length === 0) {
+
+
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
                     }
                     else {
@@ -370,7 +413,9 @@ function PackageRetrieve(id, xAuthorization) {
                 case 2:
                     error_6 = _a.sent();
                     console.error('Error calling the stored procedure:', error_6);
+
                     throw error_6;
+
                 case 3: return [2 /*return*/];
             }
         });
@@ -421,7 +466,9 @@ function PackageUpdate(body, id, xAuthorization) {
                 case 2:
                     error_7 = _a.sent();
                     console.log(error_7);
+
                     throw error_7;
+
                 case 3: return [2 /*return*/];
             }
         });
@@ -488,3 +535,65 @@ function MyPage() {
     });
 }
 exports.MyPage = MyPage;
+/**
+ * Add a new user to the system.
+ * Request to add a new user to the system. Requires an admin token.
+ *
+ * xAuthorization AuthenticationToken
+ * userName userName user to be deleted
+ * no response value expected for this operation
+ **/
+function UserDelete(userName, xAuthorization) {
+    return __awaiter(this, void 0, void 0, function () {
+        var queryString, err_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    //console.log("end function isAdmin: " + xAuthorization["isAdmin"]);
+                    if (xAuthorization["isAdmin"] != 1 && userName != xAuthorization["user"]) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Your token is valid, but you do not have proper permissions")];
+                    }
+                    queryString = 'DELETE FROM Auth WHERE user=?';
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, promisePool.execute(queryString, [userName])];
+                case 2:
+                    _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    err_1 = _a.sent();
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Error happened " + err_1)];
+                case 4: return [2 /*return*/, (0, writer_1.respondWithCode)(200, "Successfully deleted user " + userName)];
+            }
+        });
+    });
+}
+exports.UserDelete = UserDelete;
+/**
+ * Add a new user to the system.
+ * Request to add a new user to the system. Requires an admin token.
+ *
+ * body List
+ * xAuthorization AuthenticationToken
+ * no response value expected for this operation
+ **/
+function UserPost(body, xAuthorization) {
+    return __awaiter(this, void 0, void 0, function () {
+        var queryString;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (xAuthorization["isAdmin"] != 1) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Your token is valid, but you do not have proper permissions")];
+                    }
+                    queryString = 'INSERT INTO Auth VALUES (?,?,?,?,?,?)';
+                    return [4 /*yield*/, promisePool.execute(queryString, [body.user, body.pass, body.canSearch, body.canUpload, body.canDownload, body.isAdmin])];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(200, "Successfully added user " + body.user)];
+            }
+        });
+    });
+}
+exports.UserPost = UserPost;
