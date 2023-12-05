@@ -34,10 +34,12 @@ morgan.token('uuid', function (req, res) {
     ;
     return req.requestId;
 });
+//make format strings for logging 
 var reqFormat = "reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" authHeader\: :auth reqBody\: :reqBody";
-var resFormat = "reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status  authHeader\: :auth resBody\: :resBody";
+var resFormat = "reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status  authHeader\: :auth resBody\: :resBody\n";
 // create a write stream (in append mode) for the logger
 var immediateLogStream = fs.createWriteStream(path.join(__dirname, 'req.log'), { flags: 'a' });
+;
 var serverPort = 3000;
 // swaggerRouter configuration
 var options = {
@@ -64,17 +66,12 @@ var options = {
     // swaggerUIts: {},
     // swaggerUI: {}
 };
-// create a write stream (in append mode)
-var exitLogStream = fs.createWriteStream(path.join(__dirname, 'res.log'), { flags: 'a' });
-var newFormat = 'combined';
-var newOptions = { stream: exitLogStream };
-var resLogger = morgan(resFormat, newOptions);
-// function newMiddleWare(req, res, next) {
-//     console.log('Time:', Date.now())
-//     next()
-// }
 var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
 var app = expressAppConfig.getApp();
+// create a write stream (in append mode)
+var resLogStream = fs.createWriteStream(path.join(__dirname, 'res.log'), { flags: 'a' });
+var resOptions = { stream: resLogStream };
+var resLogger = morgan(resFormat, resOptions);
 app.use(resLogger);
 //hack solution to dump a logger in at the end of the middleware stack
 var stack = app._router.stack;
@@ -94,7 +91,7 @@ var stack2 = app._router.stack;
 var lastEntries2 = stack2.splice(app._router.stack.length - 1); // The number of middle ware added
 var firstEntries2 = stack2.splice(0, 1); //How many middlewares should come before the new one
 app._router.stack = __spreadArray(__spreadArray(__spreadArray([], firstEntries2, true), lastEntries2, true), stack2, true);
-console.log(app._router.stack);
+//console.log(app._router.stack);
 // // Initialize the Swagger middleware
 http.createServer(app).listen(serverPort, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);

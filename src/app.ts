@@ -22,7 +22,7 @@ morgan.token('uuid', function (req, res) { ;
     return req.requestId});        
 //make format strings for logging 
 const reqFormat = "reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" authHeader\: :auth reqBody\: :reqBody";
-const resFormat = "reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status  authHeader\: :auth resBody\: :resBody";
+const resFormat = "reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status  authHeader\: :auth resBody\: :resBody\n";
 // create a write stream (in append mode) for the logger
 var immediateLogStream = fs.createWriteStream(path.join(__dirname, 'req.log'), { flags: 'a' });
 //setup typedef for uuid field in request so that typescript doesn't throw a fit 
@@ -94,7 +94,7 @@ const stack2 = app._router.stack;
 const lastEntries2 = stack2.splice(app._router.stack.length - 1);  // The number of middle ware added
 const firstEntries2 = stack2.splice(0, 1); //How many middlewares should come before the new one
 app._router.stack = [...firstEntries2, ...lastEntries2, ...stack2];
-console.log(app._router.stack);
+//console.log(app._router.stack);
 
 
 
