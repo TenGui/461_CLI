@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateToken = exports.createToken = void 0;
 var jwt = require("jsonwebtoken");
-require('dotenv').config();
 var secret = process.env.SECRET;
 var AuthEnable = process.env.AUTH_ENABLE;
 if (secret == null) {

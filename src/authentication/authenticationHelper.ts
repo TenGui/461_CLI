@@ -1,6 +1,5 @@
 import { error } from "console";
 import * as jwt from "jsonwebtoken";
-require('dotenv').config();
 
 let secret = process.env.SECRET;
 let AuthEnable = process.env.AUTH_ENABLE;
