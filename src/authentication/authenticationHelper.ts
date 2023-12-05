@@ -1,7 +1,7 @@
 import { error } from "console";
 import * as jwt from "jsonwebtoken";
 
-let secret = "mysecret";
+let secret = process.env.SECRET;
 let AuthEnable = process.env.AUTH_ENABLE;
 
 if(secret == null) {

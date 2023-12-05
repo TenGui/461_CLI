@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateToken = exports.createToken = void 0;
 var jwt = require("jsonwebtoken");
-var secret = "mysecret";
+var secret = process.env.SECRET;
 var AuthEnable = process.env.AUTH_ENABLE;
 if (secret == null) {
     throw "The \"SECRET\" parameter for JWTs was not found in the env file";
