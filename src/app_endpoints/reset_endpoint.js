@@ -71,14 +71,14 @@ function resetDatabase() {
                                     }
                                     if (completedCount_1 === tablesToTruncate_1.length) {
                                         console.log('All tables except for "github_token" deleted successfully');
+                                        var queryString = 'INSERT INTO Auth VALUES (?,?,?,?,?,?)';
+                                        db.execute(queryString, ["ece30861defaultadminuser", "correcthorsebatterystaple123(!__+@**(A;DROP TABLE packages", 1, 1, 1, 1]);
                                         resolve(1);
                                     }
                                 });
                             });
                         }
                     });
-                    var queryString = 'INSERT INTO Auth VALUES (?,?,?,?,?,?)';
-                    db.execute(queryString, ["ece30861defaultadminuser", "correcthorsebatterystaple123(!__+@**(A;DROP TABLE packages", 1, 1, 1, 1]);
                 })];
         });
     });

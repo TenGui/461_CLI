@@ -32,10 +32,12 @@ export function validateToken(token){
     
     let decodedToken: any;
     try {
+        console.log("unbeared", unbearered)
+        console.log("secret", secret)
         decodedToken = jwt.verify(unbearered, secret);
     } 
     catch(err) {
-        //console.error(err);
+        console.error(err);
         return {"success":-1, "token": null};
     }
     return {"success":1, "token": decodedToken};

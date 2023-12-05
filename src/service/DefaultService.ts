@@ -58,7 +58,7 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
         canDownload: result[0].canDownload
       });
 
-      return respondWithCode(200, "\"bearer "+ token + "\"");
+      return respondWithCode(200, "\"bearer "+ token);
 
     } else {
       //console.log("bad password");
@@ -493,7 +493,7 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
 import { resetDatabase } from '../app_endpoints/reset_endpoint.js';
 import { version } from 'yargs';
 export async function RegistryReset(xAuthorization: AuthenticationToken): Promise<void> {
-  await resetDatabase();  
+  await resetDatabase(); 
 }
 
 

@@ -78,7 +78,7 @@ function CreateAuthToken(body) {
                             canUpload: result[0].canUpload,
                             canDownload: result[0].canDownload
                         });
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, "\"bearer " + token + "\"")];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, "\"bearer " + token)];
                     }
                     else {
                         //console.log("bad password");
