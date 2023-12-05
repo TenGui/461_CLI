@@ -233,7 +233,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Name = output["repo"];
       Content = "Content";
       URL = 'N/A';
-      Version = "1.0.0.8.2";
+      Version = "1.0.0";
     }
     
     //Check if the inserted package already exists
