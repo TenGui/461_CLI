@@ -36,11 +36,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-
-exports.MyPage = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.CreateAuthToken = void 0;
-
+exports.PackageByNameDelete = exports.UserPost = exports.UserDelete = exports.MyPage = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.CreateAuthToken = void 0;
 var writer_1 = require("../utils/writer"); // Import the response function
 var path = require("path");
+var compare_versions_1 = require("compare-versions");
 var authHelper = require("../authentication/authenticationHelper");
 var _a = require("../database_files/database_connect"), db = _a.db, promisePool = _a.promisePool;
 // const queryAsync = util.promisify(pool.query);
@@ -255,7 +254,7 @@ function PackageCreate(body, xAuthorization) {
                     Name = output_2["repo"];
                     Content = "Content";
                     URL = 'N/A';
-                    Version = "1.0.0.8.2";
+                    Version = "1.0.0";
                     _b.label = 5;
                 case 5: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
                 case 6:
@@ -315,12 +314,10 @@ function PackageDelete(id, xAuthorization) {
             switch (_b.label) {
                 case 0:
                     _b.trys.push([0, 2, , 3]);
-
                     return [4 /*yield*/, promisePool.execute('CALL PackageDelete(?)', [id])];
                 case 1:
                     _a = _b.sent(), result = _a[0], fields = _a[1];
                     if (result.affectedRows === 1) {
-                      
                         return [2 /*return*/, (0, writer_1.respondWithCode)(200)];
                     }
                     else {
@@ -386,15 +383,11 @@ exports.PackageRate = PackageRate;
  **/
 function PackageRetrieve(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-
         var query, values, results, error_6;
-
-
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-
                     query = 'CALL GetPackage(?)';
                     values = [id];
                     return [4 /*yield*/, promisePool.execute(query, values)];
@@ -402,8 +395,6 @@ function PackageRetrieve(id, xAuthorization) {
                     results = (_a.sent())[0];
                     console.log(results);
                     if (results[0].length === 0) {
-
-
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
                     }
                     else {
@@ -413,9 +404,7 @@ function PackageRetrieve(id, xAuthorization) {
                 case 2:
                     error_6 = _a.sent();
                     console.error('Error calling the stored procedure:', error_6);
-
                     throw error_6;
-
                 case 3: return [2 /*return*/];
             }
         });
@@ -466,9 +455,7 @@ function PackageUpdate(body, id, xAuthorization) {
                 case 2:
                     error_7 = _a.sent();
                     console.log(error_7);
-
                     throw error_7;
-
                 case 3: return [2 /*return*/];
             }
         });
@@ -670,3 +657,38 @@ function UserPost(body, xAuthorization) {
     });
 }
 exports.UserPost = UserPost;
+// 'use strict';
+// import { Request, Response } from 'express';
+// import { pool } from '../index.js';
+// import type { AuthenticationRequest, AuthenticationToken, PackageName, PackageRegEx, PackageData, PackageMetadata, PackageID, PackageRating, Package, List } from '../utils/types';
+// import util from 'util';
+// /**
+//  * Create an access token.
+//  *
+//  * @param body AuthenticationRequest 
+//  * @returns AuthenticationToken
+//  **/
+// export function CreateAuthToken(body: AuthenticationRequest) {
+//   return new Promise(function(resolve, reject) {
+//     const examples: any = {};
+//     examples['application/json'] = "";
+//     if (Object.keys(examples).length > 0) {
+//       resolve(examples[Object.keys(examples)[0]]);
+//     } else {
+//       //resolve();
+//     }
+//   });
+// }
+/**
+ * Delete all versions of this package.
+ *
+ * @param xAuthorization AuthenticationToken
+ * @param name PackageName
+ * @returns void
+ **/
+function PackageByNameDelete(xAuthorization, name) {
+    return new Promise(function (resolve, reject) {
+        // resolve();
+    });
+}
+exports.PackageByNameDelete = PackageByNameDelete;
