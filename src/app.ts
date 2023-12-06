@@ -16,15 +16,22 @@ morgan.token('auth', function (req, res) { ;
     return req.header('X-Authorization')});
 morgan.token('resBody', function (req, res) { ;
     //make new json to return
-    let tempBody:JSON = JSON.parse(JSON.stringify(res.body));
-    if(res.body.hasOwnProperty("Content")){
-        tempBody["Content"] = tempBody["Content"].length;
-    }
-    if(res.body.hasOwnProperty("PackageData")){
-        if(res.hasOwnProperty("PackageData")){
-            tempBody["PackageData"]["Content"] = tempBody["PackageData"]["Content"].length;
+    let tempBody:JSON;
+    if(res.body) {
+        tempBody = JSON.parse(JSON.stringify(res.body));
+        if(res.body.hasOwnProperty("Content")){
+            tempBody["Content"] = tempBody["Content"].length;
+        }
+        if(res.body.hasOwnProperty("PackageData")){
+            if(res.hasOwnProperty("PackageData")){
+                tempBody["PackageData"]["Content"] = tempBody["PackageData"]["Content"].length;
+            }
         }
     }
+    else {
+        tempBody = res.body;
+    }
+
     return JSON.stringify(tempBody)});  
 morgan.token('reqBody', function (req, res) { ;
     //make new json to return

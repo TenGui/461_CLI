@@ -25,14 +25,20 @@ morgan.token('auth', function (req, res) {
 morgan.token('resBody', function (req, res) {
     ;
     //make new json to return
-    var tempBody = JSON.parse(JSON.stringify(res.body));
-    if (res.body.hasOwnProperty("Content")) {
-        tempBody["Content"] = tempBody["Content"].length;
-    }
-    if (res.body.hasOwnProperty("PackageData")) {
-        if (res.hasOwnProperty("PackageData")) {
-            tempBody["PackageData"]["Content"] = tempBody["PackageData"]["Content"].length;
+    var tempBody;
+    if (res.body) {
+        tempBody = JSON.parse(JSON.stringify(res.body));
+        if (res.body.hasOwnProperty("Content")) {
+            tempBody["Content"] = tempBody["Content"].length;
         }
+        if (res.body.hasOwnProperty("PackageData")) {
+            if (res.hasOwnProperty("PackageData")) {
+                tempBody["PackageData"]["Content"] = tempBody["PackageData"]["Content"].length;
+            }
+        }
+    }
+    else {
+        tempBody = res.body;
     }
     return JSON.stringify(tempBody);
 });
