@@ -1,10 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NPM Package Registry Manager</title>
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f7f7f7;
+                color: #333;
+                position: relative; /* Added for positioning */
+            }
+
+            #main-title {
+                color: #4CAF50;
+                font-size: 36px;
+                margin-bottom: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            form {
+                margin-bottom: 20px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            input, button {
+                margin-bottom: 10px;
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+
+            button {
+                background-color: #4CAF50;
+                color: white;
+                cursor: pointer;
+            }
+
+            button:hover {
+                background-color: #0b530f;
+            }
+
+            #resetForm {
+                margin: 10px; /* Add margin for spacing */
+            }
+
+            #resetForm button {
+                background-color: #FF5733;
+                color: white;
+                padding: 12px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            #resetForm button:hover {
+                background-color: #FF8C66;
+            }
+
+            hr {
+                border: 1px solid #ddd;
+                margin: 20px 0;
+            }
+
+            #PackageUploadContainer, #ZipPackageUploadContainer, #resultContainer {
+                margin-top: 10px;
+            }
+
+            input[type="file"] {
+                display: none;
+            }
+
+            .custom-file-upload {
+                border: 1px solid #ccc;
+                display: inline-block;
+                padding: 6px 12px;
+                cursor: pointer;
+                background-color: #4CAF50;
+                color: white;
+                border-radius: 4px;
+            }
+
+            .container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+        </style>
     </head>
     <body>
+        <div class="container">
+            <h1 id="main-title">NPM Package Registry Manager</h1>
+            <form id="resetForm">
+                <button type="button" onclick="sendDeleteRequest()">Reset</button>
+            </form>
+        </div>
+
         <h1>Add User</h1>
         <form method="POST" action="/addUser">
             <label for="username">Username:</label>
@@ -13,7 +117,9 @@
             <input type="password" name="password" required><br>
             <button type="submit">Add User</button>
         </form>
+
         <hr>
+
         <h1>Login</h1>
         <form method="POST" action="/loginUser">
             <label for="loginUsername">Username:</label>
@@ -24,27 +130,31 @@
         </form>
 
         <hr>
+
         <h1>Upload package</h1>
-        <form id = "github_Package">
+        <form id="github_Package">
             <label for="github_url">Github URL:</label>
             <input type="text" name="github_url" required><br>
             <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
         </form>
         <div id="PackageUploadContainer"></div>
+
         <hr>
-        
+
         <h1>Upload .zip package</h1>
-        <input type="file" id="fileInput" accept=".zip">
-        <button type="button" onclick="listFiles()">List Files</button>
+        <label class="custom-file-upload">
+            <input type="file" id="fileInput" accept=".zip">
+            Add .Zip File
+        </label>
         <div id="ZipPackageUploadContainer"></div>
 
         <hr>
-        
+
         <h1>Delete Package By Name</h1>
         <form>
             <label for="delete">Delete Name:</label>
             <input type="text" id="packageNameDelete" name="delete" required><br>
-            <button type="button" onclick="deletePackage()">delete package</button>
+            <button type="button" onclick="deletePackage()">Delete Package</button>
         </form>
 
         <hr>
@@ -53,17 +163,12 @@
         <form>
             <label for="regex">Search Regex:</label>
             <input type="text" id="packageName" name="Regex" required><br>
-            <button type="button" onclick="packageRegex()">search RegEx</button>
+            <button type="button" onclick="packageRegex()">Search RegEx</button>
         </form>
-
         <div id="resultContainer"></div>
 
         <hr>
         <br>
-
-        <form id="resetForm">
-            <button type="button" onclick="sendDeleteRequest()">Reset</button>
-        </form>
 
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
@@ -224,8 +329,15 @@
                 })
                 .then(response => {
                     console.log(response.data);
+                    alert("Reset successful. Database and Auth key resetted.");
                 })
                 .catch(error => {
+                    if(error.response.status == 500){
+                        alert("Error: Auth token not set. Please log in or provide a valid token");
+                    }
+                    else{
+                        alert(error);
+                    }
                     console.error(error);
                 });
             }
