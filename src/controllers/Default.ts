@@ -16,11 +16,13 @@ async function handleRequestAsync(fn: Function, req: Request, res: Response, nex
   //console.log("request path: " + req.path);
   if(req.path != "/authenticate") {
     //console.log("First arg:" + req.header('X-Authorization'));
-    console.log("token", globalToken);
+    let tokenOut = {};
+    tokenOut = validateToken(req.header('X-Authorization'))
 
-    let tokenOut = validateToken(globalToken);
+    if(tokenOut["success"] != 1){
+      tokenOut = validateToken(globalToken);
+    }
 
-    console.log("tokenout", tokenOut);
     if(tokenOut["success"] != 1) {
         return res.status(400).send("Bad Token");
     }

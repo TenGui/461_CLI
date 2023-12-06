@@ -55,10 +55,12 @@ function handleRequestAsync(fn, req, res, next) {
                     //Check if the token is valid. If the token is invalid, send error response. If not, pass json body to the service
                     //console.log("request path: " + req.path);
                     if (req.path != "/authenticate") {
-                        //console.log("First arg:" + req.header('X-Authorization'));
-                        console.log("token", globalToken);
-                        tokenOut = (0, authenticationHelper_1.validateToken)(globalToken);
-                        console.log("tokenout", tokenOut);
+                        tokenOut = {};
+                        tokenOut = (0, authenticationHelper_1.validateToken)(req.header('X-Authorization'));
+                        if (tokenOut["success"] != 1) {
+                            console.log(req.header('X-Authorization'), " is not a valid token. Please provide a valid token or log in.");
+                            tokenOut = (0, authenticationHelper_1.validateToken)(globalToken);
+                        }
                         if (tokenOut["success"] != 1) {
                             return [2 /*return*/, res.status(400).send("Bad Token")];
                         }
