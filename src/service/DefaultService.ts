@@ -108,7 +108,7 @@ export async function PackageByNameGet(name: PackageName, xAuthorization: Authen
     }
   } catch (error) {
     console.error(error);
-    return respondWithCode(500, { error: 'Internal Server Error' });
+    return respondWithCode(500, { "Error": 'Internal Server Error' });
   }
 }
 
@@ -165,7 +165,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
     }
   } catch (error) {
     console.error(error);
-    return respondWithCode(500, { error: 'Internal Server Error' });
+    return respondWithCode(500, { "Error": 'Internal Server Error' });
   }
 }
 
@@ -315,16 +315,16 @@ export async function PackageRate(id: PackageID, xAuthorization: AuthenticationT
 
       const hasInvalidScore = Object.values(output).some(score => score === -1);
       if (hasInvalidScore) {
-        return respondWithCode(500, {error: 'The package rating system choked on at least one of the metrics.'});
+        return respondWithCode(500, {"Error": 'The package rating system choked on at least one of the metrics.'});
       }
 
       return respondWithCode(200, output);
       
     } else {
-      return respondWithCode(404, {error: "Package does not exist."});
+      return respondWithCode(404, {"Error": "Package does not exist."});
     }
   } catch (error) {
-    return respondWithCode(500, {error: 'The package rating system choked on at least one of the metrics.'});
+    return respondWithCode(500, {"Error": 'The package rating system choked on at least one of the metrics.'});
   }
 }
 

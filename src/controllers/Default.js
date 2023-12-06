@@ -61,7 +61,7 @@ function handleRequestAsync(fn, req, res, next) {
                             tokenOut = (0, authenticationHelper_1.validateToken)(globalToken);
                         }
                         if (tokenOut["success"] != 1) {
-                            return [2 /*return*/, res.status(400).send("Bad Token")];
+                            return [2 /*return*/, res.status(400).send({ "Error": "Bad Auth token/Auth Token not set" })];
                         }
                         //if the token is valid, replace the token string in the args with it's json body
                         args.pop();
@@ -339,7 +339,7 @@ function loginUser(req, res, next) {
                             case 4:
                                 authenticateError_1 = _a.sent();
                                 console.error('Error in /authenticate:', authenticateError_1.message);
-                                res.status(500).send('Internal Server Error');
+                                res.status(500).send('Internal Server Errorasd');
                                 return [3 /*break*/, 5];
                             case 5: return [2 /*return*/];
                         }

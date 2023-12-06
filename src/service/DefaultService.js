@@ -133,7 +133,7 @@ function PackageByNameGet(name, xAuthorization) {
                 case 3:
                     error_1 = _b.sent();
                     console.error(error_1);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'Internal Server Error' })];
                 case 4: return [2 /*return*/];
             }
         });
@@ -188,7 +188,7 @@ function PackageByRegExGet(body, xAuthorization) {
                 case 3:
                     error_2 = _b.sent();
                     console.error(error_2);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'Internal Server Error' })];
                 case 4: return [2 /*return*/];
             }
         });
@@ -359,14 +359,14 @@ function PackageRate(id, xAuthorization) {
                     output = _b.sent();
                     hasInvalidScore = Object.values(output).some(function (score) { return score === -1; });
                     if (hasInvalidScore) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'The package rating system choked on at least one of the metrics.' })];
                     }
                     return [2 /*return*/, (0, writer_1.respondWithCode)(200, output)];
-                case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: "Package does not exist." })];
+                case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "Package does not exist." })];
                 case 4: return [3 /*break*/, 6];
                 case 5:
                     error_5 = _b.sent();
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'The package rating system choked on at least one of the metrics.' })];
                 case 6: return [2 /*return*/];
             }
         });

@@ -24,7 +24,7 @@ async function handleRequestAsync(fn: Function, req: Request, res: Response, nex
     }
 
     if(tokenOut["success"] != 1) {
-        return res.status(400).send("Bad Token");
+        return res.status(400).send({"Error": "Bad Auth token/Auth Token not set"});
     }
     //if the token is valid, replace the token string in the args with it's json body
     args.pop();
