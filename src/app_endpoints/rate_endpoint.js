@@ -45,7 +45,6 @@ var RampUpRunner = require("../url_list/rampUpMetric/rampUpRunner");
 var RespMaintRunner = require("../url_list/respMaintMetric/respMaintRunner");
 var CorrectnessRunner = require("../url_list/correctnessMetric/correctnessRunner");
 var PR_Runner = require("../url_list/PR_metric/pull_request");
-var Version_Pin_runner = require("../url_list/versionPinningMetric/versionPinning");
 function eval_single_file(urlstr) {
     return __awaiter(this, void 0, void 0, function () {
         var url, limiter, licenseScore, rampUpScore, busFactorScore, maintainerScore, correctnessScore, pull_request_score, version_pinning_score, multipliers, adjustedScores, overallScore;
@@ -81,9 +80,7 @@ function eval_single_file(urlstr) {
                     return [4 /*yield*/, PR_Runner.getPRscore(url)];
                 case 9:
                     pull_request_score = _a.sent();
-                    return [4 /*yield*/, Version_Pin_runner.get_version_pin_score(url)];
-                case 10:
-                    version_pinning_score = _a.sent();
+                    version_pinning_score = 0.55;
                     multipliers = {
                         license: 1,
                         rampUp: 0.10,

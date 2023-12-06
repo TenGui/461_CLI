@@ -58,7 +58,6 @@ function handleRequestAsync(fn, req, res, next) {
                         tokenOut = {};
                         tokenOut = (0, authenticationHelper_1.validateToken)(req.header('X-Authorization'));
                         if (tokenOut["success"] != 1) {
-                            console.log(req.header('X-Authorization'), " is not a valid token. Please provide a valid token or log in.");
                             tokenOut = (0, authenticationHelper_1.validateToken)(globalToken);
                         }
                         if (tokenOut["success"] != 1) {
