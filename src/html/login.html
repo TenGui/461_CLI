@@ -340,7 +340,7 @@
                     })
                     .catch(error => {
                         console.error('Error deleting package:', error);
-                        if(error.response.status == 500){
+                        if(error.response.status == 400){
                             Swal.fire({
                                 icon: 'warning',
                                 title: `By Name Search Error`,
@@ -462,7 +462,11 @@
                     }
                 } catch (error) {
                     console.error('Error in loginUser:', error.message);
-                    alert('Internal Server Error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Internal error. Check console!',
+                    });
                 }
             }
 
@@ -506,7 +510,7 @@
                         displayResult(result);
                     } else {
                         const resultContainer = document.getElementById('resultContainer');
-                        if(response.status == 500){
+                        if(response.status == 400){
                             Swal.fire({
                                 icon: 'warning',
                                 title: `Upload Error`,
@@ -609,7 +613,7 @@
                                             })
                                             .catch(error => {
                                                 const ZipPackageUploadContainer = document.getElementById('ZipPackageUploadContainer');
-                                                if(error.response.status == 500){
+                                                if(error.response.status == 400){
                                                     Swal.fire({
                                                         icon: 'warning',
                                                         title: `Upload Error`,
@@ -621,7 +625,7 @@
                                                     Swal.fire({
                                                         icon: 'error',
                                                         title: `Upload Error`,
-                                                        text: `Error: ${error.response.data["Error"]}`,
+                                                        text: `Error: ${error.response.data}`,
                                                         showConfirmButton: true
                                                     });
                                                     ZipPackageUploadContainer.innerHTML = "Error: " + error.response.data["Error"];
@@ -629,18 +633,30 @@
                                                 console.error(error);
                                             });
                                         } else {
-                                            alert('GitHub repository not found in package.json.');
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Upload Error',
+                                                text: 'GitHub repository was not found in your package.json!',
+                                            });
                                         }
                                     } catch (error) {
                                         console.error('Error parsing package.json:', error);
-                                        alert('Error parsing package.json.');
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Upload Error',
+                                            text: 'Error Parsing package.json. Check Console!',
+                                        });
                                     }
                                 });
                             }
                         });
 
                         if (!packageJsonExists) {
-                            alert('package.json not found in the .zip file.');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Upload Error',
+                                text: 'Your package does not have a package.json!',
+                            });
                         }
                     });
                 };
@@ -668,16 +684,21 @@
                     packagesListContainer.innerHTML = ''; // Clear previous content
                 })
                 .catch(error => {
-                    if(error.response.status == 500){
+                    if(error.response.status == 400){
                         Swal.fire({
-                            icon: 'error',
+                            icon: 'warning',
                             title: `Oops...`,
                             text: 'Auth token invalid. Please log in or provide a valid token',
                             showConfirmButton: true
                         });
                     }
                     else{
-                        alert(error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: `Oops...`,
+                            text: `Error: ${error.response.data}`,
+                            showConfirmButton: true
+                        });
                     }
                     console.error(error);
                 });
@@ -689,7 +710,7 @@
                 if(!git_url){
                     Swal.fire({
                         icon: 'warning',
-                        title: 'Oops...',
+                        title: 'Reset Error',
                         text: 'Please enter a GitHub URL!',
                     });
                     return;
@@ -724,7 +745,7 @@
                 })
                 .catch(error => {
                     const PackageUploadContainer = document.getElementById('PackageUploadContainer');
-                    if(error.response.status == 500){
+                    if(error.response.status == 400){
                         Swal.fire({
                             icon: 'warning',
                             title: `Oops...`,

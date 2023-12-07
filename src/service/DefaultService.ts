@@ -108,7 +108,7 @@ export async function PackageByNameGet(name: PackageName, xAuthorization: Authen
     }
   } catch (error) {
     console.error(error);
-    return respondWithCode(500, { "Error": 'Internal Server Error' });
+    return respondWithCode(error.response.status, { "Error": 'ByRegex Error' });
   }
 }
 
@@ -165,7 +165,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
     }
   } catch (error) {
     console.error(error);
-    return respondWithCode(500, { "Error": 'Internal Server Error' });
+    return respondWithCode(error.response.status, { "Error": 'Error in RegexGet' });
   }
 }
 
@@ -589,7 +589,7 @@ export function PackageByNameDelete(name: PackageName, xAuthorization: Authentic
   db.query(query, [packageNameToDelete], function (err, results) {
       if (err) {
           console.error(err);
-          return respondWithCode(500); // Internal Server Error
+          return respondWithCode(499); // Internal Server Error
       }
 
       // Package is deleted

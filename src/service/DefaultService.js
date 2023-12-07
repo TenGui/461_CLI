@@ -133,7 +133,7 @@ function PackageByNameGet(name, xAuthorization) {
                 case 3:
                     error_1 = _b.sent();
                     console.error(error_1);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'Internal Server Error' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(error_1.response.status, { "Error": 'ByRegex Error' })];
                 case 4: return [2 /*return*/];
             }
         });
@@ -188,7 +188,7 @@ function PackageByRegExGet(body, xAuthorization) {
                 case 3:
                     error_2 = _b.sent();
                     console.error(error_2);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'Internal Server Error' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(error_2.response.status, { "Error": 'Error in RegexGet' })];
                 case 4: return [2 /*return*/];
             }
         });
@@ -691,9 +691,8 @@ function PackageByNameDelete(name, xAuthorization) {
     var query = 'DELETE FROM PackageMetadata WHERE Name = ?';
     db.query(query, [packageNameToDelete], function (err, results) {
         if (err) {
-            // Handle the error, you might want to log it or respond with an error code
             console.error(err);
-            return (0, writer_1.respondWithCode)(500); // Internal Server Error
+            return (0, writer_1.respondWithCode)(499); // Internal Server Error
         }
         // Package is deleted
         if (results.affectedRows > 0) {
