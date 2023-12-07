@@ -300,7 +300,7 @@
                 } catch (error) {
                     Swal.fire({
                         icon: 'warning',
-                        title: `Show Packages Error`,
+                        title: `Authentication Error`,
                         text: `Auth token invalid. Please log in or provide a valid token`,
                         showConfirmButton: true
                     });
@@ -331,19 +331,21 @@
                     })
                     .then(response => {
                         console.log(response.data); // Handle success
-                        Swal.fire({
-                            icon: 'success',
-                            title: `Delete Success`,
-                            html: `Package <strong>${packageName}</strong> deleted successfully`,
-                            showConfirmButton: true
-                        });
+                        if(response.status == 200){
+                            Swal.fire({
+                                icon: 'success',
+                                title: `Delete Success`,
+                                html: `Package <strong>${packageName}</strong> deleted successfully`,
+                                showConfirmButton: true
+                            });
+                        }
                     })
                     .catch(error => {
                         console.error('Error deleting package:', error);
                         if(error.response.status == 400){
                             Swal.fire({
                                 icon: 'warning',
-                                title: `By Name Search Error`,
+                                title: `Authentication Error`,
                                 text: `Auth token invalid. Please log in or provide a valid token`,
                                 showConfirmButton: true
                             });
@@ -521,7 +523,7 @@
                         if(response.status == 400){
                             Swal.fire({
                                 icon: 'warning',
-                                title: `Upload Error`,
+                                title: `Authentication Error`,
                                 text: `Auth token invalid. Please log in or provide a valid token`,
                                 showConfirmButton: true
                             });
@@ -624,7 +626,7 @@
                                                 if(error.response.status == 400){
                                                     Swal.fire({
                                                         icon: 'warning',
-                                                        title: `Upload Error`,
+                                                        title: `Authentication Error`,
                                                         text: `'Auth token invalid. Please log in or provide a valid token'`,
                                                         showConfirmButton: true
                                                     });
@@ -695,7 +697,7 @@
                     if(error.response.status == 400){
                         Swal.fire({
                             icon: 'warning',
-                            title: `Oops...`,
+                            title: `Authentication Error`,
                             text: 'Auth token invalid. Please log in or provide a valid token',
                             showConfirmButton: true
                         });
@@ -756,7 +758,7 @@
                     if(error.response.status == 400){
                         Swal.fire({
                             icon: 'warning',
-                            title: `Oops...`,
+                            title: `Authentication Error`,
                             text: 'Auth token invalid. Please log in or provide a valid token',
                             showConfirmButton: true
                         });

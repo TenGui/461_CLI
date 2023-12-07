@@ -587,30 +587,34 @@ export async function PackageByNameDelete(name: PackageName, xAuthorization: Aut
 
   // Step 1: Retrieve IDs from PackageMetadata
   const getIdsQuery = 'SELECT ID FROM PackageMetadata WHERE Name = ?';
-  db.query(getIdsQuery, [packageNameToDelete], async (err, results) => {
-    if (err) {
-      console.error(err);
-      return respondWithCode(499);
-    }
 
-    if (results.length === 0) {
-      return respondWithCode(404); // No package found
-    }
+  try {
+      const results = await new Promise<PackageMetadata[]>((resolve, reject) => {
+          db.query(getIdsQuery, [packageNameToDelete], (err, results) => {
+              if (err) {
+                  console.error(err);
+                  reject(err);
+              }
+              resolve(results as PackageMetadata[]);
+          });
+      });
 
-    const packageIds = results.map((result) => result.ID);
+      if (results.length === 0) {
+          return respondWithCode(404); // No package found
+      }
 
-    // Step 2: Delete each package from the Package table
-    try {
+      const packageIds = results.map((result) => result.ID);
+
+      //Delete all version of that package.
       for (const id of packageIds) {
-        const [deleteResult, deleteFields] = await (promisePool.execute as any)('CALL PackageDelete(?)', [id]);
+          const [deleteResult, deleteFields] = await (promisePool.execute as any)('CALL PackageDelete(?)', [id]);
       }
 
       return respondWithCode(200); // OK
-    } catch (deleteError) {
-      console.error(deleteError);
+  } catch (error) {
+      console.error(error);
       return respondWithCode(499); // Internal Server Error
-    }
-  });
+  }
 }
 
 // /**
