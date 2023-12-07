@@ -480,92 +480,75 @@ exports.PackageUpdate = PackageUpdate;
  **/
 function PackagesList(body, offset, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var response, _i, body_1, query, Name, VersionRange, lower, upper, _a, result_1, fields_1, table_1, row, nextPatch, splitVersion, splitVersion, splitVersion, _b, result, fields, table, idsInRange, row, range, _c, idsInRange_1, id, _d, result_2, fields_2, basicMetadata;
+        var response, _i, body_1, query, Name, VersionRange, lower, upper, table, sql_all, _a, result, fields, _b, result, fields, idsInRange, row, _c, idsInRange_1, id, _d, result, fields, basicMetadata, err_1;
         return __generator(this, function (_e) {
             switch (_e.label) {
                 case 0:
                     response = { 'application/json': [] };
-                    _i = 0, body_1 = body;
                     _e.label = 1;
                 case 1:
-                    if (!(_i < body_1.length)) return [3 /*break*/, 10];
+                    _e.trys.push([1, 12, , 13]);
+                    _i = 0, body_1 = body;
+                    _e.label = 2;
+                case 2:
+                    if (!(_i < body_1.length)) return [3 /*break*/, 11];
                     query = body_1[_i];
                     Name = query["Name"];
                     VersionRange = query["Version"];
-                    if (!(Name == "*")) return [3 /*break*/, 3];
-                    return [4 /*yield*/, promisePool.execute('SELECT Version, ID, Name FROM PackageMetadata', [])];
-                case 2:
-                    _a = _e.sent(), result_1 = _a[0], fields_1 = _a[1];
-                    table_1 = result_1;
-                    console.log(result_1, table_1);
-                    if (result_1.length > 500) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(413, "Too many packages")];
+                    //Clean Version Range
+                    if (VersionRange.includes("-")) {
+                        VersionRange = VersionRange.split("-")[0] + " - " + VersionRange.split("-")[1];
                     }
-                    for (row = 0; row < result_1.length; row++) {
-                        response['application/json'].push(result_1[row]);
-                    }
-                    return [3 /*break*/, 4];
+                    if (!(Name == "*")) return [3 /*break*/, 4];
+                    sql_all = 'SELECT ID AS \'id\', Version AS \'version\' FROM PackageMetadata';
+                    return [4 /*yield*/, promisePool.execute(sql_all, [])];
                 case 3:
-                    if (VersionRange.includes("-")) { // specific range
-                        lower = VersionRange.split("-")[0];
-                        upper = VersionRange.split("-")[1];
-                        nextPatch = parseInt(upper.split(".")[2]) + 1;
-                        upper = upper.substring(0, upper.length - 1) + nextPatch.toString();
-                    }
-                    else if (VersionRange.includes("^")) { // [2.3.1 - 3.0.0)
-                        lower = VersionRange.substring(1, VersionRange.length);
-                        splitVersion = lower.split(".");
-                        splitVersion[0] = (parseInt(splitVersion[0]) + 1).toString();
-                        splitVersion[1] = "0";
-                        splitVersion[2] = "0";
-                        upper = splitVersion.join(".");
-                    }
-                    else if (VersionRange.includes("~")) { // [2.3.1 - 2.4.0)
-                        lower = VersionRange.substring(1, VersionRange.length);
-                        splitVersion = lower.split(".");
-                        splitVersion[1] = (parseInt(splitVersion[1]) + 1).toString();
-                        splitVersion[2] = "0";
-                        upper = splitVersion.join(".");
-                    }
-                    else { //Exact
-                        lower = VersionRange;
-                        splitVersion = lower.split(".");
-                        splitVersion[2] = (parseInt(splitVersion[2]) + 1).toString();
-                        upper = splitVersion.join(".");
-                    }
-                    _e.label = 4;
+                    _a = _e.sent(), result = _a[0], fields = _a[1];
+                    table = result;
+                    return [3 /*break*/, 6];
                 case 4: return [4 /*yield*/, promisePool.execute('CALL GetIdVersionMapForPackage(?)', [Name])];
                 case 5:
                     _b = _e.sent(), result = _b[0], fields = _b[1];
                     table = result[0];
+                    _e.label = 6;
+                case 6:
+                    //console.log("Table: ", table);
                     if (table.length > 500) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(413, "Too many packages")];
                     }
                     idsInRange = [];
                     for (row = 0; row < table.length; row++) {
-                        range = lower + " - " + upper;
-                        if ((0, compare_versions_1.satisfies)(table[row]["version"], range)) {
+                        //console.log("satisfies inputs: ", table[row]["version"], VersionRange, satisfies(table[row]["version"], VersionRange));
+                        if ((0, compare_versions_1.satisfies)(table[row]["version"], VersionRange)) {
                             idsInRange.push(table[row]["id"]);
                         }
                     }
                     _c = 0, idsInRange_1 = idsInRange;
-                    _e.label = 6;
-                case 6:
-                    if (!(_c < idsInRange_1.length)) return [3 /*break*/, 9];
+                    _e.label = 7;
+                case 7:
+                    if (!(_c < idsInRange_1.length)) return [3 /*break*/, 10];
                     id = idsInRange_1[_c];
                     return [4 /*yield*/, promisePool.execute('CALL GetBasicMetadata(?)', [id])];
-                case 7:
-                    _d = _e.sent(), result_2 = _d[0], fields_2 = _d[1];
-                    basicMetadata = result_2[0][0];
-                    response['application/json'].push(basicMetadata);
-                    _e.label = 8;
                 case 8:
-                    _c++;
-                    return [3 /*break*/, 6];
+                    _d = _e.sent(), result = _d[0], fields = _d[1];
+                    basicMetadata = result[0][0];
+                    //console.log("id: ", id, " corresp Metadata: ", basicMetadata);
+                    response['application/json'].push(basicMetadata);
+                    _e.label = 9;
                 case 9:
+                    _c++;
+                    return [3 /*break*/, 7];
+                case 10:
                     _i++;
-                    return [3 /*break*/, 1];
-                case 10: 
+                    return [3 /*break*/, 2];
+                case 11:
+                    //apply the offset to the response
+                    response['application/json'] = response['application/json'].slice(offset);
+                    return [3 /*break*/, 13];
+                case 12:
+                    err_1 = _e.sent();
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Error happened\n " + err_1.stack)];
+                case 13: 
                 //console.log("\n\nRETURNED RESPONSE: ", response);
                 return [2 /*return*/, (0, writer_1.respondWithCode)(200, response['application/json'])];
             }
@@ -612,7 +595,7 @@ exports.MyPage = MyPage;
  **/
 function UserDelete(userName, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var queryString, err_1;
+        var queryString, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -629,8 +612,8 @@ function UserDelete(userName, xAuthorization) {
                     _a.sent();
                     return [3 /*break*/, 4];
                 case 3:
-                    err_1 = _a.sent();
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Error happened " + err_1)];
+                    err_2 = _a.sent();
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Error happened " + err_2)];
                 case 4: return [2 /*return*/, (0, writer_1.respondWithCode)(200, "Successfully deleted user " + userName)];
             }
         });

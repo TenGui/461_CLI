@@ -203,7 +203,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
     if("URL" in body){
       const output = await upload.process(body["URL"])
-      if(!output){
+      if(!output) {
         return respondWithCode(400, {"Error": "Repository does not exists"});
       }
 
@@ -216,7 +216,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     else if("Content" in body){
       const github_link = await upload.decompress_zip_to_github_link(body["Content"])
       console.log("Inside DefaultService: ", github_link);
-      if(github_link == ""){
+      if(github_link == "") {
         return respondWithCode(400, {"Error": "Repository does not exists/Cannot locate package.json file"});
       }
 
@@ -231,7 +231,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     }
     
     //Check if the inserted package already exists
-    const package_exist_check = await upload.check_Package_Existence(Name, Version)
+    const package_exist_check = await upload.check_Package_Existence(Name, Version);
     if(package_exist_check){
       console.log("Upload Error: Package exists already");
       return respondWithCode(409, {"Error": "Package exists already"});
@@ -418,72 +418,58 @@ export async function PackageUpdate(body: Package, id: PackageID, xAuthorization
  **/
 export async function PackagesList(body: List<PackageMetadata>, offset: string, xAuthorization: AuthenticationToken) {
   var response: any = {'application/json' : []};
+  
+  try {
+    for (const query of body) {
+      //console.log(query);
+      var Name: string = query["Name"];
+      var VersionRange: string = query["Version"];
+      var lower: string; //Inclusive lower bound
+      var upper: string; //NonInclusive upper bound
+      var table: any; //map of IDs to Versions for all packages fitting the name query
 
-  for (const query of body) {
-    var Name: string = query["Name"];
-    var VersionRange: string = query["Version"];
-    var lower: string; //Inclusive lower bound
-    var upper: string; //NonInclusive upper bound
+      //Clean Version Range
+      if (VersionRange.includes("-")) {
+        VersionRange = VersionRange.split("-")[0] + " - " + VersionRange.split("-")[1];
+      }
 
-    if (Name == "*") {
-      const [result, fields] = await promisePool.execute('SELECT Version, ID, Name FROM PackageMetadata', []);
-      const table = result;
-      console.log(result, table);
-      if (result.length > 500) {
+      if (Name == "*") { //retrieve all packages of any name
+        const sql_all: string = 'SELECT ID AS \'id\', Version AS \'version\' FROM PackageMetadata';
+        const [result, fields] = await promisePool.execute(sql_all, []);
+        table = result;
+      } else { //retrieve all packages of a given name
+        const [result, fields] = await promisePool.execute('CALL GetIdVersionMapForPackage(?)', [Name]);
+        table = result[0];
+      }
+      //console.log("Table: ", table);
+
+      if (table.length > 500){
         return respondWithCode(413, "Too many packages");
       }
-      for (let row = 0; row < result.length; row++) {
-        response['application/json'].push(result[row]);
+      var idsInRange: number[] = [];
+
+      for (let row = 0; row < table.length; row++) {
+        //console.log("satisfies inputs: ", table[row]["version"], VersionRange, satisfies(table[row]["version"], VersionRange));
+        if (satisfies(table[row]["version"], VersionRange)) {
+          idsInRange.push(table[row]["id"]);
+        }
       }
-    } else {
-      if (VersionRange.includes("-")) { // specific range
-        lower = VersionRange.split("-")[0];
-        upper = VersionRange.split("-")[1];
-        var nextPatch: number = parseInt(upper.split(".")[2]) + 1;
-        upper = upper.substring(0, upper.length-1) + nextPatch.toString();
-      } else if (VersionRange.includes("^")) { // [2.3.1 - 3.0.0)
-        lower = VersionRange.substring(1, VersionRange.length);
-        var splitVersion: string[] = lower.split(".");
-        splitVersion[0] = (parseInt(splitVersion[0]) + 1).toString();
-        splitVersion[1] = "0";
-        splitVersion[2] = "0";
-        upper = splitVersion.join(".");
-      } else if (VersionRange.includes("~")) { // [2.3.1 - 2.4.0)
-        lower = VersionRange.substring(1, VersionRange.length);
-        var splitVersion: string[] = lower.split(".");
-        splitVersion[1] = (parseInt(splitVersion[1]) + 1).toString();
-        splitVersion[2] = "0";
-        upper = splitVersion.join(".");
-      } else { //Exact
-        lower = VersionRange;
-        var splitVersion: string[] = lower.split(".");
-        splitVersion[2] = (parseInt(splitVersion[2]) + 1).toString();
-        upper = splitVersion.join(".");
+
+      //console.log("ids in range: ", idsInRange)
+
+      for (const id of idsInRange) {
+        const [result, fields] = await promisePool.execute('CALL GetBasicMetadata(?)', [id]);
+        const basicMetadata = result[0][0];
+        //console.log("id: ", id, " corresp Metadata: ", basicMetadata);
+        response['application/json'].push(basicMetadata);
+        //console.log("\n\nRESPONSE: ", response);
       }
     }
-
-    const [result, fields] = await promisePool.execute('CALL GetIdVersionMapForPackage(?)', [Name]);
-    const table = result[0];
-    if (table.length > 500){
-      return respondWithCode(413, "Too many packages");
-    }
-    var idsInRange: number[] = [];
-
-    for (let row = 0; row < table.length; row++) {
-      const range : string = lower + " - " + upper;
-
-      if (satisfies(table[row]["version"], range)) {
-        idsInRange.push(table[row]["id"]);
-      }
-    }
-
-    for (const id of idsInRange) {
-      const [result, fields] = await promisePool.execute('CALL GetBasicMetadata(?)', [id]);
-      const basicMetadata = result[0][0];
-      response['application/json'].push(basicMetadata);
-      //console.log("\n\nRESPONSE: ", response);
-    }
-  }
+    //apply the offset to the response
+    response['application/json'] = response['application/json'].slice(offset);
+} catch(err) {
+  return respondWithCode(400, "Error happened\n "+ err.stack);
+}
 
   //console.log("\n\nRETURNED RESPONSE: ", response);
   return respondWithCode(200, response['application/json']);
