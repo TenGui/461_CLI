@@ -1,5 +1,5 @@
 -- CREATE DATABASE IF NOT EXISTS mydb;
-USE mydb;
+USE will;
 
 -- Create auth table with user authentication info
 CREATE TABLE Auth (
@@ -11,7 +11,7 @@ CREATE TABLE Auth (
     isAdmin BOOL
 ) ENGINE=InnoDB;
 
---add default user
+-- add default user
 -- INSERT INTO Auth VALUES (
 --     "ece30861defaultadminuser",
 --     "correcthorsebatterystaple123(!__+@**(A;DROP TABLE packages",
@@ -179,11 +179,11 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS GetBasicMetadata;
 DELIMITER //
 -- return a map of ids to versions for a given package
-CREATE PROCEDURE GetBasicMetadata(IN id INT)
+CREATE PROCEDURE GetBasicMetadata(IN s_id INT)
 BEGIN
     SELECT Version, ID, Name
     FROM PackageMetadata
-    WHERE ID = id;
+    WHERE ID = s_id;
 END;
 //
 DELIMITER ;
