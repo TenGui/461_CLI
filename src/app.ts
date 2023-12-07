@@ -116,7 +116,7 @@ app._router.stack = [...firstEntries, ...lastEntries, ...stack];
 
 function uuidMaker (req, res, next) {
     req.requestId = uuid.v4(); // Attach a unique ID to the request
-    console.log("made id: " + req.requestId);
+    //console.log("made id: " + req.requestId);
     next();
 };
 app.use(uuidMaker);
