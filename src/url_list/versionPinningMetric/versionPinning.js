@@ -42,7 +42,7 @@ function get_version_pin_score(url) {
     return __awaiter(this, void 0, void 0, function () {
         var FILE_PATH, apiUrl;
         return __generator(this, function (_a) {
-            FILE_PATH = '/main/package.json';
+            FILE_PATH = '/HEAD/package.json';
             apiUrl = 'https://raw.githubusercontent.com/' + url[0] + '/' + url[1] + FILE_PATH;
             return [2 /*return*/, new Promise(function (resolve, reject) {
                     axios_1.default.get(apiUrl)
