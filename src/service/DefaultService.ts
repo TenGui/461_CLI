@@ -26,6 +26,10 @@ const { db, promisePool } = require("../database_files/database_connect");
  **/
 export async function CreateAuthToken(body: AuthenticationRequest) {
     //console.log("authentication endpoint hit");
+    if (authHelper.getAuthEnable() == '0') {
+      return respondWithCode(501, "This system does not support authentication.");
+    }
+    console.log("User: " + body.User.name + " pass: " + body.Secret.password);
   
     // get user credentials
     const username = body.User.name;
@@ -42,7 +46,7 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
     }
 
     //console.log("result: " + JSON.stringify(result));
-    
+    console.log("AUTH TABLE ROW: " + JSON.stringify(result));
 
     // If credentials are valid, create a JWT with permissions that correspond to that of the user
     //console.log("password check: incoming = " + password + " database = "+ result[0].pass);
@@ -58,10 +62,12 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
         canDownload: result[0].canDownload
       });
 
-      return respondWithCode(200, "\"bearer "+ token);
+      return respondWithCode(200, "bearer "+ token);
 
     } else {
       //console.log("bad password");
+      console.log("Given pw: " + password);
+      console.log("DB pw:    " + result[0].pass);
       return respondWithCode(401, "User exists. Wrong password");
     }
 

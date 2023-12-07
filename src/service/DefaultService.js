@@ -55,6 +55,11 @@ function CreateAuthToken(body) {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
+                    //console.log("authentication endpoint hit");
+                    if (authHelper.getAuthEnable() == '0') {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(501, "This system does not support authentication.")];
+                    }
+                    console.log("User: " + body.User.name + " pass: " + body.Secret.password);
                     username = body.User.name;
                     password = body.Secret.password;
                     return [4 /*yield*/, promisePool.execute('SELECT * FROM Auth WHERE user = ?', [username])];
@@ -66,6 +71,7 @@ function CreateAuthToken(body) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User is not in database")];
                     }
                     //console.log("result: " + JSON.stringify(result));
+                    console.log("AUTH TABLE ROW: " + JSON.stringify(result));
                     // If credentials are valid, create a JWT with permissions that correspond to that of the user
                     //console.log("password check: incoming = " + password + " database = "+ result[0].pass);
                     if (password === result[0].pass) {
@@ -77,10 +83,12 @@ function CreateAuthToken(body) {
                             canUpload: result[0].canUpload,
                             canDownload: result[0].canDownload
                         });
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, "\"bearer " + token)];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, "bearer " + token)];
                     }
                     else {
                         //console.log("bad password");
+                        console.log("Given pw: " + password);
+                        console.log("DB pw:    " + result[0].pass);
                         return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User exists. Wrong password")];
                     }
                     return [2 /*return*/, '']; // You can return the actual value here
