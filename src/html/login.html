@@ -348,6 +348,14 @@
                                 showConfirmButton: true
                             });
                         }
+                        else if(error.response.status == 404){
+                            Swal.fire({
+                                icon: 'error',
+                                title: `By Name Search Error`,
+                                text: `No package named ${packageName}`,
+                                showConfirmButton: true
+                            });
+                        }
                         else{
                             Swal.fire({
                                 icon: 'error',
