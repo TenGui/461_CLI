@@ -114,7 +114,7 @@ export async function PackageByNameGet(name: PackageName, xAuthorization: Authen
     }
   } catch (error) {
     console.error(error);
-    return respondWithCode(500, { error: 'Internal Server Error' });
+    return respondWithCode(error.response.status, { "Error": 'ByRegex Error' });
   }
 }
 
@@ -171,7 +171,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
     }
   } catch (error) {
     console.error(error);
-    return respondWithCode(500, { error: 'Internal Server Error' });
+    return respondWithCode(error.response.status, { "Error": 'Error in RegexGet' });
   }
 }
 
@@ -321,16 +321,16 @@ export async function PackageRate(id: PackageID, xAuthorization: AuthenticationT
 
       const hasInvalidScore = Object.values(output).some(score => score === -1);
       if (hasInvalidScore) {
-        return respondWithCode(500, {error: 'The package rating system choked on at least one of the metrics.'});
+        return respondWithCode(500, {"Error": 'The package rating system choked on at least one of the metrics.'});
       }
 
       return respondWithCode(200, output);
       
     } else {
-      return respondWithCode(404, {error: "Package does not exist."});
+      return respondWithCode(404, {"Error": "Package does not exist."});
     }
   } catch (error) {
-    return respondWithCode(500, {error: 'The package rating system choked on at least one of the metrics.'});
+    return respondWithCode(500, {"Error": 'The package rating system choked on at least one of the metrics.'});
   }
 }
 
@@ -375,11 +375,11 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
  **/
 export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
   try {
-    if ("URL" in body && "Content" in body) {
-      console.log("Improper form, URL and Content are both set");
-      return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
-    }
-    if (!("URL" in body) && !("Content" in body)) {
+    // if ("URL" in body && "Content" in body) {
+    //   console.log("Improper form, URL and Content are both set");
+    //   return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+    // }
+    if (!("URL" in body.data) && !("Content" in body.data)) {
       console.log("Improper form, URL and Content are both not set");
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
     }
@@ -588,10 +588,39 @@ export async function UserPost(body: newUser, xAuthorization: AuthenticationToke
  * @param name PackageName 
  * @returns void
  **/
-export function PackageByNameDelete(xAuthorization: AuthenticationToken, name: PackageName) {
-  return new Promise(function(resolve, reject) {
-    // resolve();
-  });
+export async function PackageByNameDelete(name: PackageName, xAuthorization: AuthenticationToken) {
+  const packageNameToDelete = name;
+
+  // Step 1: Retrieve IDs from PackageMetadata
+  const getIdsQuery = 'SELECT ID FROM PackageMetadata WHERE Name = ?';
+
+  try {
+      const results = await new Promise<PackageMetadata[]>((resolve, reject) => {
+          db.query(getIdsQuery, [packageNameToDelete], (err, results) => {
+              if (err) {
+                  console.error(err);
+                  reject(err);
+              }
+              resolve(results as PackageMetadata[]);
+          });
+      });
+
+      if (results.length === 0) {
+          return respondWithCode(404); // No package found
+      }
+
+      const packageIds = results.map((result) => result.ID);
+
+      //Delete all version of that package.
+      for (const id of packageIds) {
+          const [deleteResult, deleteFields] = await (promisePool.execute as any)('CALL PackageDelete(?)', [id]);
+      }
+
+      return respondWithCode(200); // OK
+  } catch (error) {
+      console.error(error);
+      return respondWithCode(499); // Internal Server Error
+  }
 }
 
 // /**

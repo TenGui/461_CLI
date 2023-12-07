@@ -30,12 +30,9 @@ function validateToken(token) {
     //console.log("with bearer: "+ token +"\n without bearer: "+ unbearered);
     var decodedToken;
     try {
-        console.log("unbeared", unbearered);
-        console.log("secret", secret);
         decodedToken = jwt.verify(unbearered, secret);
     }
     catch (err) {
-        console.error(err);
         return { "success": -1, "token": null };
     }
     return { "success": 1, "token": decodedToken };
