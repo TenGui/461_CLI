@@ -10,7 +10,7 @@ export async function get_version_pin_score(url:string[]): Promise<number>{
     //const REPO = splitURL[4];
 
     
-    const FILE_PATH = '/main/package.json';
+    const FILE_PATH = '/HEAD/package.json';
     const apiUrl = 'https://raw.githubusercontent.com/' + url[0] +'/' + url[1] + FILE_PATH;
 
     return new Promise ((resolve, reject) =>{
