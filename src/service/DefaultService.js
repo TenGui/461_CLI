@@ -542,6 +542,7 @@ function PackagesList(body, offset, xAuthorization) {
                     _i++;
                     return [3 /*break*/, 2];
                 case 11:
+                    //apply the offset to the response
                     response['application/json'] = response['application/json'].slice(offset);
                     return [3 /*break*/, 13];
                 case 12:
