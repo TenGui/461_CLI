@@ -133,7 +133,7 @@ function PackageByNameGet(name, xAuthorization) {
                 case 3:
                     error_1 = _b.sent();
                     console.error(error_1);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(error_1.response.status, { "Error": 'ByRegex Error' })];
                 case 4: return [2 /*return*/];
             }
         });
@@ -188,7 +188,7 @@ function PackageByRegExGet(body, xAuthorization) {
                 case 3:
                     error_2 = _b.sent();
                     console.error(error_2);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(error_2.response.status, { "Error": 'Error in RegexGet' })];
                 case 4: return [2 /*return*/];
             }
         });
@@ -359,14 +359,14 @@ function PackageRate(id, xAuthorization) {
                     output = _b.sent();
                     hasInvalidScore = Object.values(output).some(function (score) { return score === -1; });
                     if (hasInvalidScore) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'The package rating system choked on at least one of the metrics.' })];
                     }
                     return [2 /*return*/, (0, writer_1.respondWithCode)(200, output)];
-                case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: "Package does not exist." })];
+                case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "Package does not exist." })];
                 case 4: return [3 /*break*/, 6];
                 case 5:
                     error_5 = _b.sent();
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'The package rating system choked on at least one of the metrics.' })];
                 case 6: return [2 /*return*/];
             }
         });
@@ -427,11 +427,11 @@ function PackageUpdate(body, id, xAuthorization) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    if ("URL" in body && "Content" in body) {
-                        console.log("Improper form, URL and Content are both set");
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
-                    }
-                    if (!("URL" in body) && !("Content" in body)) {
+                    // if ("URL" in body && "Content" in body) {
+                    //   console.log("Improper form, URL and Content are both set");
+                    //   return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+                    // }
+                    if (!("URL" in body.data) && !("Content" in body.data)) {
                         console.log("Improper form, URL and Content are both not set");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
                     }
@@ -686,9 +686,52 @@ exports.UserPost = UserPost;
  * @param name PackageName
  * @returns void
  **/
-function PackageByNameDelete(xAuthorization, name) {
-    return new Promise(function (resolve, reject) {
-        // resolve();
+function PackageByNameDelete(name, xAuthorization) {
+    return __awaiter(this, void 0, void 0, function () {
+        var packageNameToDelete, getIdsQuery, results, packageIds, _i, packageIds_1, id, _a, deleteResult, deleteFields, error_8;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    packageNameToDelete = name;
+                    getIdsQuery = 'SELECT ID FROM PackageMetadata WHERE Name = ?';
+                    _b.label = 1;
+                case 1:
+                    _b.trys.push([1, 7, , 8]);
+                    return [4 /*yield*/, new Promise(function (resolve, reject) {
+                            db.query(getIdsQuery, [packageNameToDelete], function (err, results) {
+                                if (err) {
+                                    console.error(err);
+                                    reject(err);
+                                }
+                                resolve(results);
+                            });
+                        })];
+                case 2:
+                    results = _b.sent();
+                    if (results.length === 0) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404)]; // No package found
+                    }
+                    packageIds = results.map(function (result) { return result.ID; });
+                    _i = 0, packageIds_1 = packageIds;
+                    _b.label = 3;
+                case 3:
+                    if (!(_i < packageIds_1.length)) return [3 /*break*/, 6];
+                    id = packageIds_1[_i];
+                    return [4 /*yield*/, promisePool.execute('CALL PackageDelete(?)', [id])];
+                case 4:
+                    _a = _b.sent(), deleteResult = _a[0], deleteFields = _a[1];
+                    _b.label = 5;
+                case 5:
+                    _i++;
+                    return [3 /*break*/, 3];
+                case 6: return [2 /*return*/, (0, writer_1.respondWithCode)(200)]; // OK
+                case 7:
+                    error_8 = _b.sent();
+                    console.error(error_8);
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(499)]; // Internal Server Error
+                case 8: return [2 /*return*/];
+            }
+        });
     });
 }
 exports.PackageByNameDelete = PackageByNameDelete;
