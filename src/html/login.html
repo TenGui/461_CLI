@@ -7,34 +7,45 @@
         <style>
             body {
                 font-family: 'Arial', sans-serif;
-                max-width: 600px;
-                margin: 0 auto;
+                display: flex;
+                max-width: 100%;
+                margin: 0 50px; /* Add margin to move the left section to the right */
                 padding: 20px;
                 background-color: #f7f7f7;
                 color: #333;
-                position: relative; /* Added for positioning */
             }
-
+    
             #main-title {
                 color: #4CAF50;
                 font-size: 36px;
                 margin-bottom: 20px;
             }
-
+    
+            .left-section {
+                width: 50%;
+                padding-right: 20px;
+            }
+    
+            .right-section {
+                width: 50%;
+                padding-left: 20px;
+                border-left: 1px solid #ddd; /* Add a border between sections */
+            }
+    
             h1 {
                 font-size: 24px;
                 margin-bottom: 10px;
             }
-
+    
             form {
                 margin-bottom: 20px;
             }
-
+    
             label {
                 display: block;
                 margin-bottom: 5px;
             }
-
+    
             input, button {
                 margin-bottom: 10px;
                 padding: 8px;
@@ -42,17 +53,79 @@
                 border-radius: 4px;
                 box-sizing: border-box;
             }
-
+    
             button {
                 background-color: #4CAF50;
                 color: white;
                 cursor: pointer;
             }
-
+    
             button:hover {
                 background-color: #0b530f;
             }
-
+    
+            hr {
+                border: 1px solid #ddd;
+                margin: 20px 0;
+            }
+    
+            #PackageUploadContainer, #ZipPackageUploadContainer, #resultContainer {
+                margin-top: 10px;
+            }
+    
+            input[type="file"] {
+                display: none;
+            }
+    
+            .custom-file-upload {
+                border: 1px solid #ccc;
+                display: inline-block;
+                padding: 6px 12px;
+                cursor: pointer;
+                background-color: #4CAF50;
+                color: white;
+                border-radius: 4px;
+            }
+    
+            .container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+    
+            .file-upload-container {
+                display: flex;
+                align-items: center;
+            }
+    
+            .file-upload-container input[type="file"] {
+                display: none;
+            }
+    
+            .file-upload-container label {
+                border: 1px solid #ccc;
+                padding: 6px 12px;
+                cursor: pointer;
+                background-color: #28c232;
+                color: white;
+                border-radius: 4px;
+                margin-right: 10px;
+            }
+    
+            .file-upload-container button {
+                background-color: #4CAF50;
+                color: white;
+                padding: 8px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+    
+            .file-upload-container button:hover {
+                background-color: #0b530f;
+            }
+            
             #resetForm {
                 margin: 10px; /* Add margin for spacing */
             }
@@ -70,146 +143,185 @@
             #resetForm button:hover {
                 background-color: #FF8C66;
             }
-
-            hr {
-                border: 1px solid #ddd;
-                margin: 20px 0;
-            }
-
-            #PackageUploadContainer, #ZipPackageUploadContainer, #resultContainer {
-                margin-top: 10px;
-            }
-
-            input[type="file"] {
-                display: none;
-            }
-
-            .custom-file-upload {
-                border: 1px solid #ccc;
-                display: inline-block;
-                padding: 6px 12px;
-                cursor: pointer;
-                background-color: #4CAF50;
-                color: white;
-                border-radius: 4px;
-            }
-
-            .container {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .file-upload-container {
-                display: flex;
-                align-items: center;
-            }
-
-            .file-upload-container input[type="file"] {
-                display: none;
-            }
-
-            .file-upload-container label {
-                border: 1px solid #ccc;
-                padding: 6px 12px;
-                cursor: pointer;
-                background-color: #28c232;
-                color: white;
-                border-radius: 4px;
-                margin-right: 10px; /* Adjust margin for spacing */
-            }
-
-            .file-upload-container button {
-                background-color: #4CAF50;
-                color: white;
+            select {
                 padding: 8px;
-                border: none;
+                border: 1px solid #ccc;
                 border-radius: 4px;
-                cursor: pointer;
-                transition: background-color 0.3s ease;
+                box-sizing: border-box;
+                margin-bottom: 10px;
+            }
+            
+            .right-section {
+                padding-left: 20px;
+                border-left: 1px solid #ddd; /* Add a border between sections */
+            }
+            
+            #right-section {
+                padding-left: 20px;
+                border-left: 1px solid #ddd; /* Add a border between sections */
             }
 
-            .file-upload-container button:hover {
-                background-color: #0b530f;
-            }
         </style>
     </head>
     <body>
-        <div class="container">
-            <h1 id="main-title">NPM Package Registry Manager</h1>
-            <form id="resetForm">
-                <button type="button" onclick="sendDeleteRequest()">Reset</button>
+        <div class="left-section">
+            <div class="container">
+                <h1 id="main-title">NPM Package Registry Manager</h1>
+                <form id="resetForm">
+                    <button type="button" onclick="sendDeleteRequest()">Reset</button>
+                </form>
+            </div>
+
+            <h1>Add User</h1>
+            <form id="addUserForm">
+                <label for="username">Username:</label>
+                <input type="text" name="username" required><br>
+                <label for="password">Password:</label>
+                <input type="password" name="password" required><br>
+                <button type="button" onclick="addUser()">Add User</button>
             </form>
+
+            <hr>
+
+            <h1>Login</h1>
+            <form id="loginForm">
+                <label for="loginUsername">Username:</label>
+                <input type="text" name="loginUsername" required><br>
+                <label for="loginPassword">Password:</label>
+                <input type="password" name="loginPassword" required><br>
+                <button type="button" onclick="loginUser()">Login</button>
+            </form>
+
+            <hr>
+
+            <h1>Upload package</h1>
+            <form id="github_Package">
+                <label for="github_url">Github URL:</label>
+                <input type="text" name="github_url" required><br>
+                <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
+            </form>
+            <div id="PackageUploadContainer"></div>
+
+            <hr>
+
+            <h1>Upload .zip package</h1>
+            <div class="file-upload-container">
+                <input type="file" id="fileInput" accept=".zip" onchange="updateFileName()">
+                <label class="custom-file-upload" for="fileInput">
+                    <span id="fileNameLabel">Add .Zip File</span>
+                </label>
+                <button type="button" onclick="listFiles()">Upload</button>
+            </div>
+            <div id="ZipPackageUploadContainer"></div>
+
+            <hr>
+
+            <h1>Search Package By Regex</h1>
+            <form>
+                <label for="regex">Search Regex:</label>
+                <input type="text" id="packageName" name="Regex" required><br>
+                <button type="button" onclick="packageRegex()">Search RegEx</button>
+            </form>
+            <div id="resultContainer"></div>
+
+            <hr>
+
+            <h1>Package By Name Operations</h1>
+            <form id="packageByNameForm">
+                <label for="packageName">Package Name:</label>
+                <input type="text" id="packageName" name="packageName" required>
+                
+                <select id="operation" name="operation">
+                    <option value="delete">Delete</option>
+                    <option value="get">Get</option>
+                </select>
+                <br>
+                <button type="button" onclick="performPackageOperation()">Submit</button>
+            </form>
+            
+            <hr>
+
+            <h1>Package By ID Operations</h1>
+            <form id="packageByIdForm">
+                <label for="packageId">Package ID:</label>
+                <input type="text" id="packageId" name="packageId" required>
+                
+                <select id="operation" name="operation">
+                    <option value="delete">Delete</option>
+                    <option value="get">Get</option>
+                    <option value="Put">Put</option>
+                </select>
+                <br>
+                <button type="button" onclick="performPackageOperation()">Submit</button>
+            </form>
+            
+            <hr>
+            <br>
         </div>
 
-        <h1>Add User</h1>
-        <form id="addUserForm">
-            <label for="username">Username:</label>
-            <input type="text" name="username" required><br>
-            <label for="password">Password:</label>
-            <input type="password" name="password" required><br>
-            <button type="button" onclick="addUser()">Add User</button>
-        </form>
-
-        <hr>
-
-        <h1>Login</h1>
-        <form id="loginForm">
-            <label for="loginUsername">Username:</label>
-            <input type="text" name="loginUsername" required><br>
-            <label for="loginPassword">Password:</label>
-            <input type="password" name="loginPassword" required><br>
-            <button type="button" onclick="loginUser()">Login</button>
-        </form>
-
-        <hr>
-
-        <h1>Upload package</h1>
-        <form id="github_Package">
-            <label for="github_url">Github URL:</label>
-            <input type="text" name="github_url" required><br>
-            <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
-        </form>
-        <div id="PackageUploadContainer"></div>
-
-        <hr>
-
-        <h1>Upload .zip package</h1>
-        <div class="file-upload-container">
-            <input type="file" id="fileInput" accept=".zip" onchange="updateFileName()">
-            <label class="custom-file-upload" for="fileInput">
-                <span id="fileNameLabel">Add .Zip File</span>
-            </label>
-            <button type="button" onclick="listFiles()">Upload</button>
+        <div id="right-section">
+            <h1>Packages inside database</h1>
+            <button id="showPackagesButton" onclick="showPackages()">Show Packages</button>
+            <div id="packagesList"></div>
         </div>
-        <div id="ZipPackageUploadContainer"></div>
 
-        <hr>
-
-        <h1>Delete Package By Name</h1>
-        <form>
-            <label for="delete">Delete Name:</label>
-            <input type="text" id="packageNameDelete" name="delete" required><br>
-            <button type="button" onclick="deletePackage()">Delete Package</button>
-        </form>
-
-        <hr>
-
-        <h1>Search Package By Regex</h1>
-        <form>
-            <label for="regex">Search Regex:</label>
-            <input type="text" id="packageName" name="Regex" required><br>
-            <button type="button" onclick="packageRegex()">Search RegEx</button>
-        </form>
-        <div id="resultContainer"></div>
-
-        <hr>
-        <br>
+<!---------------------------------------------- Below is Javascript ---------------------------------------------------------------------->  
+<!---------------------------------------------- Below is Javascript ---------------------------------------------------------------------->  
+<!---------------------------------------------- Below is Javascript ---------------------------------------------------------------------->  
 
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
+            async function showPackages() {
+                try {
+                    const requestBody = [
+                        {
+                            "Version": "*",
+                            "Name": "*"
+                        }
+                    ];
+
+                    const response = await axios.post('/packages', requestBody, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Authorization': '1' // Replace with your JWT token or any other authorization token
+                        },
+                    });
+
+                    const packagesListContainer = document.getElementById('packagesList');
+                    packagesListContainer.innerHTML = ''; // Clear previous content
+
+                    if (response.data && response.data.length > 0) {
+                        const ul = document.createElement('ul');
+                        let x = 0;
+                        response.data.forEach(packageInfo => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <strong>Package Name: </strong>${packageInfo.Name}<br>
+                                &nbsp;&nbsp;&nbsp;<strong>ID: </strong>${packageInfo.ID}<br>
+                                &nbsp;&nbsp;&nbsp;<strong>Version: </strong>${packageInfo.Version}
+                            `;
+                            ul.appendChild(li);
+                        });
+                        packagesListContainer.appendChild(ul);
+
+                        // Display total number of packages
+                        const totalCountParagraph = document.createElement('h3');
+                        totalCountParagraph.textContent = `Total Packages: ${response.data.length}`;
+                        packagesListContainer.appendChild(totalCountParagraph);
+                    } else {
+                        packagesListContainer.textContent = 'No packages found.';
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: `Show Packages Error`,
+                        text: `Auth token invalid. Please log in or provide a valid token`,
+                        showConfirmButton: true
+                    });
+                }
+            }
 
             async function addUser() {
                 const addUserForm = document.getElementById('addUserForm');
@@ -376,18 +488,18 @@
 
             async function deletePackage()
             {
-                const packageName = document.getElementById('packageNameDelete').value;
-                const response = await fetch('/package/byName' , {
-                    method: 'DELETE',
-                    headers: {
-                            'Content-Type': 'application/json',
-                            'X-Authorization': '1'
-                        },
-                        body: packageNameDelete,
-                    });
+            const packageName = document.getElementById('packageNameDelete').value;
+            const response = await fetch('/package/byName' , {
+                method: 'DELETE',
+                headers: {
+                        'Content-Type': 'application/json',
+                        'X-Authorization': '1'
+                    },
+                    body: packageNameDelete,
+                });
 
 
-                };
+            };
 
             
             
@@ -525,6 +637,8 @@
                         showConfirmButton: false,
                         timer: 2300
                     });
+                    const packagesListContainer = document.getElementById('packagesList');
+                    packagesListContainer.innerHTML = ''; // Clear previous content
                 })
                 .catch(error => {
                     if(error.response.status == 500){
