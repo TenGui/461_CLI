@@ -39,4 +39,7 @@ export function validateToken(token){
     }
     return {"success":1, "token": decodedToken};
 }
+export function getAuthEnable(){
+    return AuthEnable
+}
 

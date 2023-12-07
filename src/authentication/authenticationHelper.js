@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateToken = exports.createToken = void 0;
+exports.getAuthEnable = exports.validateToken = exports.createToken = void 0;
 var jwt = require("jsonwebtoken");
 var secret = process.env.SECRET;
 var AuthEnable = process.env.AUTH_ENABLE;
@@ -38,3 +38,7 @@ function validateToken(token) {
     return { "success": 1, "token": decodedToken };
 }
 exports.validateToken = validateToken;
+function getAuthEnable() {
+    return AuthEnable;
+}
+exports.getAuthEnable = getAuthEnable;
