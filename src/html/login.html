@@ -228,28 +228,12 @@
 
             <h1>Package By Name Operations</h1>
             <form id="packageByNameForm">
-                <label for="packageName">Package Name:</label>
-                <input type="text" id="packageName" name="packageName" required>
+                <label for="byName">Package Name:</label>
+                <input type="text" id="byName" name="byName" required>
                 
                 <select id="operation" name="operation">
                     <option value="delete">Delete</option>
                     <option value="get">Get</option>
-                </select>
-                <br>
-                <button type="button" onclick="performPackageOperation()">Submit</button>
-            </form>
-            
-            <hr>
-
-            <h1>Package By ID Operations</h1>
-            <form id="packageByIdForm">
-                <label for="packageId">Package ID:</label>
-                <input type="text" id="packageId" name="packageId" required>
-                
-                <select id="operation" name="operation">
-                    <option value="delete">Delete</option>
-                    <option value="get">Get</option>
-                    <option value="Put">Put</option>
                 </select>
                 <br>
                 <button type="button" onclick="performPackageOperation()">Submit</button>
@@ -321,6 +305,47 @@
                         showConfirmButton: true
                     });
                 }
+            }
+
+            async function performPackageOperation() {
+                // Get package name and operation from the form
+                var packageName = document.getElementById("byName").value;
+                var operation = document.getElementById("operation").value;
+                // Check if the operation is "delete"
+                if (operation === "delete") {
+                    // Make a DELETE request using Axios with headers
+                    axios.delete(`/package/byName/${packageName}`, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Authorization': '1' // Replace with your JWT token
+                        },
+                    })
+                    .then(response => {
+                        console.log(response.data); // Handle success
+                        Swal.fire({
+                            icon: 'success',
+                            title: `Delete Success`,
+                            html: `Package <strong>${packageName}</strong> deleted successfully`,
+                            showConfirmButton: true
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error deleting package:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: `Oops...`,
+                            html: `Failed to delete . Check console for error.`,
+                            showConfirmButton: true
+                        });
+                    });
+                } else if (operation === "get") {
+                    // Handle other operations if needed
+                    alert("Performing 'Get' operation.");
+                }
+                // You can add more else-if conditions for other operations
+
+                // Clear the form after processing
+                document.getElementById("packageByNameForm").reset();
             }
 
             async function addUser() {
@@ -485,23 +510,6 @@
                     console.error('Error during fetch:', error);
                 }
             }
-
-            async function deletePackage()
-            {
-            const packageName = document.getElementById('packageNameDelete').value;
-            const response = await fetch('/package/byName' , {
-                method: 'DELETE',
-                headers: {
-                        'Content-Type': 'application/json',
-                        'X-Authorization': '1'
-                    },
-                    body: packageNameDelete,
-                });
-
-
-            };
-
-            
             
             function displayResult(result) {
                 const resultContainer = document.getElementById('resultContainer');
