@@ -99,6 +99,39 @@
                 justify-content: space-between;
                 align-items: center;
             }
+
+            .file-upload-container {
+                display: flex;
+                align-items: center;
+            }
+
+            .file-upload-container input[type="file"] {
+                display: none;
+            }
+
+            .file-upload-container label {
+                border: 1px solid #ccc;
+                padding: 6px 12px;
+                cursor: pointer;
+                background-color: #28c232;
+                color: white;
+                border-radius: 4px;
+                margin-right: 10px; /* Adjust margin for spacing */
+            }
+
+            .file-upload-container button {
+                background-color: #4CAF50;
+                color: white;
+                padding: 8px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            .file-upload-container button:hover {
+                background-color: #0b530f;
+            }
         </style>
     </head>
     <body>
@@ -110,23 +143,23 @@
         </div>
 
         <h1>Add User</h1>
-        <form method="POST" action="/addUser">
+        <form id="addUserForm">
             <label for="username">Username:</label>
             <input type="text" name="username" required><br>
             <label for="password">Password:</label>
             <input type="password" name="password" required><br>
-            <button type="submit">Add User</button>
+            <button type="button" onclick="addUser()">Add User</button>
         </form>
 
         <hr>
 
         <h1>Login</h1>
-        <form method="POST" action="/loginUser">
+        <form id="loginForm">
             <label for="loginUsername">Username:</label>
             <input type="text" name="loginUsername" required><br>
             <label for="loginPassword">Password:</label>
             <input type="password" name="loginPassword" required><br>
-            <button type="submit">Login</button>
+            <button type="button" onclick="loginUser()">Login</button>
         </form>
 
         <hr>
@@ -142,10 +175,13 @@
         <hr>
 
         <h1>Upload .zip package</h1>
-        <label class="custom-file-upload">
-            <input type="file" id="fileInput" accept=".zip">
-            Add .Zip File
-        </label>
+        <div class="file-upload-container">
+            <input type="file" id="fileInput" accept=".zip" onchange="updateFileName()">
+            <label class="custom-file-upload" for="fileInput">
+                <span id="fileNameLabel">Add .Zip File</span>
+            </label>
+            <button type="button" onclick="listFiles()">Upload</button>
+        </div>
         <div id="ZipPackageUploadContainer"></div>
 
         <hr>
@@ -172,11 +208,132 @@
 
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-        
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
+
+            async function addUser() {
+                const addUserForm = document.getElementById('addUserForm');
+                const usernameInput = addUserForm.elements['username'];
+                const passwordInput = addUserForm.elements['password'];
+
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+
+                if (!username || !password) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'Cannot add a user with no username/password!',
+                    });
+                    return;
+                }
+
+                try {
+                    const response = await axios.post('/addUser', {
+                        username: username,
+                        password: password
+                    });
+
+                    // Check the response and show a customized notification
+                    if (response.data === 'User added successfully') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: `User ${usernameInput.value} added successfully`,
+                            showConfirmButton: false,
+                            timer: 2300
+                        });
+
+                        // Clear input fields after successful user addition
+                        addUserForm.elements['username'].value = '';
+                        addUserForm.elements['password'].value = '';
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: `Failed to add user ${usernameInput.value}`,
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error in addUser:', error.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Internal Server Error',
+                        text: 'Please try again later',
+                    });
+                }
+            }
+
+            async function loginUser() {
+                const loginForm = document.getElementById('loginForm');
+                const loginUsernameInput = loginForm.elements['loginUsername'];
+                const loginPasswordInput = loginForm.elements['loginPassword'];
+
+                const loginUsername = loginUsernameInput.value;
+                const loginPassword = loginPasswordInput.value;
+
+                if (!loginUsername || !loginUsername) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'Missing Username/Password!',
+                    });
+                    return;
+                }
+                try {
+                    const response = await axios.post('/loginUser', {
+                        loginUsername: loginUsername,
+                        loginPassword: loginPassword
+                    });
+                    
+                    if (response.data === 'Login Successful') {
+                        //alert box for successful login
+                        Swal.fire({
+                            icon: 'success',
+                            title: `Welcome ${loginUsernameInput.value}!`,
+                            text: 'Login successful. Auth token set!',
+                            showConfirmButton: false,
+                            timer: 2300
+                        });
+                        loginUsernameInput.value = '';
+                        loginPasswordInput.value = '';
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Incorrect Username/Password',
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error in loginUser:', error.message);
+                    alert('Internal Server Error');
+                }
+            }
+
+            function updateFileName() {
+                const fileInput = document.getElementById('fileInput');
+                const fileNameLabel = document.getElementById('fileNameLabel');
+
+                if (fileInput.files.length > 0) {
+                    const fileName = fileInput.files[0].name;
+                    fileNameLabel.textContent = fileName;
+                } else {
+                    fileNameLabel.textContent = 'Add .Zip File';
+                }
+            }
+
             async function packageRegex() {
                 const packageName = document.getElementById('packageName').value;
                 try {
+
+                    if(!packageName){
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Oops...',
+                            text: 'Please enter a regex expression!',
+                        });
+                        return;
+                    }
                     const response = await fetch('/package/byRegEx', {
                         method: 'POST',
                         headers: {
@@ -194,10 +351,21 @@
                     } else {
                         const resultContainer = document.getElementById('resultContainer');
                         if(response.status == 500){
-                            resultContainer.textContent = "Error: Auth token not set. Please log in or provide a valid token";
+                            Swal.fire({
+                                icon: 'warning',
+                                title: `Upload Error`,
+                                text: `Auth token invalid. Please log in or provide a valid token`,
+                                showConfirmButton: true
+                            });
                         }
                         else{
-                            resultContainer.textContent = response.status + " error, " + response.statusText;
+                            Swal.fire({
+                                icon: 'error',
+                                title: `Search error`,
+                                text: `Error: No matching package with regex exp \'${packageName}\'`,
+                                showConfirmButton: true
+                            });
+                            resultContainer.textContent = `Error: No Matching Package with Regex exp \'${packageName}\'`;
                         }
                         console.error('Failed to fetch data:', response.status, response.statusText);
                     }
@@ -244,7 +412,11 @@
                 const fileInput = document.getElementById('fileInput');
 
                 if (!fileInput.files || fileInput.files.length === 0) {
-                    alert('Please select a .zip file.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Warning!',
+                        text: 'Please add a .Zip file',
+                    });
                     return;
                 }
 
@@ -287,16 +459,33 @@
                                             })
                                             .then(response => {
                                                 const ZipPackageUploadContainer = document.getElementById('ZipPackageUploadContainer');
-                                                ZipPackageUploadContainer.innerHTML = "Zip file upload successfully";
+                                                Swal.fire({
+                                                    icon: 'success',
+                                                    title: `Success`,
+                                                    html: `Zip package <strong>${response.data["metadata"]["Name"]}</strong> upload successfully`,
+                                                    showConfirmButton: true
+                                                });
+                                                ZipPackageUploadContainer.innerHTML = `Zip package <strong>${response.data["metadata"]["Name"]}</strong> upload successfully`;
                                                 console.log(response.data);
                                             })
                                             .catch(error => {
                                                 const ZipPackageUploadContainer = document.getElementById('ZipPackageUploadContainer');
                                                 if(error.response.status == 500){
-                                                    ZipPackageUploadContainer.innerHTML = "Error: Auth token not set. Please log in or provide a valid token";
+                                                    Swal.fire({
+                                                        icon: 'warning',
+                                                        title: `Upload Error`,
+                                                        text: `'Auth token invalid. Please log in or provide a valid token'`,
+                                                        showConfirmButton: true
+                                                    });
                                                 }
                                                 else{
-                                                    ZipPackageUploadContainer.innerHTML = error.response.status + " error " + error.response.data["Error"];
+                                                    Swal.fire({
+                                                        icon: 'error',
+                                                        title: `Upload Error`,
+                                                        text: `Error: ${error.response.data["Error"]}`,
+                                                        showConfirmButton: true
+                                                    });
+                                                    ZipPackageUploadContainer.innerHTML = "Error: " + error.response.data["Error"];
                                                 }
                                                 console.error(error);
                                             });
@@ -329,11 +518,22 @@
                 })
                 .then(response => {
                     console.log(response.data);
-                    alert("Reset successful. Database and Auth key resetted.");
+                    Swal.fire({
+                        icon: 'success',
+                        title: `Reset complete!`,
+                        text: 'Reset successful. Database and Auth key resetted!',
+                        showConfirmButton: false,
+                        timer: 2300
+                    });
                 })
                 .catch(error => {
                     if(error.response.status == 500){
-                        alert("Error: Auth token not set. Please log in or provide a valid token");
+                        Swal.fire({
+                            icon: 'error',
+                            title: `Oops...`,
+                            text: 'Auth token invalid. Please log in or provide a valid token',
+                            showConfirmButton: true
+                        });
                     }
                     else{
                         alert(error);
@@ -363,16 +563,33 @@
                 })
                 .then(response => {
                     const PackageUploadContainer = document.getElementById('PackageUploadContainer');
-                    PackageUploadContainer.textContent = 'Package Uploaded Successfully';
+                    Swal.fire({
+                        icon: 'success',
+                        title: `Success`,
+                        html: `Package <strong>${response.data["metadata"]["Name"]}</strong> Uploaded Successfully`,
+                        showConfirmButton: true
+                    });
+                    PackageUploadContainer.innerHTML = `Package <strong>${response.data["metadata"]["Name"]}</strong> Uploaded Successfully`;
                     console.log(response.data);
                 })
                 .catch(error => {
                     const PackageUploadContainer = document.getElementById('PackageUploadContainer');
                     if(error.response.status == 500){
-                        PackageUploadContainer.textContent = "Error: Auth token not set. Please log in or provide a valid token";
+                        Swal.fire({
+                            icon: 'warning',
+                            title: `Oops...`,
+                            text: 'Auth token invalid. Please log in or provide a valid token',
+                            showConfirmButton: true
+                        });
                     }
                     else{
-                        PackageUploadContainer.textContent = error.response.status + " error, " + error.response.data["Error"];
+                        Swal.fire({
+                            icon: 'error',
+                            title: `Upload Error`,
+                            text: `Error: ${error.response.data["Error"]}`,
+                            showConfirmButton: true
+                        });
+                        PackageUploadContainer.textContent = "Error: " + error.response.data["Error"];
                     }
                     console.error(error);
                 });

@@ -339,7 +339,7 @@ function loginUser(req, res, next) {
                             case 4:
                                 authenticateError_1 = _a.sent();
                                 console.error('Error in /authenticate:', authenticateError_1.message);
-                                res.status(500).send('Internal Server Errorasd');
+                                res.status(500).send('Internal Server Error');
                                 return [3 /*break*/, 5];
                             case 5: return [2 /*return*/];
                         }
