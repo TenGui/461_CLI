@@ -24,7 +24,7 @@ async function handleRequestAsync(fn: Function, req: Request, res: Response, nex
     }
 
     if(tokenOut["success"] != 1) {
-        return res.status(400).send({"Error": "Bad Auth token/Auth Token not set"});
+        return res.status(400).send();
     }
     //if the token is valid, replace the token string in the args with it's json body
     args.pop();
@@ -156,7 +156,7 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
           res.send('Login Successful');
         } catch (authenticateError) {
           console.error('Error in /authenticate:', authenticateError.message);
-          res.status(500).send('Internal Server Error');
+          res.status(400).send('Error in /authenticate, Auth token not set!');
         }
       }
     });
@@ -172,7 +172,7 @@ export async function MyPage(req: Request, res: Response, next: NextFunction) {
     res.sendFile(filePath, (err) => {
       if (err) {
         console.error('Error sending the HTML file:', err);
-        res.status(500).send('Internal Server Error');
+        res.status(400).send('Error in MyPage');
       }
     });
   } catch (error) {
