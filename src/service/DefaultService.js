@@ -687,20 +687,51 @@ exports.UserPost = UserPost;
  * @returns void
  **/
 function PackageByNameDelete(name, xAuthorization) {
-    var packageNameToDelete = name;
-    var query = 'DELETE FROM PackageMetadata WHERE Name = ?';
-    db.query(query, [packageNameToDelete], function (err, results) {
-        if (err) {
-            console.error(err);
-            return (0, writer_1.respondWithCode)(499); // Internal Server Error
-        }
-        // Package is deleted
-        if (results.affectedRows > 0) {
-            return (0, writer_1.respondWithCode)(200); // OK
-        }
-        else {
-            return (0, writer_1.respondWithCode)(404); // Not Found
-        }
+    return __awaiter(this, void 0, void 0, function () {
+        var packageNameToDelete, getIdsQuery, results, packageIds, _i, packageIds_1, id, _a, deleteResult, deleteFields, error_8;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    packageNameToDelete = name;
+                    getIdsQuery = 'SELECT ID FROM PackageMetadata WHERE Name = ?';
+                    _b.label = 1;
+                case 1:
+                    _b.trys.push([1, 7, , 8]);
+                    return [4 /*yield*/, new Promise(function (resolve, reject) {
+                            db.query(getIdsQuery, [packageNameToDelete], function (err, results) {
+                                if (err) {
+                                    console.error(err);
+                                    reject(err);
+                                }
+                                resolve(results);
+                            });
+                        })];
+                case 2:
+                    results = _b.sent();
+                    if (results.length === 0) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404)]; // No package found
+                    }
+                    packageIds = results.map(function (result) { return result.ID; });
+                    _i = 0, packageIds_1 = packageIds;
+                    _b.label = 3;
+                case 3:
+                    if (!(_i < packageIds_1.length)) return [3 /*break*/, 6];
+                    id = packageIds_1[_i];
+                    return [4 /*yield*/, promisePool.execute('CALL PackageDelete(?)', [id])];
+                case 4:
+                    _a = _b.sent(), deleteResult = _a[0], deleteFields = _a[1];
+                    _b.label = 5;
+                case 5:
+                    _i++;
+                    return [3 /*break*/, 3];
+                case 6: return [2 /*return*/, (0, writer_1.respondWithCode)(200)]; // OK
+                case 7:
+                    error_8 = _b.sent();
+                    console.error(error_8);
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(499)]; // Internal Server Error
+                case 8: return [2 /*return*/];
+            }
+        });
     });
 }
 exports.PackageByNameDelete = PackageByNameDelete;
