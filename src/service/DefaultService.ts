@@ -369,11 +369,11 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
  **/
 export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
   try {
-    if ("URL" in body && "Content" in body) {
-      console.log("Improper form, URL and Content are both set");
-      return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
-    }
-    if (!("URL" in body) && !("Content" in body)) {
+    // if ("URL" in body && "Content" in body) {
+    //   console.log("Improper form, URL and Content are both set");
+    //   return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+    // }
+    if (!("URL" in body.data) && !("Content" in body.data)) {
       console.log("Improper form, URL and Content are both not set");
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
     }
@@ -582,9 +582,22 @@ export async function UserPost(body: newUser, xAuthorization: AuthenticationToke
  * @param name PackageName 
  * @returns void
  **/
-export function PackageByNameDelete(xAuthorization: AuthenticationToken, name: PackageName) {
-  return new Promise(function(resolve, reject) {
-    // resolve();
+export function PackageByNameDelete(name: PackageName, xAuthorization: AuthenticationToken) {
+  var packageNameToDelete = name;
+  var query = 'DELETE FROM PackageMetadata WHERE Name = ?';
+
+  db.query(query, [packageNameToDelete], function (err, results) {
+      if (err) {
+          console.error(err);
+          return respondWithCode(500); // Internal Server Error
+      }
+
+      // Package is deleted
+      if (results.affectedRows > 0) {
+          return respondWithCode(200); // OK
+      } else {
+          return respondWithCode(404); // Not Found
+      }
   });
 }
 

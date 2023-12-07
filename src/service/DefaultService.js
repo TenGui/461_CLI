@@ -427,11 +427,11 @@ function PackageUpdate(body, id, xAuthorization) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    if ("URL" in body && "Content" in body) {
-                        console.log("Improper form, URL and Content are both set");
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
-                    }
-                    if (!("URL" in body) && !("Content" in body)) {
+                    // if ("URL" in body && "Content" in body) {
+                    //   console.log("Improper form, URL and Content are both set");
+                    //   return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+                    // }
+                    if (!("URL" in body.data) && !("Content" in body.data)) {
                         console.log("Improper form, URL and Content are both not set");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
                     }
@@ -686,9 +686,22 @@ exports.UserPost = UserPost;
  * @param name PackageName
  * @returns void
  **/
-function PackageByNameDelete(xAuthorization, name) {
-    return new Promise(function (resolve, reject) {
-        // resolve();
+function PackageByNameDelete(name, xAuthorization) {
+    var packageNameToDelete = name;
+    var query = 'DELETE FROM PackageMetadata WHERE Name = ?';
+    db.query(query, [packageNameToDelete], function (err, results) {
+        if (err) {
+            // Handle the error, you might want to log it or respond with an error code
+            console.error(err);
+            return (0, writer_1.respondWithCode)(500); // Internal Server Error
+        }
+        // Package is deleted
+        if (results.affectedRows > 0) {
+            return (0, writer_1.respondWithCode)(200); // OK
+        }
+        else {
+            return (0, writer_1.respondWithCode)(404); // Not Found
+        }
     });
 }
 exports.PackageByNameDelete = PackageByNameDelete;
