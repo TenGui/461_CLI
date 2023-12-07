@@ -1,75 +1,451 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NPM Package Registry Manager</title>
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                display: flex;
+                max-width: 100%;
+                margin: 0 50px; /* Add margin to move the left section to the right */
+                padding: 20px;
+                background-color: #f7f7f7;
+                color: #333;
+            }
+    
+            #main-title {
+                color: #4CAF50;
+                font-size: 36px;
+                margin-bottom: 20px;
+            }
+    
+            .left-section {
+                width: 50%;
+                padding-right: 20px;
+            }
+    
+            .right-section {
+                width: 50%;
+                padding-left: 20px;
+                border-left: 1px solid #ddd; /* Add a border between sections */
+            }
+    
+            h1 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+    
+            form {
+                margin-bottom: 20px;
+            }
+    
+            label {
+                display: block;
+                margin-bottom: 5px;
+            }
+    
+            input, button {
+                margin-bottom: 10px;
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+    
+            button {
+                background-color: #4CAF50;
+                color: white;
+                cursor: pointer;
+            }
+    
+            button:hover {
+                background-color: #0b530f;
+            }
+    
+            hr {
+                border: 1px solid #ddd;
+                margin: 20px 0;
+            }
+    
+            #PackageUploadContainer, #ZipPackageUploadContainer, #resultContainer {
+                margin-top: 10px;
+            }
+    
+            input[type="file"] {
+                display: none;
+            }
+    
+            .custom-file-upload {
+                border: 1px solid #ccc;
+                display: inline-block;
+                padding: 6px 12px;
+                cursor: pointer;
+                background-color: #4CAF50;
+                color: white;
+                border-radius: 4px;
+            }
+    
+            .container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+    
+            .file-upload-container {
+                display: flex;
+                align-items: center;
+            }
+    
+            .file-upload-container input[type="file"] {
+                display: none;
+            }
+    
+            .file-upload-container label {
+                border: 1px solid #ccc;
+                padding: 6px 12px;
+                cursor: pointer;
+                background-color: #28c232;
+                color: white;
+                border-radius: 4px;
+                margin-right: 10px;
+            }
+    
+            .file-upload-container button {
+                background-color: #4CAF50;
+                color: white;
+                padding: 8px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+    
+            .file-upload-container button:hover {
+                background-color: #0b530f;
+            }
+            
+            #resetForm {
+                margin: 10px; /* Add margin for spacing */
+            }
+
+            #resetForm button {
+                background-color: #FF5733;
+                color: white;
+                padding: 12px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            #resetForm button:hover {
+                background-color: #FF8C66;
+            }
+            select {
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+                margin-bottom: 10px;
+            }
+            
+            .right-section {
+                padding-left: 20px;
+                border-left: 1px solid #ddd; /* Add a border between sections */
+            }
+            
+            #right-section {
+                padding-left: 20px;
+                border-left: 1px solid #ddd; /* Add a border between sections */
+            }
+
+        </style>
     </head>
     <body>
-        <h1>Add User test 123 123 12 3</h1>
-        <form method="POST" action="/addUser">
-            <label for="username">Username:</label>
-            <input type="text" name="username" required><br>
-            <label for="password">Password:</label>
-            <input type="password" name="password" required><br>
-            <button type="submit">Add User</button>
-        </form>
-        <hr>
-        <h1>Login</h1>
-        <form method="POST" action="/loginUser">
-            <label for="loginUsername">Username:</label>
-            <input type="text" name="loginUsername" required><br>
-            <label for="loginPassword">Password:</label>
-            <input type="password" name="loginPassword" required><br>
-            <button type="submit">Login</button>
-        </form>
+        <div class="left-section">
+            <div class="container">
+                <h1 id="main-title">NPM Package Registry Manager</h1>
+                <form id="resetForm">
+                    <button type="button" onclick="sendDeleteRequest()">Reset</button>
+                </form>
+            </div>
 
-        <hr>
-        <h1>Upload package</h1>
-        <form id = "github_Package">
-            <label for="github_url">Github URL:</label>
-            <input type="text" name="github_url" required><br>
-            <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
-        </form>
-        <hr>
-        
-        <h1>Upload .zip package</h1>
-        <input type="file" id="fileInput" accept=".zip">
-        <button type="button" onclick="listFiles()">List Files</button>
-        
-        <ul id="fileList"></ul>
-        
-        <h1>Delete Package By Name</h1>
-        <form>
-            <label for="delete">Delete Name:</label>
-            <input type="text" id="packageNameDelete" name="delete" required><br>
-            <button type="button" onclick="deletePackage()">delete package</button>
-        </form>
+            <h1>Add User</h1>
+            <form id="addUserForm">
+                <label for="username">Username:</label>
+                <input type="text" name="username" required><br>
+                <label for="password">Password:</label>
+                <input type="password" name="password" required><br>
+                <button type="button" onclick="addUser()">Add User</button>
+            </form>
 
-        <hr>
+            <hr>
 
-        <h1>Search Package By Regex</h1>
-        <form>
-            <label for="regex">Search Regex:</label>
-            <input type="text" id="packageName" name="Regex" required><br>
-            <button type="button" onclick="packageRegex()">search RegEx</button>
-        </form>
+            <h1>Login</h1>
+            <form id="loginForm">
+                <label for="loginUsername">Username:</label>
+                <input type="text" name="loginUsername" required><br>
+                <label for="loginPassword">Password:</label>
+                <input type="password" name="loginPassword" required><br>
+                <button type="button" onclick="loginUser()">Login</button>
+            </form>
 
-        <div id="resultContainer"></div>
+            <hr>
 
-        <hr>
-        <br>
+            <h1>Upload package</h1>
+            <form id="github_Package">
+                <label for="github_url">Github URL:</label>
+                <input type="text" name="github_url" required><br>
+                <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
+            </form>
+            <div id="PackageUploadContainer"></div>
 
-        <form id="resetForm">
-            <button type="button" onclick="sendDeleteRequest()">Reset</button>
-        </form>
+            <hr>
+
+            <h1>Upload .zip package</h1>
+            <div class="file-upload-container">
+                <input type="file" id="fileInput" accept=".zip" onchange="updateFileName()">
+                <label class="custom-file-upload" for="fileInput">
+                    <span id="fileNameLabel">Add .Zip File</span>
+                </label>
+                <button type="button" onclick="listFiles()">Upload</button>
+            </div>
+            <div id="ZipPackageUploadContainer"></div>
+
+            <hr>
+
+            <h1>Search Package By Regex</h1>
+            <form>
+                <label for="regex">Search Regex:</label>
+                <input type="text" id="packageName" name="Regex" required><br>
+                <button type="button" onclick="packageRegex()">Search RegEx</button>
+            </form>
+            <div id="resultContainer"></div>
+
+            <hr>
+
+            <h1>Package By Name Operations</h1>
+            <form id="packageByNameForm">
+                <label for="packageName">Package Name:</label>
+                <input type="text" id="packageName" name="packageName" required>
+                
+                <select id="operation" name="operation">
+                    <option value="delete">Delete</option>
+                    <option value="get">Get</option>
+                </select>
+                <br>
+                <button type="button" onclick="performPackageOperation()">Submit</button>
+            </form>
+            
+            <hr>
+
+            <h1>Package By ID Operations</h1>
+            <form id="packageByIdForm">
+                <label for="packageId">Package ID:</label>
+                <input type="text" id="packageId" name="packageId" required>
+                
+                <select id="operation" name="operation">
+                    <option value="delete">Delete</option>
+                    <option value="get">Get</option>
+                    <option value="Put">Put</option>
+                </select>
+                <br>
+                <button type="button" onclick="performPackageOperation()">Submit</button>
+            </form>
+            
+            <hr>
+            <br>
+        </div>
+
+        <div id="right-section">
+            <h1>Packages inside database</h1>
+            <button id="showPackagesButton" onclick="showPackages()">Show Packages</button>
+            <div id="packagesList"></div>
+        </div>
+
+<!---------------------------------------------- Below is Javascript ---------------------------------------------------------------------->  
+<!---------------------------------------------- Below is Javascript ---------------------------------------------------------------------->  
+<!---------------------------------------------- Below is Javascript ---------------------------------------------------------------------->  
 
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-        
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
+            async function showPackages() {
+                try {
+                    const requestBody = [
+                        {
+                            "Version": "*",
+                            "Name": "*"
+                        }
+                    ];
+
+                    const response = await axios.post('/packages', requestBody, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Authorization': '1' // Replace with your JWT token or any other authorization token
+                        },
+                    });
+
+                    const packagesListContainer = document.getElementById('packagesList');
+                    packagesListContainer.innerHTML = ''; // Clear previous content
+
+                    if (response.data && response.data.length > 0) {
+                        const ul = document.createElement('ul');
+                        let x = 0;
+                        response.data.forEach(packageInfo => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <strong>Package Name: </strong>${packageInfo.Name}<br>
+                                &nbsp;&nbsp;&nbsp;<strong>ID: </strong>${packageInfo.ID}<br>
+                                &nbsp;&nbsp;&nbsp;<strong>Version: </strong>${packageInfo.Version}
+                            `;
+                            ul.appendChild(li);
+                        });
+                        packagesListContainer.appendChild(ul);
+
+                        // Display total number of packages
+                        const totalCountParagraph = document.createElement('h3');
+                        totalCountParagraph.textContent = `Total Packages: ${response.data.length}`;
+                        packagesListContainer.appendChild(totalCountParagraph);
+                    } else {
+                        packagesListContainer.textContent = 'No packages found.';
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: `Show Packages Error`,
+                        text: `Auth token invalid. Please log in or provide a valid token`,
+                        showConfirmButton: true
+                    });
+                }
+            }
+
+            async function addUser() {
+                const addUserForm = document.getElementById('addUserForm');
+                const usernameInput = addUserForm.elements['username'];
+                const passwordInput = addUserForm.elements['password'];
+
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+
+                if (!username || !password) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'Cannot add a user with no username/password!',
+                    });
+                    return;
+                }
+
+                try {
+                    const response = await axios.post('/addUser', {
+                        username: username,
+                        password: password
+                    });
+
+                    // Check the response and show a customized notification
+                    if (response.data === 'User added successfully') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: `User ${usernameInput.value} added successfully`,
+                            showConfirmButton: false,
+                            timer: 2300
+                        });
+
+                        // Clear input fields after successful user addition
+                        addUserForm.elements['username'].value = '';
+                        addUserForm.elements['password'].value = '';
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: `Failed to add user ${usernameInput.value}`,
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error in addUser:', error.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Internal Server Error',
+                        text: 'Please try again later',
+                    });
+                }
+            }
+
+            async function loginUser() {
+                const loginForm = document.getElementById('loginForm');
+                const loginUsernameInput = loginForm.elements['loginUsername'];
+                const loginPasswordInput = loginForm.elements['loginPassword'];
+
+                const loginUsername = loginUsernameInput.value;
+                const loginPassword = loginPasswordInput.value;
+
+                if (!loginUsername || !loginUsername) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'Missing Username/Password!',
+                    });
+                    return;
+                }
+                try {
+                    const response = await axios.post('/loginUser', {
+                        loginUsername: loginUsername,
+                        loginPassword: loginPassword
+                    });
+                    
+                    if (response.data === 'Login Successful') {
+                        //alert box for successful login
+                        Swal.fire({
+                            icon: 'success',
+                            title: `Welcome ${loginUsernameInput.value}!`,
+                            text: 'Login successful. Auth token set!',
+                            showConfirmButton: false,
+                            timer: 2300
+                        });
+                        loginUsernameInput.value = '';
+                        loginPasswordInput.value = '';
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Incorrect Username/Password',
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error in loginUser:', error.message);
+                    alert('Internal Server Error');
+                }
+            }
+
+            function updateFileName() {
+                const fileInput = document.getElementById('fileInput');
+                const fileNameLabel = document.getElementById('fileNameLabel');
+
+                if (fileInput.files.length > 0) {
+                    const fileName = fileInput.files[0].name;
+                    fileNameLabel.textContent = fileName;
+                } else {
+                    fileNameLabel.textContent = 'Add .Zip File';
+                }
+            }
+
             async function packageRegex() {
                 const packageName = document.getElementById('packageName').value;
                 try {
+
+                    if(!packageName){
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Oops...',
+                            text: 'Please enter a regex expression!',
+                        });
+                        return;
+                    }
                     const response = await fetch('/package/byRegEx', {
                         method: 'POST',
                         headers: {
@@ -85,6 +461,24 @@
                         const result = await response.json();
                         displayResult(result);
                     } else {
+                        const resultContainer = document.getElementById('resultContainer');
+                        if(response.status == 500){
+                            Swal.fire({
+                                icon: 'warning',
+                                title: `Upload Error`,
+                                text: `Auth token invalid. Please log in or provide a valid token`,
+                                showConfirmButton: true
+                            });
+                        }
+                        else{
+                            Swal.fire({
+                                icon: 'error',
+                                title: `Search error`,
+                                text: `Error: No matching package with regex exp \'${packageName}\'`,
+                                showConfirmButton: true
+                            });
+                            resultContainer.textContent = `Error: No Matching Package with Regex exp \'${packageName}\'`;
+                        }
                         console.error('Failed to fetch data:', response.status, response.statusText);
                     }
                 } catch (error) {
@@ -94,18 +488,18 @@
 
             async function deletePackage()
             {
-                const packageName = document.getElementById('packageNameDelete').value;
-                const response = await fetch('/package/byName' , {
-                    method: 'DELETE',
-                    headers: {
-                            'Content-Type': 'application/json',
-                            'X-Authorization': '1'
-                        },
-                        body: packageNameDelete,
-                    });
+            const packageName = document.getElementById('packageNameDelete').value;
+            const response = await fetch('/package/byName' , {
+                method: 'DELETE',
+                headers: {
+                        'Content-Type': 'application/json',
+                        'X-Authorization': '1'
+                    },
+                    body: packageNameDelete,
+                });
 
 
-                };
+            };
 
             
             
@@ -128,10 +522,13 @@
 
             function listFiles() {
                 const fileInput = document.getElementById('fileInput');
-                const fileList = document.getElementById('fileList');
 
                 if (!fileInput.files || fileInput.files.length === 0) {
-                    alert('Please select a .zip file.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Warning!',
+                        text: 'Please add a .Zip file',
+                    });
                     return;
                 }
 
@@ -143,16 +540,11 @@
                     const zipContent = event.target.result;
 
                     zip.loadAsync(zipContent).then(function (contents) {
-                        fileList.innerHTML = ''; // Clear existing list
 
                         let packageJsonExists = false;
                         let packageJsonContent = '';
 
                         contents.forEach(function (relativePath, zipEntry) {
-                            const listItem = document.createElement('li');
-                            listItem.textContent = relativePath;
-                            fileList.appendChild(listItem);
-
                             // Check if the file name contains package.json
                             if (relativePath.includes('package.json')) {
                                 packageJsonExists = true;
@@ -178,14 +570,37 @@
                                                 },
                                             })
                                             .then(response => {
+                                                const ZipPackageUploadContainer = document.getElementById('ZipPackageUploadContainer');
+                                                Swal.fire({
+                                                    icon: 'success',
+                                                    title: `Success`,
+                                                    html: `Zip package <strong>${response.data["metadata"]["Name"]}</strong> upload successfully`,
+                                                    showConfirmButton: true
+                                                });
+                                                ZipPackageUploadContainer.innerHTML = `Zip package <strong>${response.data["metadata"]["Name"]}</strong> upload successfully`;
                                                 console.log(response.data);
-                                                uploadStatus.textContent = "File Uploaded Successfully";
                                             })
                                             .catch(error => {
+                                                const ZipPackageUploadContainer = document.getElementById('ZipPackageUploadContainer');
+                                                if(error.response.status == 500){
+                                                    Swal.fire({
+                                                        icon: 'warning',
+                                                        title: `Upload Error`,
+                                                        text: `'Auth token invalid. Please log in or provide a valid token'`,
+                                                        showConfirmButton: true
+                                                    });
+                                                }
+                                                else{
+                                                    Swal.fire({
+                                                        icon: 'error',
+                                                        title: `Upload Error`,
+                                                        text: `Error: ${error.response.data["Error"]}`,
+                                                        showConfirmButton: true
+                                                    });
+                                                    ZipPackageUploadContainer.innerHTML = "Error: " + error.response.data["Error"];
+                                                }
                                                 console.error(error);
-                                                uploadStatus.textContent = error;
                                             });
-                                            alert('GitHub Repository: ' + githubRepository);
                                         } else {
                                             alert('GitHub repository not found in package.json.');
                                         }
@@ -206,38 +621,6 @@
                 zipReader.readAsArrayBuffer(zipFile);
             }
 
-
-
-
-            function uploadFile() {
-                const fileInput = document.getElementById('fileInput');
-                const uploadStatus = document.getElementById('uploadStatus');
-        
-                const formData = new FormData();
-                formData.append('file', fileInput.files[0]);
-                console.log("FILES", fileInput.files[0]);
-                
-                const jsProgram = "if (process.argv.length === 7) {\nconsole.log('Success')\nprocess.exit(0)\n} else {\nconsole.log('Failed')\nprocess.exit(1)\n}\n";
-                const requestBody = {
-                    JSProgram: jsProgram,
-                    Content: ".zip file"
-                };
-                axios.post('/package', requestBody, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Authorization': '1' // Replace with your JWT token
-                    },
-                })
-                .then(response => {
-                    console.log(response.data);
-                    uploadStatus.textContent = "File Uploaded Successfully";
-                })
-                .catch(error => {
-                    console.error(error);
-                    uploadStatus.textContent = error;
-                });
-            }
-
             function sendDeleteRequest() {
                 axios.delete('/reset', {
                     headers: {
@@ -247,8 +630,28 @@
                 })
                 .then(response => {
                     console.log(response.data);
+                    Swal.fire({
+                        icon: 'success',
+                        title: `Reset complete!`,
+                        text: 'Reset successful. Database and Auth key resetted!',
+                        showConfirmButton: false,
+                        timer: 2300
+                    });
+                    const packagesListContainer = document.getElementById('packagesList');
+                    packagesListContainer.innerHTML = ''; // Clear previous content
                 })
                 .catch(error => {
+                    if(error.response.status == 500){
+                        Swal.fire({
+                            icon: 'error',
+                            title: `Oops...`,
+                            text: 'Auth token invalid. Please log in or provide a valid token',
+                            showConfirmButton: true
+                        });
+                    }
+                    else{
+                        alert(error);
+                    }
                     console.error(error);
                 });
             }
@@ -273,9 +676,35 @@
                     },
                 })
                 .then(response => {
+                    const PackageUploadContainer = document.getElementById('PackageUploadContainer');
+                    Swal.fire({
+                        icon: 'success',
+                        title: `Success`,
+                        html: `Package <strong>${response.data["metadata"]["Name"]}</strong> Uploaded Successfully`,
+                        showConfirmButton: true
+                    });
+                    PackageUploadContainer.innerHTML = `Package <strong>${response.data["metadata"]["Name"]}</strong> Uploaded Successfully`;
                     console.log(response.data);
                 })
                 .catch(error => {
+                    const PackageUploadContainer = document.getElementById('PackageUploadContainer');
+                    if(error.response.status == 500){
+                        Swal.fire({
+                            icon: 'warning',
+                            title: `Oops...`,
+                            text: 'Auth token invalid. Please log in or provide a valid token',
+                            showConfirmButton: true
+                        });
+                    }
+                    else{
+                        Swal.fire({
+                            icon: 'error',
+                            title: `Upload Error`,
+                            text: `Error: ${error.response.data["Error"]}`,
+                            showConfirmButton: true
+                        });
+                        PackageUploadContainer.textContent = "Error: " + error.response.data["Error"];
+                    }
                     console.error(error);
                 });
             }

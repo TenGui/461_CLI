@@ -35,7 +35,6 @@ export function validateToken(token){
         decodedToken = jwt.verify(unbearered, secret);
     } 
     catch(err) {
-        //console.error(err);
         return {"success":-1, "token": null};
     }
     return {"success":1, "token": decodedToken};

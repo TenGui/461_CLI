@@ -36,9 +36,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserPost = exports.UserDelete = exports.MyPage = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.PackageByNameDelete = exports.CreateAuthToken = void 0;
+exports.PackageByNameDelete = exports.UserPost = exports.UserDelete = exports.MyPage = exports.RegistryReset = exports.PackagesList = exports.PackageUpdate = exports.PackageRetrieve = exports.PackageRate = exports.PackageDelete = exports.PackageCreate = exports.PackageByRegExGet = exports.PackageByNameGet = exports.CreateAuthToken = void 0;
 var writer_1 = require("../utils/writer"); // Import the response function
 var path = require("path");
+var compare_versions_1 = require("compare-versions");
 var authHelper = require("../authentication/authenticationHelper");
 var _a = require("../database_files/database_connect"), db = _a.db, promisePool = _a.promisePool;
 // const queryAsync = util.promisify(pool.query);
@@ -76,7 +77,7 @@ function CreateAuthToken(body) {
                             canUpload: result[0].canUpload,
                             canDownload: result[0].canDownload
                         });
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, "\"bearer " + token + "\"")];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, "\"bearer " + token)];
                     }
                     else {
                         //console.log("bad password");
@@ -95,36 +96,50 @@ exports.CreateAuthToken = CreateAuthToken;
  * @param name PackageName
  * @returns void
  **/
-function PackageByNameDelete(name, xAuthorization) {
+function PackageByNameGet(name, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var query, results, error_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var query, _a, rows, fields, output, error_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    query = 'DELETE FROM PackageMetadata WHERE Name = ?';
-                    _a.label = 1;
+                    query = 'SELECT * FROM PackageMetadata WHERE Name = ?';
+                    _b.label = 1;
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
+                    _b.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, db.promise().execute(query, [name])];
                 case 2:
-                    results = (_a.sent())[0];
-                    if (results.affectedRows > 0) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, { success: 'Package deleted successfully' })];
+                    _a = _b.sent(), rows = _a[0], fields = _a[1];
+                    console.log('Results:', rows);
+                    if (rows.length > 0) {
+                        output = rows.map(function (pkg) { return ({
+                            User: {
+                                name: 'Pranav',
+                                isAdmin: true
+                            },
+                            Date: pkg.date_column.toISOString(),
+                            PackageMetadata: {
+                                Name: pkg.Name,
+                                Version: pkg.version,
+                                ID: pkg.id
+                            },
+                            Action: 'DOWNLOAD'
+                        }); });
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, output)];
                     }
                     else {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: 'No package found with the specified name' })];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "No package found" })];
                     }
                     return [3 /*break*/, 4];
                 case 3:
-                    error_1 = _a.sent();
+                    error_1 = _b.sent();
                     console.error(error_1);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'Internal Server Error' })];
                 case 4: return [2 /*return*/];
             }
         });
     });
 }
-exports.PackageByNameDelete = PackageByNameDelete;
+exports.PackageByNameGet = PackageByNameGet;
 // Your code here
 /**
  * Return the history of this package (all versions).
@@ -133,44 +148,6 @@ exports.PackageByNameDelete = PackageByNameDelete;
  * @param xAuthorization AuthenticationToken
  * @returns List
  **/
-function PackageByNameGet(name, xAuthorization) {
-    return __awaiter(this, void 0, void 0, function () {
-        var examples;
-        return __generator(this, function (_a) {
-            examples = {};
-            examples['application/json'] = [
-                {
-                    "Action": "CREATE",
-                    "User": {
-                        "name": "Alfalfa",
-                        "isAdmin": true
-                    },
-                    "PackageMetadata": {
-                        "Version": "1.2.3",
-                        "ID": "ID",
-                        "Name": "Name"
-                    },
-                    "Date": "2023-03-23T23:11:15Z"
-                },
-                {
-                    "Action": "CREATE",
-                    "User": {
-                        "name": "Alfalfa",
-                        "isAdmin": true
-                    },
-                    "PackageMetadata": {
-                        "Version": "1.2.3",
-                        "ID": "ID",
-                        "Name": "Name"
-                    },
-                    "Date": "2023-03-23T23:11:15Z"
-                },
-            ];
-            return [2 /*return*/, examples['application/json']];
-        });
-    });
-}
-exports.PackageByNameGet = PackageByNameGet;
 /**
  * Get any packages fitting the regular expression.
  * Search for a package using a regular expression over package names and READMEs. This is similar to search by name.
@@ -211,7 +188,7 @@ function PackageByRegExGet(body, xAuthorization) {
                 case 3:
                     error_2 = _b.sent();
                     console.error(error_2);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'Internal Server Error' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'Internal Server Error' })];
                 case 4: return [2 /*return*/];
             }
         });
@@ -257,7 +234,7 @@ function PackageCreate(body, xAuthorization) {
                     Name = output_1["repo"];
                     Content = 'N/A';
                     URL = output_1["url"];
-                    Version = "1.0.0.8.2";
+                    Version = "1.0.5";
                     return [3 /*break*/, 5];
                 case 2:
                     if (!("Content" in body)) return [3 /*break*/, 5];
@@ -277,7 +254,7 @@ function PackageCreate(body, xAuthorization) {
                     Name = output_2["repo"];
                     Content = "Content";
                     URL = 'N/A';
-                    Version = "1.0.0.8.2";
+                    Version = "1.0.0";
                     _b.label = 5;
                 case 5: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
                 case 6:
@@ -337,12 +314,10 @@ function PackageDelete(id, xAuthorization) {
             switch (_b.label) {
                 case 0:
                     _b.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, promisePool.execute('CALL PackageDelete(?)', [
-                            id
-                        ])];
+                    return [4 /*yield*/, promisePool.execute('CALL PackageDelete(?)', [id])];
                 case 1:
                     _a = _b.sent(), result = _a[0], fields = _a[1];
-                    if (result.affectedRows == 1) {
+                    if (result.affectedRows === 1) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(200)];
                     }
                     else {
@@ -384,14 +359,14 @@ function PackageRate(id, xAuthorization) {
                     output = _b.sent();
                     hasInvalidScore = Object.values(output).some(function (score) { return score === -1; });
                     if (hasInvalidScore) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'The package rating system choked on at least one of the metrics.' })];
                     }
                     return [2 /*return*/, (0, writer_1.respondWithCode)(200, output)];
-                case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { error: "Package does not exist." })];
+                case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "Package does not exist." })];
                 case 4: return [3 /*break*/, 6];
                 case 5:
                     error_5 = _b.sent();
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { error: 'The package rating system choked on at least one of the metrics.' })];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'The package rating system choked on at least one of the metrics.' })];
                 case 6: return [2 /*return*/];
             }
         });
@@ -408,18 +383,18 @@ exports.PackageRate = PackageRate;
  **/
 function PackageRetrieve(id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var results, error_6;
+        var query, values, results, error_6;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, promisePool.execute('CALL GetPackage(?)', [
-                            id,
-                        ])];
+                    query = 'CALL GetPackage(?)';
+                    values = [id];
+                    return [4 /*yield*/, promisePool.execute(query, values)];
                 case 1:
                     results = (_a.sent())[0];
                     console.log(results);
-                    if (results[0].length == 0) {
+                    if (results[0].length === 0) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
                     }
                     else {
@@ -429,7 +404,7 @@ function PackageRetrieve(id, xAuthorization) {
                 case 2:
                     error_6 = _a.sent();
                     console.error('Error calling the stored procedure:', error_6);
-                    throw error_6; // Re-throw the error for the caller to handle
+                    throw error_6;
                 case 3: return [2 /*return*/];
             }
         });
@@ -480,7 +455,7 @@ function PackageUpdate(body, id, xAuthorization) {
                 case 2:
                     error_7 = _a.sent();
                     console.log(error_7);
-                    return [3 /*break*/, 3];
+                    throw error_7;
                 case 3: return [2 /*return*/];
             }
         });
@@ -498,22 +473,95 @@ exports.PackageUpdate = PackageUpdate;
  **/
 function PackagesList(body, offset, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var examples;
-        return __generator(this, function (_a) {
-            examples = {};
-            examples['application/json'] = [
-                {
-                    "Version": "1.2.3",
-                    "ID": "ID",
-                    "Name": "Name",
-                },
-                {
-                    "Version": "1.2.3",
-                    "ID": "ID",
-                    "Name": "Name",
-                },
-            ];
-            return [2 /*return*/, examples['application/json']];
+        var response, _i, body_1, query, Name, VersionRange, lower, upper, _a, result_1, fields_1, table_1, row, nextPatch, splitVersion, splitVersion, splitVersion, _b, result, fields, table, idsInRange, row, range, _c, idsInRange_1, id, _d, result_2, fields_2, basicMetadata;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
+                case 0:
+                    response = { 'application/json': [] };
+                    _i = 0, body_1 = body;
+                    _e.label = 1;
+                case 1:
+                    if (!(_i < body_1.length)) return [3 /*break*/, 10];
+                    query = body_1[_i];
+                    Name = query["Name"];
+                    VersionRange = query["Version"];
+                    if (!(Name == "*")) return [3 /*break*/, 3];
+                    return [4 /*yield*/, promisePool.execute('SELECT Version, ID, Name FROM PackageMetadata', [])];
+                case 2:
+                    _a = _e.sent(), result_1 = _a[0], fields_1 = _a[1];
+                    table_1 = result_1;
+                    console.log(result_1, table_1);
+                    if (result_1.length > 500) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(413, "Too many packages")];
+                    }
+                    for (row = 0; row < result_1.length; row++) {
+                        response['application/json'].push(result_1[row]);
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    if (VersionRange.includes("-")) { // specific range
+                        lower = VersionRange.split("-")[0];
+                        upper = VersionRange.split("-")[1];
+                        nextPatch = parseInt(upper.split(".")[2]) + 1;
+                        upper = upper.substring(0, upper.length - 1) + nextPatch.toString();
+                    }
+                    else if (VersionRange.includes("^")) { // [2.3.1 - 3.0.0)
+                        lower = VersionRange.substring(1, VersionRange.length);
+                        splitVersion = lower.split(".");
+                        splitVersion[0] = (parseInt(splitVersion[0]) + 1).toString();
+                        splitVersion[1] = "0";
+                        splitVersion[2] = "0";
+                        upper = splitVersion.join(".");
+                    }
+                    else if (VersionRange.includes("~")) { // [2.3.1 - 2.4.0)
+                        lower = VersionRange.substring(1, VersionRange.length);
+                        splitVersion = lower.split(".");
+                        splitVersion[1] = (parseInt(splitVersion[1]) + 1).toString();
+                        splitVersion[2] = "0";
+                        upper = splitVersion.join(".");
+                    }
+                    else { //Exact
+                        lower = VersionRange;
+                        splitVersion = lower.split(".");
+                        splitVersion[2] = (parseInt(splitVersion[2]) + 1).toString();
+                        upper = splitVersion.join(".");
+                    }
+                    _e.label = 4;
+                case 4: return [4 /*yield*/, promisePool.execute('CALL GetIdVersionMapForPackage(?)', [Name])];
+                case 5:
+                    _b = _e.sent(), result = _b[0], fields = _b[1];
+                    table = result[0];
+                    if (table.length > 500) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(413, "Too many packages")];
+                    }
+                    idsInRange = [];
+                    for (row = 0; row < table.length; row++) {
+                        range = lower + " - " + upper;
+                        if ((0, compare_versions_1.satisfies)(table[row]["version"], range)) {
+                            idsInRange.push(table[row]["id"]);
+                        }
+                    }
+                    _c = 0, idsInRange_1 = idsInRange;
+                    _e.label = 6;
+                case 6:
+                    if (!(_c < idsInRange_1.length)) return [3 /*break*/, 9];
+                    id = idsInRange_1[_c];
+                    return [4 /*yield*/, promisePool.execute('CALL GetBasicMetadata(?)', [id])];
+                case 7:
+                    _d = _e.sent(), result_2 = _d[0], fields_2 = _d[1];
+                    basicMetadata = result_2[0][0];
+                    response['application/json'].push(basicMetadata);
+                    _e.label = 8;
+                case 8:
+                    _c++;
+                    return [3 /*break*/, 6];
+                case 9:
+                    _i++;
+                    return [3 /*break*/, 1];
+                case 10: 
+                //console.log("\n\nRETURNED RESPONSE: ", response);
+                return [2 /*return*/, (0, writer_1.respondWithCode)(200, response['application/json'])];
+            }
         });
     });
 }
@@ -609,3 +657,38 @@ function UserPost(body, xAuthorization) {
     });
 }
 exports.UserPost = UserPost;
+// 'use strict';
+// import { Request, Response } from 'express';
+// import { pool } from '../index.js';
+// import type { AuthenticationRequest, AuthenticationToken, PackageName, PackageRegEx, PackageData, PackageMetadata, PackageID, PackageRating, Package, List } from '../utils/types';
+// import util from 'util';
+// /**
+//  * Create an access token.
+//  *
+//  * @param body AuthenticationRequest 
+//  * @returns AuthenticationToken
+//  **/
+// export function CreateAuthToken(body: AuthenticationRequest) {
+//   return new Promise(function(resolve, reject) {
+//     const examples: any = {};
+//     examples['application/json'] = "";
+//     if (Object.keys(examples).length > 0) {
+//       resolve(examples[Object.keys(examples)[0]]);
+//     } else {
+//       //resolve();
+//     }
+//   });
+// }
+/**
+ * Delete all versions of this package.
+ *
+ * @param xAuthorization AuthenticationToken
+ * @param name PackageName
+ * @returns void
+ **/
+function PackageByNameDelete(xAuthorization, name) {
+    return new Promise(function (resolve, reject) {
+        // resolve();
+    });
+}
+exports.PackageByNameDelete = PackageByNameDelete;

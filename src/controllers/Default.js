@@ -41,6 +41,7 @@ var Default = require("../service/DefaultService");
 var writer_1 = require("../utils/writer");
 var database_connect_1 = require("../database_files/database_connect");
 var authenticationHelper_1 = require("../authentication/authenticationHelper");
+var globalToken = "";
 function handleRequestAsync(fn, req, res, next) {
     var args = [];
     for (var _i = 4; _i < arguments.length; _i++) {
@@ -54,9 +55,13 @@ function handleRequestAsync(fn, req, res, next) {
                     //Check if the token is valid. If the token is invalid, send error response. If not, pass json body to the service
                     //console.log("request path: " + req.path);
                     if (req.path != "/authenticate") {
+                        tokenOut = {};
                         tokenOut = (0, authenticationHelper_1.validateToken)(req.header('X-Authorization'));
                         if (tokenOut["success"] != 1) {
-                            return [2 /*return*/, res.status(400).send("Bad Token")];
+                            tokenOut = (0, authenticationHelper_1.validateToken)(globalToken);
+                        }
+                        if (tokenOut["success"] != 1) {
+                            return [2 /*return*/, res.status(400).send({ "Error": "Bad Auth token/Auth Token not set" })];
                         }
                         //if the token is valid, replace the token string in the args with it's json body
                         args.pop();
@@ -74,6 +79,9 @@ function handleRequestAsync(fn, req, res, next) {
                 case 2:
                     response = _a.sent();
                     (0, writer_1.writeJson)(res, response);
+                    if (req.path == "/reset") {
+                        globalToken = "";
+                    }
                     return [3 /*break*/, 4];
                 case 3:
                     error_1 = _a.sent();
@@ -104,9 +112,7 @@ function PackageByNameDelete(req, res, next, name, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    console.log("createAuthToken: default.ts");
-                    return [4 /*yield*/, handleRequestAsync(Default.PackageByNameDelete, req, res, next, name, xAuthorization)];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageByNameDelete, req, res, next, name, xAuthorization)];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -256,12 +262,9 @@ function RegistryReset(req, res, next, xAuthorization) {
             switch (_a.label) {
                 case 0: 
                 // const xAuthorization = req.headers['x-authorization'];
-                return [4 /*yield*/, (0, reset_endpoint_js_1.resetDatabase)(res)];
+                return [4 /*yield*/, handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization)];
                 case 1:
                     // const xAuthorization = req.headers['x-authorization'];
-                    _a.sent();
-                    return [4 /*yield*/, handleRequestAsync(Default.RegistryReset, req, res, next, req.header('X-Authorization'))];
-                case 2:
                     _a.sent();
                     return [2 /*return*/];
             }
@@ -275,8 +278,8 @@ function addUser(req, res, next) {
         return __generator(this, function (_b) {
             try {
                 _a = req.body, username = _a.username, password = _a.password;
-                query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-                database_connect_1.db.query(query, [username, password], function (err) {
+                query = 'INSERT INTO Auth (user, pass, canSearch, canUpload, canDownload, isAdmin) VALUES (?, ?, ?, ?, ?, ?)';
+                database_connect_1.db.query(query, [username, password, true, true, true, true], function (err) {
                     if (err)
                         throw err;
                     res.send('User added successfully');
@@ -291,24 +294,57 @@ function addUser(req, res, next) {
     });
 }
 exports.addUser = addUser;
+var axios_1 = require("axios");
 function loginUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var _a, loginUsername, loginPassword, query;
+        var _this = this;
         return __generator(this, function (_b) {
             try {
                 _a = req.body, loginUsername = _a.loginUsername, loginPassword = _a.loginPassword;
-                query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-                database_connect_1.db.query(query, [loginUsername, loginPassword], function (err, results) {
-                    console.log(results[0]);
-                    if (err)
-                        throw err;
-                    if (results[0] == undefined) {
-                        res.send('Login Failed');
-                    }
-                    else {
-                        res.send('Login Successful');
-                    }
-                });
+                query = 'SELECT * FROM Auth WHERE user = ? AND pass = ?';
+                database_connect_1.db.query(query, [loginUsername, loginPassword], function (err, results) { return __awaiter(_this, void 0, void 0, function () {
+                    var adminJson, serverUrl, authenticateResponse, token, authenticateError_1;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                console.log(results[0]);
+                                if (err)
+                                    throw err;
+                                if (!(results[0] === undefined)) return [3 /*break*/, 1];
+                                res.send('Login Failed');
+                                return [3 /*break*/, 5];
+                            case 1:
+                                adminJson = {
+                                    "User": {
+                                        "name": results[0].user,
+                                        "isAdmin": true
+                                    },
+                                    "Secret": {
+                                        "password": results[0].pass
+                                    }
+                                };
+                                _a.label = 2;
+                            case 2:
+                                _a.trys.push([2, 4, , 5]);
+                                serverUrl = process.env.SERVER_URL || 'http://localhost:3000';
+                                return [4 /*yield*/, axios_1.default.put("".concat(serverUrl, "/authenticate"), adminJson)];
+                            case 3:
+                                authenticateResponse = _a.sent();
+                                console.log(authenticateResponse.data);
+                                token = authenticateResponse.data;
+                                globalToken = token;
+                                res.send('Login Successful');
+                                return [3 /*break*/, 5];
+                            case 4:
+                                authenticateError_1 = _a.sent();
+                                console.error('Error in /authenticate:', authenticateError_1.message);
+                                res.status(500).send('Internal Server Error');
+                                return [3 /*break*/, 5];
+                            case 5: return [2 /*return*/];
+                        }
+                    });
+                }); });
             }
             catch (error) {
                 // Handle any errors

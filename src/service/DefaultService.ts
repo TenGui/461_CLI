@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { respondWithCode } from '../utils/writer'; // Import the response function
 import type { AuthenticationRequest, AuthenticationToken, PackageName, PackageRegEx, PackageData, PackageMetadata, PackageID, PackageRating, Package, List, newUser } from '../utils/types';
 import * as path from 'path';
+import { satisfies } from 'compare-versions';
 import {
   ConnectionOptions,
   ResultSetHeader,
@@ -57,7 +58,7 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
         canDownload: result[0].canDownload
       });
 
-      return respondWithCode(200, "\"bearer "+ token + "\"");
+      return respondWithCode(200, "\"bearer "+ token);
 
     } else {
       //console.log("bad password");
@@ -75,24 +76,42 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
  * @returns void
  **/
 
-export async function PackageByNameDelete(name: PackageName, xAuthorization: AuthenticationToken, ){
 
 
-  const query = 'DELETE FROM PackageMetadata WHERE Name = ?';
+export async function PackageByNameGet(name: PackageName, xAuthorization: AuthenticationToken) {
+  var query = 'SELECT * FROM PackageMetadata WHERE Name = ?';
 
   try {
-    const [results] = await db.promise().execute(query, [name]);
+    const [rows, fields] = await db.promise().execute(query, [name]);
 
-    if (results.affectedRows > 0) {
-      return respondWithCode(200, {success: 'Package deleted successfully'});
+    console.log('Results:', rows);
+
+    if (rows.length > 0) {
+      // Construct an array of packages in the desired format
+      const output = rows.map((pkg: RowDataPacket) => ({
+        User: {
+          name: 'Pranav',
+          isAdmin: true
+        },
+        Date: pkg.date_column.toISOString(),
+        PackageMetadata: {
+          Name: pkg.Name,
+          Version: pkg.version,
+          ID: pkg.id
+        },
+        Action: 'DOWNLOAD'
+      }));
+      
+      return respondWithCode(200, output);
     } else {
-      return respondWithCode(404, { error: 'No package found with the specified name' });
+      return respondWithCode(404, {"Error" : "No package found"});
     }
   } catch (error) {
     console.error(error);
-    return respondWithCode(500, { error: 'Internal Server Error' });
+    return respondWithCode(500, { "Error": 'Internal Server Error' });
   }
 }
+
 
 
 
@@ -109,39 +128,9 @@ export async function PackageByNameDelete(name: PackageName, xAuthorization: Aut
  * @param xAuthorization AuthenticationToken 
  * @returns List
  **/
-export async function PackageByNameGet(name: PackageName, xAuthorization: AuthenticationToken) {
-  const examples: any = {};
-  examples['application/json'] = [
-    {
-      "Action": "CREATE",
-      "User": {
-        "name": "Alfalfa",
-        "isAdmin": true
-      },
-      "PackageMetadata": {
-        "Version": "1.2.3",
-        "ID": "ID",
-        "Name": "Name"
-      },
-      "Date": "2023-03-23T23:11:15Z"
-    },
-    {
-      "Action": "CREATE",
-      "User": {
-        "name": "Alfalfa",
-        "isAdmin": true
-      },
-      "PackageMetadata": {
-        "Version": "1.2.3",
-        "ID": "ID",
-        "Name": "Name"
-      },
-      "Date": "2023-03-23T23:11:15Z"
-    },
-  ];
 
-  return examples['application/json'];
-}
+  
+
 
 /**
  * Get any packages fitting the regular expression.
@@ -176,7 +165,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
     }
   } catch (error) {
     console.error(error);
-    return respondWithCode(500, { error: 'Internal Server Error' });
+    return respondWithCode(500, { "Error": 'Internal Server Error' });
   }
 }
 
@@ -215,7 +204,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Name = output["repo"];
       Content = 'N/A';
       URL = output["url"];
-      Version = "1.0.0.8.2";
+      Version = "1.0.5";
       //JSProgram = body["JSProgram"];
     }
     else if("Content" in body){
@@ -232,7 +221,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Name = output["repo"];
       Content = "Content";
       URL = 'N/A';
-      Version = "1.0.0.8.2";
+      Version = "1.0.0";
     }
     
     //Check if the inserted package already exists
@@ -287,21 +276,22 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
  **/
 export async function PackageDelete(id: PackageID, xAuthorization: AuthenticationToken) {
   try {
-    const [result, fields] = await promisePool.execute('CALL PackageDelete(?)', [
-      id
-    ]);
+
+    const [result, fields] = await (promisePool.execute as any)('CALL PackageDelete(?)', [id]);
+
     
-    if(result.affectedRows == 1) {
-      return respondWithCode(200)
-    }
-    else {
+    if (result.affectedRows === 1) {
+      return respondWithCode(200);
+    } else {
       return respondWithCode(404);
     }
   } catch (error) {
-    console.log(error)
-    throw error
+    console.log(error);
+    throw error;
   }
 }
+
+
 
 /**
  *
@@ -325,16 +315,16 @@ export async function PackageRate(id: PackageID, xAuthorization: AuthenticationT
 
       const hasInvalidScore = Object.values(output).some(score => score === -1);
       if (hasInvalidScore) {
-        return respondWithCode(500, {error: 'The package rating system choked on at least one of the metrics.'});
+        return respondWithCode(500, {"Error": 'The package rating system choked on at least one of the metrics.'});
       }
 
       return respondWithCode(200, output);
       
     } else {
-      return respondWithCode(404, {error: "Package does not exist."});
+      return respondWithCode(404, {"Error": "Package does not exist."});
     }
   } catch (error) {
-    return respondWithCode(500, {error: 'The package rating system choked on at least one of the metrics.'});
+    return respondWithCode(500, {"Error": 'The package rating system choked on at least one of the metrics.'});
   }
 }
 
@@ -347,29 +337,26 @@ export async function PackageRate(id: PackageID, xAuthorization: AuthenticationT
  * @returns Package
  **/
 export async function PackageRetrieve(id: PackageID, xAuthorization: AuthenticationToken) {
-  try{
+  try {
+    const query = 'CALL GetPackage(?)';
+    const values: [PackageID] = [id];
 
-    // interface test extends RowDataPacket {
-    //   ID: JSON;
-    // }
+    const [results] = await (promisePool.execute as any)(query, values);
 
-    const [results] = await promisePool.execute('CALL GetPackage(?)', [
-      id,
-    ]);
 
-    console.log(results)
+    console.log(results);
 
-    if(results[0].length == 0) {
+    if (results[0].length === 0) {
       return respondWithCode(404);
-    }
-    else {
+    } else {
       return respondWithCode(200, results[0][0]);
     }
   } catch (error) {
     console.error('Error calling the stored procedure:', error);
-    throw error; // Re-throw the error for the caller to handle
+    throw error;
   }
 }
+
 
 /**
  * Update this content of the package.
@@ -381,36 +368,38 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
  * @returns void
  **/
 export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
-  // Your code here
   try {
-    if("URL" in body && "Content" in body){
-      console.log("Improper form, URL and Content are both set")
+    if ("URL" in body && "Content" in body) {
+      console.log("Improper form, URL and Content are both set");
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
     }
-    if(!("URL" in body) && !("Content" in body)){
-      console.log("Improper form, URL and Content are both not set")
+    if (!("URL" in body) && !("Content" in body)) {
+      console.log("Improper form, URL and Content are both not set");
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
     }
-    
-    const [results] = await promisePool.execute('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
+
+
+    const [results] = await (promisePool.execute as any)('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
+
       id,
       body.metadata.Name,
       body.metadata.Version,
       body.data.Content,
       body.data.URL,
       body.data.JSProgram
-    ]); 
-  
-    if(results[0][0].updateSuccess == 0) {
+    ]);
+
+    if (results[0][0].updateSuccess == 0) {
       return respondWithCode(404);
     } else {
       return respondWithCode(200);
     }
-   
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    throw error;
   }
 }
+
 
 /**
  * Get the packages from the registry.
@@ -422,21 +411,76 @@ export async function PackageUpdate(body: Package, id: PackageID, xAuthorization
  * @returns List
  **/
 export async function PackagesList(body: List<PackageMetadata>, offset: string, xAuthorization: AuthenticationToken) {
-  const examples: any = {};
-  examples['application/json'] = [
-    {
-      "Version": "1.2.3",
-      "ID": "ID",
-      "Name": "Name",
-    },
-    {
-      "Version": "1.2.3",
-      "ID": "ID",
-      "Name": "Name",
-    },
-  ];
+  var response: any = {'application/json' : []};
 
-  return examples['application/json'];
+  for (const query of body) {
+    var Name: string = query["Name"];
+    var VersionRange: string = query["Version"];
+    var lower: string; //Inclusive lower bound
+    var upper: string; //NonInclusive upper bound
+
+    if (Name == "*") {
+      const [result, fields] = await promisePool.execute('SELECT Version, ID, Name FROM PackageMetadata', []);
+      const table = result;
+      console.log(result, table);
+      if (result.length > 500) {
+        return respondWithCode(413, "Too many packages");
+      }
+      for (let row = 0; row < result.length; row++) {
+        response['application/json'].push(result[row]);
+      }
+    } else {
+      if (VersionRange.includes("-")) { // specific range
+        lower = VersionRange.split("-")[0];
+        upper = VersionRange.split("-")[1];
+        var nextPatch: number = parseInt(upper.split(".")[2]) + 1;
+        upper = upper.substring(0, upper.length-1) + nextPatch.toString();
+      } else if (VersionRange.includes("^")) { // [2.3.1 - 3.0.0)
+        lower = VersionRange.substring(1, VersionRange.length);
+        var splitVersion: string[] = lower.split(".");
+        splitVersion[0] = (parseInt(splitVersion[0]) + 1).toString();
+        splitVersion[1] = "0";
+        splitVersion[2] = "0";
+        upper = splitVersion.join(".");
+      } else if (VersionRange.includes("~")) { // [2.3.1 - 2.4.0)
+        lower = VersionRange.substring(1, VersionRange.length);
+        var splitVersion: string[] = lower.split(".");
+        splitVersion[1] = (parseInt(splitVersion[1]) + 1).toString();
+        splitVersion[2] = "0";
+        upper = splitVersion.join(".");
+      } else { //Exact
+        lower = VersionRange;
+        var splitVersion: string[] = lower.split(".");
+        splitVersion[2] = (parseInt(splitVersion[2]) + 1).toString();
+        upper = splitVersion.join(".");
+      }
+    }
+
+    const [result, fields] = await promisePool.execute('CALL GetIdVersionMapForPackage(?)', [Name]);
+    const table = result[0];
+    if (table.length > 500){
+      return respondWithCode(413, "Too many packages");
+    }
+    var idsInRange: number[] = [];
+
+    for (let row = 0; row < table.length; row++) {
+      const range : string = lower + " - " + upper;
+
+      if (satisfies(table[row]["version"], range)) {
+        idsInRange.push(table[row]["id"]);
+      }
+    }
+
+    for (const id of idsInRange) {
+      const [result, fields] = await promisePool.execute('CALL GetBasicMetadata(?)', [id]);
+      const basicMetadata = result[0][0];
+      response['application/json'].push(basicMetadata);
+      //console.log("\n\nRESPONSE: ", response);
+    }
+  }
+
+  //console.log("\n\nRETURNED RESPONSE: ", response);
+  return respondWithCode(200, response['application/json']);
 }
 
 /**
@@ -447,8 +491,9 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
  * @returns void
  **/
 import { resetDatabase } from '../app_endpoints/reset_endpoint.js';
+import { version } from 'yargs';
 export async function RegistryReset(xAuthorization: AuthenticationToken): Promise<void> {
-  await resetDatabase();  
+  await resetDatabase(); 
 }
 
 
@@ -530,18 +575,18 @@ export async function UserPost(body: newUser, xAuthorization: AuthenticationToke
 // }
 
 
-// /**
-//  * Delete all versions of this package.
-//  *
-//  * @param xAuthorization AuthenticationToken 
-//  * @param name PackageName 
-//  * @returns void
-//  **/
-// export function PackageByNameDelete(xAuthorization: AuthenticationToken, name: PackageName) {
-//   return new Promise(function(resolve, reject) {
-//     // resolve();
-//   });
-// }
+/**
+ * Delete all versions of this package.
+ *
+ * @param xAuthorization AuthenticationToken 
+ * @param name PackageName 
+ * @returns void
+ **/
+export function PackageByNameDelete(xAuthorization: AuthenticationToken, name: PackageName) {
+  return new Promise(function(resolve, reject) {
+    // resolve();
+  });
+}
 
 // /**
 //  * Return the history of this package (all versions).

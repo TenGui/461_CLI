@@ -51,6 +51,7 @@ async function eval_single_file(urlstr: string): Promise<PackageRating> {
     const version_pinning_score: number = await Version_Pin_runner.get_version_pin_score(
     url
     );
+    //const version_pinning_score: number = 0.55;
     
     //OVERALL SCORE
     const multipliers = {
