@@ -16,7 +16,7 @@ export function createToken(payload){
     return jwt.sign(payload, secret, { expiresIn: '10h' });
 }
 
-export function validateToken(token){
+export function validateToken(token: string){
     if(AuthEnable != '1'){
         return {"success":1, "token": { 
             user: 'authBypass', 
@@ -27,6 +27,7 @@ export function validateToken(token){
             canDownload: 1
           }};
     }
+    token = token.substring(1,token.length-1);
     let unbearered = token.split(" ")[1];
     //console.log("with bearer: "+ token +"\n without bearer: "+ unbearered);
     

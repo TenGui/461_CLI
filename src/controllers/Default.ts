@@ -17,7 +17,11 @@ async function handleRequestAsync(fn: Function, req: Request, res: Response, nex
   if(req.path != "/authenticate") {
     //console.log("First arg:" + req.header('X-Authorization'));
     let tokenOut = {};
-    tokenOut = validateToken(req.header('X-Authorization'))
+    const xAuthorizationHeader = req.header('X-Authorization');
+
+    if (xAuthorizationHeader !== undefined) {
+      tokenOut = validateToken(xAuthorizationHeader);
+    }
 
     if(tokenOut["success"] != 1){
       tokenOut = validateToken(globalToken);
