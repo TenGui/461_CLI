@@ -208,13 +208,21 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         return respondWithCode(400, {"Error": "Repository does not exists"});
       }
 
+      Name = output["repo"];
+      URL = output["url"];
+      Version = "1.0.5";
+
+      const package_exist_check = await upload.check_Package_Existence(Name, Version);
+      if(package_exist_check){
+        console.log("Upload Error: Package exists already");
+        return respondWithCode(409, {"Error": "Package exists already"});
+      }
+
       const { zipContent, readmeContent } = await fetchGitHubData(output["owner"], output["repo"], output["url"]);
       const zip_base64 = Buffer.from(zipContent).toString('base64');
 
-      Name = output["repo"];
       Content = ""
-      URL = output["url"];
-      Version = "1.0.5";
+
       //JSProgram = body["JSProgram"];
     }
     else if("Content" in body){

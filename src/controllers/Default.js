@@ -61,7 +61,6 @@ function handleRequestAsync(fn, req, res, next) {
                             tokenOut = (0, authenticationHelper_1.validateToken)(globalToken);
                         }
                         if (tokenOut["success"] != 1) {
-                            console.log("hereasdasd");
                             return [2 /*return*/, res.status(400).send()];
                         }
                         //if the token is valid, replace the token string in the args with it's json body
