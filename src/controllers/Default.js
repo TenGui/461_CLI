@@ -48,7 +48,7 @@ function handleRequestAsync(fn, req, res, next) {
         args[_i - 4] = arguments[_i];
     }
     return __awaiter(this, void 0, void 0, function () {
-        var tokenOut, response, error_1;
+        var tokenOut, xAuthorizationHeader, response, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -56,7 +56,10 @@ function handleRequestAsync(fn, req, res, next) {
                     //console.log("request path: " + req.path);
                     if (req.path != "/authenticate") {
                         tokenOut = {};
-                        tokenOut = (0, authenticationHelper_1.validateToken)(req.header('X-Authorization'));
+                        xAuthorizationHeader = req.header('X-Authorization');
+                        if (xAuthorizationHeader !== undefined) {
+                            tokenOut = (0, authenticationHelper_1.validateToken)(xAuthorizationHeader);
+                        }
                         if (tokenOut["success"] != 1) {
                             tokenOut = (0, authenticationHelper_1.validateToken)(globalToken);
                         }

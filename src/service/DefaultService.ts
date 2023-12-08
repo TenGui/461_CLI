@@ -62,7 +62,7 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
         canDownload: result[0].canDownload
       });
 
-      return respondWithCode(200, "\"bearer "+ token + "\"");
+      return respondWithCode(200, "\"\\\"bearer "+ token + "\\\"\"");
 
     } else {
       //console.log("bad password");
