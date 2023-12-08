@@ -519,7 +519,7 @@ function PackagesList(body, offset, xAuthorization) {
                     idsInRange = [];
                     for (row = 0; row < table.length; row++) {
                         //console.log("satisfies inputs: ", table[row]["version"], VersionRange, satisfies(table[row]["version"], VersionRange));
-                        if ((0, compare_versions_1.satisfies)(table[row]["version"], VersionRange)) {
+                        if (VersionRange == "*" || (0, compare_versions_1.satisfies)(table[row]["version"], VersionRange)) {
                             idsInRange.push(table[row]["id"]);
                         }
                     }

@@ -450,7 +450,7 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
 
       for (let row = 0; row < table.length; row++) {
         //console.log("satisfies inputs: ", table[row]["version"], VersionRange, satisfies(table[row]["version"], VersionRange));
-        if (satisfies(table[row]["version"], VersionRange)) {
+        if (VersionRange == "*" || satisfies(table[row]["version"], VersionRange)) {
           idsInRange.push(table[row]["id"]);
         }
       }
