@@ -62,7 +62,7 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
         canDownload: result[0].canDownload
       });
 
-      return respondWithCode(200, "bearer "+ token);
+      return respondWithCode(200, "\"bearer "+ token + "\"");
 
     } else {
       //console.log("bad password");
@@ -182,6 +182,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
  * @returns Package
  **/
 import { Upload } from '../app_endpoints/upload_endpoint.js';
+import { fetchGitHubData } from '../utils/github_to_base64.js';
 export async function PackageCreate(body: PackageData, xAuthorization: AuthenticationToken) {
   try {
     var Name: string = "";
@@ -207,15 +208,17 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         return respondWithCode(400, {"Error": "Repository does not exists"});
       }
 
+      const { zipContent, readmeContent } = await fetchGitHubData(output["owner"], output["repo"], output["url"]);
+      const zip_base64 = Buffer.from(zipContent).toString('base64');
+
       Name = output["repo"];
-      Content = 'N/A';
+      Content = ""
       URL = output["url"];
       Version = "1.0.5";
       //JSProgram = body["JSProgram"];
     }
     else if("Content" in body){
       const github_link = await upload.decompress_zip_to_github_link(body["Content"])
-      console.log("Inside DefaultService: ", github_link);
       if(github_link == "") {
         return respondWithCode(400, {"Error": "Repository does not exists/Cannot locate package.json file"});
       }
