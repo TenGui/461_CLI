@@ -61,8 +61,8 @@ morgan.token('uuid', function (req, res) {
     return req.requestId;
 });
 //make format strings for logging 
-var reqFormat = "REQUEST reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" authHeader\: :auth reqBody\: :reqBody";
-var resFormat = "RESPONSE reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status  authHeader\: :auth resBody\: :resBody";
+var reqFormat = "\nREQUEST reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" authHeader\: :auth reqBody\: :reqBody";
+var resFormat = "\nRESPONSE reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status  authHeader\: :auth resBody\: :resBody";
 // create a write stream (in append mode) for the logger
 var logStream = fs.createWriteStream(path.join(__dirname, 'req.log'), { flags: 'a' });
 ;
@@ -110,7 +110,7 @@ app._router.stack = __spreadArray(__spreadArray(__spreadArray([], firstEntries, 
 //console.log(app._router.stack);
 function uuidMaker(req, res, next) {
     req.requestId = uuid.v4(); // Attach a unique ID to the request
-    console.log("made id: " + req.requestId);
+    //console.log("made id: " + req.requestId);
     next();
 }
 ;
