@@ -269,7 +269,7 @@
                     const response = await axios.post('/packages', requestBody, {
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-Authorization': '1' // Replace with your JWT token or any other authorization token
+                            'X-Authorization': "\"\\\"1\\\"\"" // Replace with your JWT token or any other authorization token
                         },
                     });
 
@@ -326,7 +326,7 @@
                     axios.delete(`/package/byName/${packageName}`, {
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-Authorization': '1' // Replace with your JWT token
+                            'X-Authorization': "\"\\\"1\\\"\"" // Replace with your JWT token
                         },
                     })
                     .then(response => {
@@ -508,7 +508,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-Authorization': '1'
+                            'X-Authorization': "\"\\\"1\\\"\""
                         },
                         body: JSON.stringify({
                             RegEx: packageName,
@@ -607,7 +607,7 @@
                                             axios.post('/package', requestBody, {
                                                 headers: {
                                                     'Content-Type': 'application/json',
-                                                    'X-Authorization': '1' // Replace with your JWT token
+                                                    'X-Authorization': "\"\\\"1\\\"\"" // Replace with your JWT token
                                                 },
                                             })
                                             .then(response => {
@@ -678,7 +678,7 @@
                 axios.delete('/reset', {
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Authorization': '1' // Replace with your JWT token
+                        'X-Authorization': "\"\\\"1\\\"\"" // Replace with your JWT token
                     },
                 })
                 .then(response => {
@@ -739,7 +739,7 @@
                 axios.post('/package', requestBody, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Authorization': '1' // Replace with your JWT token
+                        'X-Authorization': "\"\\\"1\\\"\"" // Replace with your JWT token
                     },
                 })
                 .then(response => {
@@ -756,10 +756,15 @@
                 .catch(error => {
                     const PackageUploadContainer = document.getElementById('PackageUploadContainer');
                     if(error.response.status == 400){
+                        var testOutput = 'Auth token invalid. Please log in or provide a valid token'
+                        if(error.response.data.Error != undefined){
+                            testOutput = error.response.data.Error;
+                        }
+
                         Swal.fire({
                             icon: 'warning',
                             title: `Authentication Error`,
-                            text: 'Auth token invalid. Please log in or provide a valid token',
+                            text: testOutput,
                             showConfirmButton: true
                         });
                     }
