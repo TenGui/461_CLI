@@ -507,8 +507,10 @@ function PackagesList(body, offset, xAuthorization) {
                     Name = query["Name"];
                     VersionRange = query["Version"];
                     //Clean Version Range
-                    if (VersionRange.includes("-")) {
-                        VersionRange = VersionRange.split("-")[0] + " - " + VersionRange.split("-")[1];
+                    if (VersionRange != undefined) {
+                        if (VersionRange.includes("-")) {
+                            VersionRange = VersionRange.split("-")[0] + " - " + VersionRange.split("-")[1];
+                        }
                     }
                     if (!(Name == "*")) return [3 /*break*/, 4];
                     sql_all = 'SELECT ID AS \'id\', Version AS \'version\' FROM PackageMetadata';

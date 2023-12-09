@@ -440,8 +440,10 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
       var table: any; //map of IDs to Versions for all packages fitting the name query
 
       //Clean Version Range
-      if (VersionRange.includes("-")) {
-        VersionRange = VersionRange.split("-")[0] + " - " + VersionRange.split("-")[1];
+      if(VersionRange != undefined){
+        if (VersionRange.includes("-")) {
+          VersionRange = VersionRange.split("-")[0] + " - " + VersionRange.split("-")[1];
+        }
       }
 
       if (Name == "*") { //retrieve all packages of any name
