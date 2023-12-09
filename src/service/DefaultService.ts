@@ -226,6 +226,10 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       //JSProgram = body["JSProgram"];
     }
     else if("Content" in body){
+      if(typeof body["Content"] != 'string'){
+        return respondWithCode(400, {"Error": "Content has to be string"});
+      }
+      
       if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
         try {
           const contentstring = body["Content"]

@@ -257,6 +257,9 @@ function PackageCreate(body, xAuthorization) {
                     return [3 /*break*/, 7];
                 case 4:
                     if (!("Content" in body)) return [3 /*break*/, 7];
+                    if (typeof body["Content"] != 'string') {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Content has to be string" })];
+                    }
                     if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
                         try {
                             contentstring = body["Content"];
