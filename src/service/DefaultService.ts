@@ -232,17 +232,15 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         return respondWithCode(400, {"Error": "Content has to be string"});
       }
       
-      if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
-        try {
-          const contentstring = body["Content"]
-          const decodedContent = atob(contentstring);
-        } catch (error) {
-            // If decoding fails, it's not a valid base64 string
-            const errorMessage = "Not a valid base64-encoded zip file";
-            console.error(errorMessage);
-            return respondWithCode(400, { "Error": errorMessage });
-        }
+      try {
+        const contentstring = body["Content"]
+        const decodedContent = atob(contentstring);
+      } catch (error) {
+          // If decoding fails, it's not a valid base64 string
+          const errorMessage = "Not a valid base64-encoded zip file";
+          return respondWithCode(400, { "Error": errorMessage });
       }
+
 
       const github_link = await upload.decompress_zip_to_github_link(body["Content"])
       if(github_link == "") {
