@@ -336,7 +336,7 @@ function loginUser(req, res, next) {
                                 authenticateResponse = _a.sent();
                                 console.log(authenticateResponse.data);
                                 token = authenticateResponse.data;
-                                globalToken = token;
+                                globalToken = JSON.stringify(token);
                                 res.send('Login Successful');
                                 return [3 /*break*/, 5];
                             case 4:

@@ -156,7 +156,7 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
           console.log(authenticateResponse.data);
 
           const token = authenticateResponse.data;
-          globalToken = token;
+          globalToken = JSON.stringify(token);
           res.send('Login Successful');
         } catch (authenticateError) {
           console.error('Error in /authenticate:', authenticateError.message);

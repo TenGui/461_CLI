@@ -117,6 +117,16 @@ export class Upload{
     }
     
     async process(url){
+        const githubUrlRegex = /github\.com\/(.+)/;
+        const match = url.match(githubUrlRegex);
+    
+        if (match) {
+            const extractedString = match[1];
+            url = `https://github.com/${extractedString}`;
+        } else {
+            return false;
+        }
+
         const output = await this.check_valid_githubURL(url);
         if(!output){
             return false;
