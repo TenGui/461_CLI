@@ -254,7 +254,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         return respondWithCode(400, {"Error": "Repository does not exists"});
       }
 
-      const readmeResponse = await fetch(github_link + '/blob/main/README.md');
+      const readmeResponse = await fetch(output["url"] + '/blob/main/README.md');
       const readmeText = await readmeResponse.text();
 
       // Use cheerio to parse the README content
