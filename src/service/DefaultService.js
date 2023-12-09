@@ -225,7 +225,7 @@ function PackageCreate(body, xAuthorization) {
                     JSProgram = "";
                     README = "";
                     upload = new upload_endpoint_js_1.Upload();
-                    //Check if package is given 
+                    //Edge Cases
                     if ("URL" in body && "Content" in body) {
                         console.log("Improper form, URL and Content are both set");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
@@ -560,7 +560,7 @@ function PackagesList(body, offset, xAuthorization) {
                     idsInRange = [];
                     for (row = 0; row < table.length; row++) {
                         //console.log("satisfies inputs: ", table[row]["version"], VersionRange, satisfies(table[row]["version"], VersionRange));
-                        if (VersionRange == "*" || (0, compare_versions_1.satisfies)(table[row]["version"], VersionRange)) {
+                        if (VersionRange == "*" || VersionRange == undefined || (0, compare_versions_1.satisfies)(table[row]["version"], VersionRange)) {
                             idsInRange.push(table[row]["id"]);
                         }
                     }

@@ -188,8 +188,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     var README:string = "";
     const upload = new Upload()
 
-    //Check if package is given 
-    
+    //Edge Cases
     if("URL" in body && "Content" in body){
       console.log("Improper form, URL and Content are both set")
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
@@ -198,6 +197,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       console.log("Improper form, URL and Content are both not set")
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
     }
+
 
     if("URL" in body){
       const output = await upload.process(body["URL"])
@@ -218,7 +218,6 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
     
       const { zipContent, readmeContent } = await fetchGitHubData(output["owner"], output["repo"], output["url"]);
-     
       const zip_base64 = Buffer.from(zipContent).toString('base64');
 
       //console.log(readmeContent);
@@ -491,7 +490,7 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
 
       for (let row = 0; row < table.length; row++) {
         //console.log("satisfies inputs: ", table[row]["version"], VersionRange, satisfies(table[row]["version"], VersionRange));
-        if (VersionRange == "*" || satisfies(table[row]["version"], VersionRange)) {
+        if (VersionRange == "*" || VersionRange == undefined || satisfies(table[row]["version"], VersionRange)) {
           idsInRange.push(table[row]["id"]);
         }
       }
