@@ -212,7 +212,7 @@ var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 var github_to_base64_js_1 = require("../utils/github_to_base64.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Content, URL, Version, JSProgram, upload, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, github_link, output_2, package_exist_check, _b, result, fields, output, error_3;
+        var Name, Content, URL, Version, JSProgram, upload, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, package_exist_check, _b, result, fields, output, error_3;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -257,6 +257,17 @@ function PackageCreate(body, xAuthorization) {
                     return [3 /*break*/, 7];
                 case 4:
                     if (!("Content" in body)) return [3 /*break*/, 7];
+                    if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
+                        try {
+                            contentstring = body["Content"];
+                            decodedContent = atob(contentstring);
+                        }
+                        catch (error) {
+                            errorMessage = "Not a valid base64-encoded zip file";
+                            console.error(errorMessage);
+                            return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": errorMessage })];
+                        }
+                    }
                     return [4 /*yield*/, upload.decompress_zip_to_github_link(body["Content"])];
                 case 5:
                     github_link = _c.sent();
