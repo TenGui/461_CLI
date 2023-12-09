@@ -6,3 +6,6 @@ cd /home/ec2-user/461_Team4_Phase2 >> /home/ec2-user/461_Team4_Phase2/deploy.log
 
 echo 'npm install' >> /home/ec2-user/461_Team4_Phase2/deploy.log 
 npm install >> /home/ec2-user/461_Team4_Phase2/deploy.log
+
+echo 'Changing permissions...'
+chmod -R 755 /home/ec2-user/461_Team4_Phase2
