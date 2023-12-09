@@ -41,6 +41,7 @@ var writer_1 = require("../utils/writer"); // Import the response function
 var path = require("path");
 var compare_versions_1 = require("compare-versions");
 var authHelper = require("../authentication/authenticationHelper");
+var cheerio = require('cheerio');
 var _a = require("../database_files/database_connect"), db = _a.db, promisePool = _a.promisePool;
 // const queryAsync = util.promisify(pool.query);
 /**
@@ -147,7 +148,6 @@ function PackageByNameGet(name, xAuthorization) {
     });
 }
 exports.PackageByNameGet = PackageByNameGet;
-// Your code here
 /**
  * Return the history of this package (all versions).
  *
@@ -210,18 +210,14 @@ exports.PackageByRegExGet = PackageByRegExGet;
  **/
 var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 var github_to_base64_js_1 = require("../utils/github_to_base64.js");
-
 var version_js_1 = require("../utils/version.js");
-
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         var Name, Content, URL, Version, JSProgram, README, upload, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, readmeResponse, readmeText, $, package_exist_check, _b, result, fields, output, error_3;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-
-                    _c.trys.push([0, 11, , 12]);
-
+                    _c.trys.push([0, 14, , 15]);
                     Name = "";
                     Content = "";
                     URL = "";
@@ -250,7 +246,6 @@ function PackageCreate(body, xAuthorization) {
                     return [4 /*yield*/, (0, version_js_1.getGitHubPackageVersion)(output_1["url"])];
                 case 2:
                     Version = _c.sent();
-                    console.log(Version);
                     return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
                 case 3:
                     package_exist_check_1 = _c.sent();
@@ -262,13 +257,16 @@ function PackageCreate(body, xAuthorization) {
                 case 4:
                     _a = _c.sent(), zipContent = _a.zipContent, readmeContent = _a.readmeContent;
                     zip_base64 = Buffer.from(zipContent).toString('base64');
-                    console.log(readmeContent);
-
-                    Content = "";
-                    return [3 /*break*/, 8];
+                    //console.log(readmeContent);
+                    Content = zip_base64;
+                    README = readmeContent;
+                    JSProgram = body["JSProgram"];
+                    return [3 /*break*/, 11];
                 case 5:
-                    if (!("Content" in body)) return [3 /*break*/, 8];
-
+                    if (!("Content" in body)) return [3 /*break*/, 11];
+                    if (typeof body["Content"] != 'string') {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Content has to be string" })];
+                    }
                     if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
                         try {
                             contentstring = body["Content"];
@@ -293,28 +291,28 @@ function PackageCreate(body, xAuthorization) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
                     }
                     return [4 /*yield*/, fetch(github_link + '/blob/main/README.md')];
-                case 7:
+                case 8:
                     readmeResponse = _c.sent();
                     return [4 /*yield*/, readmeResponse.text()];
-                case 8:
+                case 9:
                     readmeText = _c.sent();
                     $ = cheerio.load(readmeText);
                     README = $('article').text();
                     Name = output_2["repo"];
                     Content = body.Content;
                     URL = github_link;
-                    Version = "1.0.0";
-
-                    _c.label = 8;
-                case 8: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
-                case 9:
-
+                    return [4 /*yield*/, (0, version_js_1.getGitHubPackageVersion)(output_2["url"])];
+                case 10:
+                    Version = _c.sent();
+                    JSProgram = body["JSProgram"];
+                    _c.label = 11;
+                case 11: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                case 12:
                     package_exist_check = _c.sent();
                     if (package_exist_check) {
                         console.log("Upload Error: Package exists already");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Error": "Package exists already" })];
                     }
-                    console.log(README);
                     return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
                             Name,
                             Version,
@@ -323,11 +321,8 @@ function PackageCreate(body, xAuthorization) {
                             URL,
                             JSProgram
                         ])];
-
-                case 10:
-
+                case 13:
                     _b = _c.sent(), result = _b[0], fields = _b[1];
-                    console.log(result);
                     output = {
                         "metadata": {
                             "Name": Name,
@@ -346,13 +341,11 @@ function PackageCreate(body, xAuthorization) {
                     // }
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
-
-                case 11:
+                case 14:
                     error_3 = _c.sent();
                     console.error('Error calling the stored procedure:', error_3);
                     throw error_3; // Re-throw the error for the caller to handle
-                case 12: return [2 /*return*/];
-
+                case 15: return [2 /*return*/];
             }
         });
     });

@@ -13,6 +13,7 @@ import {
 } from 'mysql2/promise';
 import * as jwt from "jsonwebtoken";
 import * as authHelper from '../authentication/authenticationHelper';
+const cheerio = require('cheerio');
 
 const { db, promisePool } = require("../database_files/database_connect");
 
@@ -207,7 +208,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Name = output["repo"];
       URL = output["url"];
       Version = await getGitHubPackageVersion(output["url"]);
-      console.log(Version);
+      //console.log(Version);
 
       const package_exist_check = await upload.check_Package_Existence(Name, Version);
       if(package_exist_check){
@@ -219,9 +220,8 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       const { zipContent, readmeContent } = await fetchGitHubData(output["owner"], output["repo"], output["url"]);
      
       const zip_base64 = Buffer.from(zipContent).toString('base64');
-      console.log(readmeContent);
 
-      console.log(readmeContent);
+      //console.log(readmeContent);
 
       Content = zip_base64
       README = readmeContent
@@ -264,7 +264,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Name = output["repo"];
       Content = body.Content;
       URL = github_link;
-      Version = "1.0.0";
+      Version = await getGitHubPackageVersion(output["url"]);
       JSProgram = body["JSProgram"];
 
     }
@@ -276,7 +276,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       return respondWithCode(409, {"Error": "Package exists already"});
     }
 
-    console.log(README)
+    //console.log(README)
 
     const [result, fields] = await promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
       Name,
@@ -287,7 +287,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       JSProgram
     ]);
 
-    console.log(result);
+    //console.log(result);
 
     const output = {
       "metadata" : {

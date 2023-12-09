@@ -64,7 +64,7 @@ function fetchGitHubData(owner, repo, gitHubUrl) {
                     readmeText = _a.sent();
                     $ = cheerio.load(readmeText);
                     readmeContent = $('body').text();
-                    console.log(readmeContent);
+                    //console.log(readmeContent);
                     return [2 /*return*/, { zipContent: zipContent, readmeContent: readmeContent }];
                 case 5:
                     error_1 = _a.sent();

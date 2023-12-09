@@ -18,7 +18,7 @@ export async function getGitHubPackageVersion(githubUrl: string): Promise<string
 
             // Extract the version from package.json
             const version: string = packageJson.version || '1.0.0';
-            console.log('Package Version:', version);
+            //console.log('Package Version:', version);
 
             // Return the extracted version
             return version;
