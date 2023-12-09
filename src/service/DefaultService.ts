@@ -118,15 +118,6 @@ export async function PackageByNameGet(name: PackageName, xAuthorization: Authen
   }
 }
 
-
-
-
-  
-
-  
-  // Your code here
-
-
 /**
  * Return the history of this package (all versions).
  *
@@ -183,13 +174,15 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
  **/
 import { Upload } from '../app_endpoints/upload_endpoint.js';
 import { fetchGitHubData } from '../utils/github_to_base64.js';
+const cheerio = require('cheerio');
 export async function PackageCreate(body: PackageData, xAuthorization: AuthenticationToken) {
   try {
     var Name: string = "";
     var Content = "";
-    var URL: string = "";
+    var URL: any = "";
     var Version:string = "";
     var JSProgram:any = "";
+    var README:string = "";
     const upload = new Upload()
 
     //Check if package is given 
@@ -219,12 +212,15 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         return respondWithCode(409, {"Error": "Package exists already"});
       }
 
+    
       const { zipContent, readmeContent } = await fetchGitHubData(output["owner"], output["repo"], output["url"]);
       const zip_base64 = Buffer.from(zipContent).toString('base64');
 
-      Content = ""
+      console.log(readmeContent);
 
-      //JSProgram = body["JSProgram"];
+      Content = zip_base64
+      README = readmeContent
+      JSProgram = body["JSProgram"];
     }
     else if("Content" in body){
       if(typeof body["Content"] != 'string'){
@@ -252,10 +248,20 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       if(!output){
         return respondWithCode(400, {"Error": "Repository does not exists"});
       }
+
+      const readmeResponse = await fetch(github_link + '/blob/main/README.md');
+      const readmeText = await readmeResponse.text();
+
+      // Use cheerio to parse the README content
+      const $ = cheerio.load(readmeText);
+      README = $('article').text();
+
       Name = output["repo"];
-      Content = "Content";
-      URL = 'N/A';
+      Content = body.Content;
+      URL = github_link;
       Version = "1.0.0";
+      JSProgram = body["JSProgram"];
+
     }
     
     //Check if the inserted package already exists
@@ -265,13 +271,18 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       return respondWithCode(409, {"Error": "Package exists already"});
     }
 
-    const [result, fields] = await promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
+    console.log(README)
+
+    const [result, fields] = await promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
       Name,
       Version,
       Content,
+      README,
       URL,
       JSProgram
     ]);
+
+    console.log(result);
 
     const output = {
       "metadata" : {
@@ -280,16 +291,16 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         "ID": result[0][0].packageID
       },
       "data": {
-        "JSProgram": JSProgram
+        "Content": Content
       }
     }
     
-    if("URL" in body){
-      output["data"]["URL"] = URL;
-    }
-    else if("Content" in body){
-      output["data"]["Content"] = Content;
-    }
+    // if("URL" in body){
+    //   output["data"]["URL"] = URL;
+    // }
+    // else if("Content" in body){
+    //   output["data"]["Content"] = Content;
+    // }
 
     console.log('Packaged added successfully');
 
