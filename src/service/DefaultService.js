@@ -238,7 +238,8 @@ function PackageCreate(body, xAuthorization) {
                     Version = "";
                     JSProgram = "";
                     upload = new upload_endpoint_js_1.Upload();
-                    //Check if package is given
+                    //Check if package is given 
+                    console.log("hi" + body.Content);
                     if ("URL" in body && "Content" in body) {
                         console.log("Improper form, URL and Content are both set");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
@@ -291,7 +292,7 @@ function PackageCreate(body, xAuthorization) {
                             Version,
                             Content,
                             URL,
-                            JSProgram,
+                            JSProgram
                         ])];
                 case 7:
                     _a = _b.sent(), result = _a[0], fields = _a[1];
@@ -299,7 +300,7 @@ function PackageCreate(body, xAuthorization) {
                         "metadata": {
                             "Name": Name,
                             "version": Version,
-                            "ID": "1"
+                            "ID": result[0][0].packageID
                         },
                         "data": {
                             "JSProgram": JSProgram
@@ -452,21 +453,16 @@ function PackageUpdate(body, id, xAuthorization) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    if ("URL" in body && "Content" in body) {
-                        console.log("Improper form, URL and Content are both set");
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
-                    }
-                    if (!("URL" in body) && !("Content" in body)) {
-                        console.log("Improper form, URL and Content are both not set");
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
+                    if (Object.keys(body.data).length != 1 || (!("URL" in body.data) && !("Content" in body.data) && !("JSProgram" in body.data))) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form" })];
                     }
                     return [4 /*yield*/, promisePool.execute('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
                             id,
                             body.metadata.Name,
                             body.metadata.Version,
-                            body.data.Content,
-                            body.data.URL,
-                            body.data.JSProgram
+                            body.data.Content || null,
+                            body.data.URL || null,
+                            body.data.JSProgram || null // Replace undefined with null for JSProgram
                         ])];
                 case 1:
                     results = (_a.sent())[0];

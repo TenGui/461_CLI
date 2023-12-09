@@ -1,5 +1,5 @@
 -- CREATE DATABASE IF NOT EXISTS mydb;
-USE mydb;
+-- USE mydb;
 
 -- Create auth table with user authentication info
 CREATE TABLE Auth (
@@ -11,7 +11,7 @@ CREATE TABLE Auth (
     isAdmin BOOL
 ) ENGINE=InnoDB;
 
---add default user
+-- add default user
 -- INSERT INTO Auth VALUES (
 --     "ece30861defaultadminuser",
 --     "correcthorsebatterystaple123(!__+@**(A;DROP TABLE packages",
@@ -19,7 +19,7 @@ CREATE TABLE Auth (
 --     1,
 --     1,
 --     1
--- ) ENGINE=InnoDB;
+-- )
 
 -- Create Package table with foreign keys to PackageMetadata and PackageData
 CREATE TABLE Package (
@@ -39,6 +39,7 @@ CREATE TABLE PackageMetadata (
 CREATE TABLE PackageData (
     ID INT PRIMARY KEY,
     Content LONGTEXT,
+    README LONGTEXT,
     URL VARCHAR(255),
     JSProgram LONGTEXT,
     FOREIGN KEY (ID) REFERENCES Package(PackageID) ON DELETE CASCADE
@@ -51,6 +52,7 @@ CREATE PROCEDURE InsertPackage(
     IN Name VARCHAR(255),
     IN Version VARCHAR(20),
     IN Content LONGTEXT,
+    IN README LONGTEXT,
     IN URL VARCHAR(255),
     IN JSProgram LONGTEXT
 )
@@ -71,15 +73,18 @@ BEGIN
   INSERT INTO Package ()
   VALUES();
 
-  SET package_id = LAST_INSERT_ID();
+  SET @package_id = LAST_INSERT_ID();
 
   -- Insert data into PackageMetadata
   INSERT INTO PackageMetadata (ID, Name, Version)
-  VALUES (package_id, Name, Version);
+  VALUES (@package_id, Name, Version);
 
   -- Insert data into PackageData
-  INSERT INTO PackageData (ID, Content, JSProgram, URL)
-  VALUES (package_id, Content, JSProgram, URL);
+  INSERT INTO PackageData (ID, Content, JSProgram, README, URL)
+  VALUES (@package_id, Content, JSProgram, README, URL);
+
+  -- Select the last inserted ID
+  SELECT @packageID as packageID;
 
   COMMIT;
 END;
@@ -100,9 +105,7 @@ BEGIN
             'ID', pm.ID
         ) as metadata,
         JSON_OBJECT(
-            'Content', pd.Content,
-            'URL', pd.URL,
-            'JSProgram', pd.JSProgram
+            'Content', pd.Content
         ) as data
     FROM Package AS p
     JOIN PackageMetadata AS pm ON p.PackageID = pm.ID
@@ -149,9 +152,9 @@ BEGIN
     -- If the record exists, update PackageData
     IF record_exists > 0 THEN
         UPDATE PackageData
-        SET Content = p_Content,
-            URL = p_URL,
-            JSProgram = p_JSProgram
+        SET Content = CASE WHEN p_Content IS NOT NULL THEN p_Content ELSE Content END,
+            URL = CASE WHEN p_URL IS NOT NULL THEN p_URL ELSE URL END,
+            JSProgram = CASE WHEN p_JSProgram IS NOT NULL THEN p_JSProgram ELSE JSProgram END
         WHERE ID = p_ID;
     -- ELSE
     --     -- Handle the case where the record does not exist (optional)
@@ -160,6 +163,18 @@ BEGIN
     --     SIGNAL SQLSTATE '45000'
     --         SET MESSAGE_TEXT = 'Record not found in PackageMetadata';
     END IF;
+
+    -- UPDATE PackageData
+    -- SET Content = p_Content,
+    --     URL = p_URL,
+    --     JSProgram = p_JSProgram
+    -- FROM PackageData
+    -- JOIN PackageMetadata ON PackageData.ID = PackageMetadata.ID
+    -- WHERE PackageData.ID = p_ID
+    -- AND PackageMetadata.Name = p_Name
+    -- AND PackageMetadata.Version = p_Version;
+
+
 END;
 //
 DELIMITER ;

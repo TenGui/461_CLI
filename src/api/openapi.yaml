@@ -738,6 +738,7 @@ components:
       properties:
         Content:
           type: string
+          nullable: true
           description: |-
             Package contents. This is the zip file uploaded by the user. (Encoded as text using a Base64 encoding).
 
@@ -746,9 +747,11 @@ components:
             See https://docs.npmjs.com/cli/v7/configuring-npm/package-json#homepage.
         URL:
           type: string
+          nullable: true
           description: Package URL (for use in public ingest).
         JSProgram:
           type: string
+          nullable: true
           description: A JavaScript program (for use with sensitive modules).
       description: |-
         This is a "union" type.

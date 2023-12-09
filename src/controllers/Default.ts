@@ -81,10 +81,6 @@ export async function PackageRetrieve(req: Request, res: Response, next: NextFun
 }
 
 export async function PackageUpdate(req: Request, res: Response, next: NextFunction, body: any, id: string, xAuthorization: string) {
-  console.log(body);
-  console.log(id);
-  console.log(xAuthorization);
-  console.log(req);
   await handleRequestAsync(Default.PackageUpdate, req, res, next, body, id, req.header('X-Authorization'));
 }
 

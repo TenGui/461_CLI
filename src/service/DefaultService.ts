@@ -196,7 +196,8 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     var JSProgram:any = "";
     const upload = new Upload()
 
-    //Check if package is given
+    //Check if package is given 
+    
     if("URL" in body && "Content" in body){
       console.log("Improper form, URL and Content are both set")
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
@@ -218,7 +219,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Version = "1.0.0.8.2";
       //JSProgram = body["JSProgram"];
     }
-    else if("Content" in body){
+    else if("Content" in body) {
       const github_link = await upload.decompress_zip_to_github_link(body["Content"])
       console.log("Inside DefaultService: ", github_link);
       if(github_link == ""){
@@ -247,14 +248,14 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Version,
       Content,
       URL,
-      JSProgram,
+      JSProgram
     ]);
 
     const output = {
       "metadata" : {
         "Name": Name,
         "version": Version,
-        "ID": "1"
+        "ID": result[0][0].packageID
       },
       "data": {
         "JSProgram": JSProgram
@@ -381,25 +382,19 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
  * @returns void
  **/
 export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
-  // Your code here
   try {
-    if("URL" in body && "Content" in body){
-      console.log("Improper form, URL and Content are both set")
-      return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+    if(Object.keys(body.data).length != 1 || (!("URL" in body.data) && !("Content" in body.data) && !("JSProgram" in body.data)) ){
+      return respondWithCode(400, {"Error": "Improper form"});
     }
-    if(!("URL" in body) && !("Content" in body)){
-      console.log("Improper form, URL and Content are both not set")
-      return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
-    }
-    
+
     const [results] = await promisePool.execute('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
       id,
       body.metadata.Name,
       body.metadata.Version,
-      body.data.Content,
-      body.data.URL,
-      body.data.JSProgram
-    ]); 
+      body.data.Content || null,   // Replace undefined with null for Content
+      body.data.URL || null,       // Replace undefined with null for URL
+      body.data.JSProgram || null  // Replace undefined with null for JSProgram
+  ]);
   
     if(results[0][0].updateSuccess == 0) {
       return respondWithCode(404);
