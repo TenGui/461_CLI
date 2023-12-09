@@ -12,6 +12,7 @@ CREATE TABLE Auth (
 ) ENGINE=InnoDB;
 
 -- add default user
+-- add default user
 -- INSERT INTO Auth VALUES (
 --     "ece30861defaultadminuser",
 --     "correcthorsebatterystaple123(!__+@**(A;DROP TABLE packages",
@@ -175,6 +176,30 @@ BEGIN
     -- AND PackageMetadata.Version = p_Version;
 
 
+END;
+//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS GetIdVersionMapForPackage;
+DELIMITER //
+-- return a map of ids to versions for a given package
+CREATE PROCEDURE GetIdVersionMapForPackage(IN packagename VARCHAR(255))
+BEGIN
+    SELECT ID AS 'id', Version AS 'version'
+    FROM PackageMetadata
+    WHERE Name = packagename;
+END;
+//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS GetBasicMetadata;
+DELIMITER //
+-- return a map of ids to versions for a given package
+CREATE PROCEDURE GetBasicMetadata(IN s_id INT)
+BEGIN
+    SELECT Version, ID, Name
+    FROM PackageMetadata
+    WHERE ID = s_id;
 END;
 //
 DELIMITER ;

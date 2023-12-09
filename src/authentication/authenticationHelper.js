@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateToken = exports.createToken = void 0;
+exports.getAuthEnable = exports.validateToken = exports.createToken = void 0;
 var jwt = require("jsonwebtoken");
 var secret = process.env.SECRET;
 var AuthEnable = process.env.AUTH_ENABLE;
@@ -26,6 +26,7 @@ function validateToken(token) {
                 canDownload: 1
             } };
     }
+    token = token.substring(1, token.length - 1);
     var unbearered = token.split(" ")[1];
     //console.log("with bearer: "+ token +"\n without bearer: "+ unbearered);
     var decodedToken;
@@ -33,9 +34,12 @@ function validateToken(token) {
         decodedToken = jwt.verify(unbearered, secret);
     }
     catch (err) {
-        //console.error(err);
         return { "success": -1, "token": null };
     }
     return { "success": 1, "token": decodedToken };
 }
 exports.validateToken = validateToken;
+function getAuthEnable() {
+    return AuthEnable;
+}
+exports.getAuthEnable = getAuthEnable;

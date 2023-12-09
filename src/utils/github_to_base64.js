@@ -36,52 +36,41 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetDatabase = void 0;
-var express = require('express');
-var app = express();
-var db = require("../database_files/database_connect").db;
-function resetDatabase() {
+exports.fetchGitHubData = void 0;
+var cheerio = require('cheerio');
+function fetchGitHubData(owner, repo, gitHubUrl) {
     return __awaiter(this, void 0, void 0, function () {
+        var zipUrl, zipResponse, zipArrayBuffer, zipContent, readmeResponse, readmeText, $, readmeContent, error_1;
         return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (resolve, reject) {
-                    var getTableNamesQuery = 'SHOW TABLES';
-                    db.query(getTableNamesQuery, function (err, results) {
-                        if (err) {
-                            console.error('Error retrieving table names:', err);
-                            reject(-1);
-                        }
-                        else {
-                            var tableNames = results.map(function (row) { return Object.values(row)[0]; });
-                            var tablesToTruncate_1 = tableNames.filter(function (tableName) { return tableName !== 'github_token'; });
-                            if (tablesToTruncate_1.length === 0) {
-                                console.log('No tables to reset.');
-                                resolve(1);
-                            }
-                            var completedCount_1 = 0;
-                            tablesToTruncate_1.forEach(function (tableName) {
-                                var truncateTableQuery = "DELETE FROM ".concat(tableName);
-                                db.query(truncateTableQuery, function (err) {
-                                    completedCount_1++;
-                                    if (err) {
-                                        console.error("Error DELETING table ".concat(tableName, ":"), err);
-                                        reject(-1);
-                                    }
-                                    else {
-                                        console.log("Table ".concat(tableName, " deleted successfully"));
-                                    }
-                                    if (completedCount_1 === tablesToTruncate_1.length) {
-                                        console.log('All tables except for "github_token" deleted successfully');
-                                        var queryString = 'INSERT INTO Auth VALUES (?,?,?,?,?,?)';
-                                        db.execute(queryString, ["ece30861defaultadminuser", "correcthorsebatterystaple123(!__+@**(A'\"`;DROP TABLE packages;", 1, 1, 1, 1]);
-                                        resolve(1);
-                                    }
-                                });
-                            });
-                        }
-                    });
-                })];
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 5, , 6]);
+                    zipUrl = "https://codeload.github.com/".concat(owner, "/").concat(repo, "/zip/master");
+                    return [4 /*yield*/, fetch(zipUrl)];
+                case 1:
+                    zipResponse = _a.sent();
+                    if (!zipResponse.ok) {
+                        throw new Error("Error fetching ZIP file: ".concat(zipResponse.status, " ").concat(zipResponse.statusText));
+                    }
+                    return [4 /*yield*/, zipResponse.arrayBuffer()];
+                case 2:
+                    zipArrayBuffer = _a.sent();
+                    zipContent = new Uint8Array(zipArrayBuffer);
+                    return [4 /*yield*/, fetch(gitHubUrl + '/blob/main/README.md')];
+                case 3:
+                    readmeResponse = _a.sent();
+                    return [4 /*yield*/, readmeResponse.text()];
+                case 4:
+                    readmeText = _a.sent();
+                    $ = cheerio.load(readmeText);
+                    readmeContent = $('article').text();
+                    return [2 /*return*/, { zipContent: zipContent, readmeContent: readmeContent }];
+                case 5:
+                    error_1 = _a.sent();
+                    throw new Error("Error fetching GitHub data: ".concat(error_1.message));
+                case 6: return [2 /*return*/];
+            }
         });
     });
 }
-exports.resetDatabase = resetDatabase;
-exports.default = app;
+exports.fetchGitHubData = fetchGitHubData;
