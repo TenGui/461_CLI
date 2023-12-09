@@ -36,42 +36,47 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchGitHubData = void 0;
-var cheerio = require('cheerio');
-function fetchGitHubData(owner, repo, gitHubUrl) {
+exports.getGitHubPackageVersion = void 0;
+function getGitHubPackageVersion(githubUrl) {
     return __awaiter(this, void 0, void 0, function () {
-        var zipUrl, zipResponse, zipArrayBuffer, zipContent, readmeResponse, readmeText, $, readmeContent, error_1;
+        var response, apiResponse, rawBlobUrlMatch, rawBlobUrl, rawContentResponse, rawContent, packageJson, version, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    zipUrl = "https://codeload.github.com/".concat(owner, "/").concat(repo, "/zip/master");
-                    return [4 /*yield*/, fetch(zipUrl)];
+                    _a.trys.push([0, 7, , 8]);
+                    return [4 /*yield*/, fetch("".concat(githubUrl, "/blob/master/package.json"))];
                 case 1:
-                    zipResponse = _a.sent();
-                    if (!zipResponse.ok) {
-                        throw new Error("Error fetching ZIP file: ".concat(zipResponse.status, " ").concat(zipResponse.statusText));
-                    }
-                    return [4 /*yield*/, zipResponse.arrayBuffer()];
+                    response = _a.sent();
+                    return [4 /*yield*/, response.text()];
                 case 2:
-                    zipArrayBuffer = _a.sent();
-                    zipContent = new Uint8Array(zipArrayBuffer);
-                    return [4 /*yield*/, fetch("".concat(gitHubUrl, "/raw/master/README.md"))];
+                    apiResponse = _a.sent();
+                    rawBlobUrlMatch = apiResponse.match(/https:\/\/github\.com\/[^"]+\/raw\/[^"]+\/package\.json/);
+                    rawBlobUrl = rawBlobUrlMatch ? rawBlobUrlMatch[0] : null;
+                    if (!rawBlobUrl) return [3 /*break*/, 5];
+                    return [4 /*yield*/, fetch(rawBlobUrl)];
                 case 3:
-                    readmeResponse = _a.sent();
-                    return [4 /*yield*/, readmeResponse.text()];
+                    rawContentResponse = _a.sent();
+                    return [4 /*yield*/, rawContentResponse.text()];
                 case 4:
-                    readmeText = _a.sent();
-                    $ = cheerio.load(readmeText);
-                    readmeContent = $('body').text();
-                    //console.log(readmeContent);
-                    return [2 /*return*/, { zipContent: zipContent, readmeContent: readmeContent }];
+                    rawContent = _a.sent();
+                    packageJson = JSON.parse(rawContent);
+                    version = packageJson.version || '1.0.0';
+                    //console.log('Package Version:', version);
+                    // Return the extracted version
+                    return [2 /*return*/, version];
                 case 5:
+                    console.error('Unable to extract rawBlobUrl from GitHub API response.');
+                    // Return a default version if rawBlobUrl is not found
+                    return [2 /*return*/, '1.0.0'];
+                case 6: return [3 /*break*/, 8];
+                case 7:
                     error_1 = _a.sent();
-                    throw new Error("Error fetching GitHub data: ".concat(error_1.message));
-                case 6: return [2 /*return*/];
+                    console.error('Error fetching or parsing package.json:', error_1.message);
+                    // Return a default version in case of an error
+                    return [2 /*return*/, '1.0.0'];
+                case 8: return [2 /*return*/];
             }
         });
     });
 }
-exports.fetchGitHubData = fetchGitHubData;
+exports.getGitHubPackageVersion = getGitHubPackageVersion;

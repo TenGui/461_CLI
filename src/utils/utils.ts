@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
+
 export function parseFromGitLink(url: string): [string, string] {
   const username: string = url.split("/")[3];
   const repo: string = url.split("/")[4];
@@ -29,3 +30,7 @@ export async function GetDetailsFromNPM(
   const repo = datasplit.pop().split(".")[0];
   return [datasplit.pop(), repo];
 }
+
+
+
+
