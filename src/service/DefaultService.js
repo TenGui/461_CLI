@@ -290,7 +290,7 @@ function PackageCreate(body, xAuthorization) {
                     if (!output_2) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
                     }
-                    return [4 /*yield*/, fetch(github_link + '/blob/main/README.md')];
+                    return [4 /*yield*/, fetch(output_2["url"] + '/blob/main/README.md')];
                 case 8:
                     readmeResponse = _c.sent();
                     return [4 /*yield*/, readmeResponse.text()];
