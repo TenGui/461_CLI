@@ -1,5 +1,6 @@
 const cheerio = require('cheerio');
 
+
 export async function fetchGitHubData(owner, repo, gitHubUrl): Promise<{ zipContent: Uint8Array, readmeContent: string }> {
   try {
       // Fetch the ZIP file from the GitHub repository
@@ -12,12 +13,14 @@ export async function fetchGitHubData(owner, repo, gitHubUrl): Promise<{ zipCont
       const zipContent = new Uint8Array(zipArrayBuffer);
 
       // Fetch the README file from the GitHub repository (assuming it's in the root of the repository)
-      const readmeResponse = await fetch(gitHubUrl + '/blob/main/README.md');
+      const readmeResponse = await fetch(`${gitHubUrl}/raw/master/README.md`);
+      
       const readmeText = await readmeResponse.text();
 
       // Use cheerio to parse the README content
       const $ = cheerio.load(readmeText);
-      const readmeContent = $('article').text();
+      const readmeContent = $('body').text();
+      console.log(readmeContent);
 
       return { zipContent, readmeContent };
   } catch (error) {
