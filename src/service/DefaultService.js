@@ -210,21 +210,26 @@ exports.PackageByRegExGet = PackageByRegExGet;
  **/
 var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 var github_to_base64_js_1 = require("../utils/github_to_base64.js");
+
 var version_js_1 = require("../utils/version.js");
+
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Content, URL, Version, JSProgram, upload, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, package_exist_check, _b, result, fields, output, error_3;
+        var Name, Content, URL, Version, JSProgram, README, upload, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, readmeResponse, readmeText, $, package_exist_check, _b, result, fields, output, error_3;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
+
                     _c.trys.push([0, 11, , 12]);
+
                     Name = "";
                     Content = "";
                     URL = "";
                     Version = "";
                     JSProgram = "";
+                    README = "";
                     upload = new upload_endpoint_js_1.Upload();
-                    //Check if package is given
+                    //Check if package is given 
                     if ("URL" in body && "Content" in body) {
                         console.log("Improper form, URL and Content are both set");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
@@ -258,10 +263,12 @@ function PackageCreate(body, xAuthorization) {
                     _a = _c.sent(), zipContent = _a.zipContent, readmeContent = _a.readmeContent;
                     zip_base64 = Buffer.from(zipContent).toString('base64');
                     console.log(readmeContent);
+
                     Content = "";
                     return [3 /*break*/, 8];
                 case 5:
                     if (!("Content" in body)) return [3 /*break*/, 8];
+
                     if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
                         try {
                             contentstring = body["Content"];
@@ -285,50 +292,67 @@ function PackageCreate(body, xAuthorization) {
                     if (!output_2) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
                     }
+                    return [4 /*yield*/, fetch(github_link + '/blob/main/README.md')];
+                case 7:
+                    readmeResponse = _c.sent();
+                    return [4 /*yield*/, readmeResponse.text()];
+                case 8:
+                    readmeText = _c.sent();
+                    $ = cheerio.load(readmeText);
+                    README = $('article').text();
                     Name = output_2["repo"];
-                    Content = "Content";
-                    URL = 'N/A';
+                    Content = body.Content;
+                    URL = github_link;
                     Version = "1.0.0";
+
                     _c.label = 8;
                 case 8: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
                 case 9:
+
                     package_exist_check = _c.sent();
                     if (package_exist_check) {
                         console.log("Upload Error: Package exists already");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Error": "Package exists already" })];
                     }
-                    return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?)', [
+                    console.log(README);
+                    return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
                             Name,
                             Version,
                             Content,
+                            README,
                             URL,
-                            JSProgram,
+                            JSProgram
                         ])];
+
                 case 10:
+
                     _b = _c.sent(), result = _b[0], fields = _b[1];
+                    console.log(result);
                     output = {
                         "metadata": {
                             "Name": Name,
                             "version": Version,
-                            "ID": "1"
+                            "ID": result[0][0].packageID
                         },
                         "data": {
-                            "JSProgram": JSProgram
+                            "Content": Content
                         }
                     };
-                    if ("URL" in body) {
-                        output["data"]["URL"] = URL;
-                    }
-                    else if ("Content" in body) {
-                        output["data"]["Content"] = Content;
-                    }
+                    // if("URL" in body){
+                    //   output["data"]["URL"] = URL;
+                    // }
+                    // else if("Content" in body){
+                    //   output["data"]["Content"] = Content;
+                    // }
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
+
                 case 11:
                     error_3 = _c.sent();
                     console.error('Error calling the stored procedure:', error_3);
                     throw error_3; // Re-throw the error for the caller to handle
                 case 12: return [2 /*return*/];
+
             }
         });
     });
@@ -461,21 +485,16 @@ function PackageUpdate(body, id, xAuthorization) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    // if ("URL" in body && "Content" in body) {
-                    //   console.log("Improper form, URL and Content are both set");
-                    //   return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
-                    // }
-                    if (!("URL" in body.data) && !("Content" in body.data)) {
-                        console.log("Improper form, URL and Content are both not set");
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
+                    if (Object.keys(body.data).length != 1 || (!("URL" in body.data) && !("Content" in body.data) && !("JSProgram" in body.data))) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form" })];
                     }
                     return [4 /*yield*/, promisePool.execute('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
                             id,
                             body.metadata.Name,
                             body.metadata.Version,
-                            body.data.Content,
-                            body.data.URL,
-                            body.data.JSProgram
+                            body.data.Content || null,
+                            body.data.URL || null,
+                            body.data.JSProgram || null // Replace undefined with null for JSProgram
                         ])];
                 case 1:
                     results = (_a.sent())[0];
@@ -557,11 +576,11 @@ function PackagesList(body, offset, xAuthorization) {
                 case 7:
                     if (!(_c < idsInRange_1.length)) return [3 /*break*/, 10];
                     id = idsInRange_1[_c];
-                    return [4 /*yield*/, promisePool.execute('CALL GetBasicMetadata(?)', [id])];
+                    return [4 /*yield*/, promisePool.execute('SELECT Version, ID, Name FROM PackageMetadata WHERE ID = ?', [id])];
                 case 8:
                     _d = _e.sent(), result = _d[0], fields = _d[1];
-                    basicMetadata = result[0][0];
-                    //console.log("id: ", id, " corresp Metadata: ", basicMetadata);
+                    basicMetadata = result[0];
+                    //console.log("id: ", id, " corresp Metadata: ", result);
                     response['application/json'].push(basicMetadata);
                     _e.label = 9;
                 case 9:

@@ -171,10 +171,20 @@ var Upload = /** @class */ (function () {
     };
     Upload.prototype.process = function (url) {
         return __awaiter(this, void 0, void 0, function () {
-            var output;
+            var githubUrlRegex, match, extractedString, output;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.check_valid_githubURL(url)];
+                    case 0:
+                        githubUrlRegex = /github\.com\/(.+)/;
+                        match = url.match(githubUrlRegex);
+                        if (match) {
+                            extractedString = match[1];
+                            url = "https://github.com/".concat(extractedString);
+                        }
+                        else {
+                            return [2 /*return*/, false];
+                        }
+                        return [4 /*yield*/, this.check_valid_githubURL(url)];
                     case 1:
                         output = _a.sent();
                         if (!output) {

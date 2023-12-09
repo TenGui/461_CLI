@@ -70,9 +70,9 @@ const options: any =  {
     },
     openApiValidator: {
         apiSpec: path.join(__dirname, 'api/openapi.yaml'),
-        validateResponses: {
-            removeAdditional: true,
-        },
+        // validateResponses: {
+        //     removeAdditional: true,
+        // },
         validateRequests: {
             allowUnknownQueryParameters: false
         }, 
