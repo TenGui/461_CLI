@@ -217,7 +217,7 @@ function PackageCreate(body, xAuthorization) {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _c.trys.push([0, 13, , 14]);
+                    _c.trys.push([0, 14, , 15]);
                     Name = "";
                     Content = "";
                     URL = "";
@@ -246,7 +246,6 @@ function PackageCreate(body, xAuthorization) {
                     return [4 /*yield*/, (0, version_js_1.getGitHubPackageVersion)(output_1["url"])];
                 case 2:
                     Version = _c.sent();
-                    console.log(Version);
                     return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
                 case 3:
                     package_exist_check_1 = _c.sent();
@@ -258,14 +257,13 @@ function PackageCreate(body, xAuthorization) {
                 case 4:
                     _a = _c.sent(), zipContent = _a.zipContent, readmeContent = _a.readmeContent;
                     zip_base64 = Buffer.from(zipContent).toString('base64');
-                    console.log(readmeContent);
-                    console.log(readmeContent);
+                    //console.log(readmeContent);
                     Content = zip_base64;
                     README = readmeContent;
                     JSProgram = body["JSProgram"];
-                    return [3 /*break*/, 10];
+                    return [3 /*break*/, 11];
                 case 5:
-                    if (!("Content" in body)) return [3 /*break*/, 10];
+                    if (!("Content" in body)) return [3 /*break*/, 11];
                     if (typeof body["Content"] != 'string') {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Content has to be string" })];
                     }
@@ -303,17 +301,18 @@ function PackageCreate(body, xAuthorization) {
                     Name = output_2["repo"];
                     Content = body.Content;
                     URL = github_link;
-                    Version = "1.0.0";
+                    return [4 /*yield*/, (0, version_js_1.getGitHubPackageVersion)(output_2["url"])];
+                case 10:
+                    Version = _c.sent();
                     JSProgram = body["JSProgram"];
-                    _c.label = 10;
-                case 10: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
-                case 11:
+                    _c.label = 11;
+                case 11: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                case 12:
                     package_exist_check = _c.sent();
                     if (package_exist_check) {
                         console.log("Upload Error: Package exists already");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Error": "Package exists already" })];
                     }
-                    console.log(README);
                     return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
                             Name,
                             Version,
@@ -322,9 +321,8 @@ function PackageCreate(body, xAuthorization) {
                             URL,
                             JSProgram
                         ])];
-                case 12:
+                case 13:
                     _b = _c.sent(), result = _b[0], fields = _b[1];
-                    console.log(result);
                     output = {
                         "metadata": {
                             "Name": Name,
@@ -343,11 +341,11 @@ function PackageCreate(body, xAuthorization) {
                     // }
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
-                case 13:
+                case 14:
                     error_3 = _c.sent();
                     console.error('Error calling the stored procedure:', error_3);
                     throw error_3; // Re-throw the error for the caller to handle
-                case 14: return [2 /*return*/];
+                case 15: return [2 /*return*/];
             }
         });
     });

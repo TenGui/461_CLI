@@ -264,7 +264,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Name = output["repo"];
       Content = body.Content;
       URL = github_link;
-      Version = "1.0.0";
+      Version = await getGitHubPackageVersion(output["url"]);
       JSProgram = body["JSProgram"];
 
     }

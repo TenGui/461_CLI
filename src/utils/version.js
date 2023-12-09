@@ -61,7 +61,7 @@ function getGitHubPackageVersion(githubUrl) {
                     rawContent = _a.sent();
                     packageJson = JSON.parse(rawContent);
                     version = packageJson.version || '1.0.0';
-                    console.log('Package Version:', version);
+                    //console.log('Package Version:', version);
                     // Return the extracted version
                     return [2 /*return*/, version];
                 case 5:

@@ -20,7 +20,7 @@ export async function fetchGitHubData(owner, repo, gitHubUrl): Promise<{ zipCont
       // Use cheerio to parse the README content
       const $ = cheerio.load(readmeText);
       const readmeContent = $('body').text();
-      console.log(readmeContent);
+      //console.log(readmeContent);
 
       return { zipContent, readmeContent };
   } catch (error) {
