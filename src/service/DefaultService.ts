@@ -174,7 +174,9 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
  **/
 import { Upload } from '../app_endpoints/upload_endpoint.js';
 import { fetchGitHubData } from '../utils/github_to_base64.js';
-const cheerio = require('cheerio');
+
+import {getGitHubPackageVersion} from '../utils/version.js';
+
 export async function PackageCreate(body: PackageData, xAuthorization: AuthenticationToken) {
   try {
     var Name: string = "";
@@ -204,7 +206,8 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
       Name = output["repo"];
       URL = output["url"];
-      Version = "1.0.5";
+      Version = await getGitHubPackageVersion(output["url"]);
+      console.log(Version);
 
       const package_exist_check = await upload.check_Package_Existence(Name, Version);
       if(package_exist_check){
@@ -214,7 +217,9 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
     
       const { zipContent, readmeContent } = await fetchGitHubData(output["owner"], output["repo"], output["url"]);
+     
       const zip_base64 = Buffer.from(zipContent).toString('base64');
+      console.log(readmeContent);
 
       console.log(readmeContent);
 
