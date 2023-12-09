@@ -107,6 +107,7 @@ export class Upload{
                         });
                     } else {
                         entry.autodrain();
+                        resolve("");
                     }
                 })
                 .on('error', (err: Error) => {
