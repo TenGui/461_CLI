@@ -487,9 +487,9 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
       //console.log("ids in range: ", idsInRange)
 
       for (const id of idsInRange) {
-        const [result, fields] = await promisePool.execute('CALL GetBasicMetadata(?)', [id]);
-        const basicMetadata = result[0][0];
-        //console.log("id: ", id, " corresp Metadata: ", basicMetadata);
+        const [result, fields] = await promisePool.execute('SELECT Version, ID, Name FROM PackageMetadata WHERE ID = ?', [id]);
+        const basicMetadata = result[0];
+        //console.log("id: ", id, " corresp Metadata: ", result);
         response['application/json'].push(basicMetadata);
         //console.log("\n\nRESPONSE: ", response);
       }
