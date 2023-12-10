@@ -289,7 +289,7 @@ function PackageCreate(body, xAuthorization) {
                         }
                         catch (error) {
                             errorMessage = "Not a valid base64-encoded zip file";
-                            console.error(errorMessage);
+                            console.log("error", errorMessage);
                             return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": errorMessage })];
                         }
                     }
@@ -358,8 +358,8 @@ function PackageCreate(body, xAuthorization) {
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
                 case 14:
                     error_3 = _c.sent();
-                    console.error('Error calling the stored procedure:', error_3);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(400, JSON.stringify("Upload errorss: " + error_3))];
+                    console.log('Upload error:', error_3);
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(400, JSON.stringify("Upload errors: " + error_3))];
                 case 15: return [2 /*return*/];
             }
         });
