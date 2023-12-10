@@ -139,33 +139,69 @@ export async function PackageByNameGet(name: PackageName, xAuthorization: Authen
  * @returns List
  **/
 export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: AuthenticationToken) {
-  if(!body.RegEx){
-    return respondWithCode(404, {"Error" : "There is missing field(s) in the PackageRegEx"});
+  if (!body.RegEx) {
+    return respondWithCode(404, { "Error": "There is a missing field(s) in the PackageRegEx" });
   }
   const packageName = body.RegEx;
 
-  const query = 'SELECT Name, version FROM PackageMetadata WHERE Name REGEXP ?';
+  var safe = require('safe-regex');
+
+  if( !safe(packageName))
+  {
+    return respondWithCode(404, {  "Error": "unSafe Regex" });
+  }
+
+  // Query for matching against the Name column
+  const queryName = `
+    SELECT PM.Name, PM.version
+    FROM PackageMetadata PM
+    WHERE PM.Name REGEXP ?;
+  `;
+
+  // Query for matching against the README column
+  const queryReadme = `
+    SELECT PM.Name, PM.version
+    FROM PackageMetadata PM
+    LEFT JOIN PackageData PD ON PM.ID = PD.ID
+    WHERE PD.Readme REGEXP ?;
+  `;
 
   try {
-    const [rows, fields] = await db.promise().execute(query, [packageName]);
+    // Execute the query for matching against the Name column
+    const [rowsName, fieldsName] = await db.promise().execute(queryName, [packageName]);
 
-    console.log('Results:', rows);
+    
 
-    if (rows.length > 0) {
-      const matchedPackages = rows.map((pkg: RowDataPacket) => ({
+    if (rowsName.length > 0) {
+      const matchedPackagesName = rowsName.map((pkg: RowDataPacket) => ({
         name: pkg.Name,
         version: pkg.version,
       }));
-      
-      return respondWithCode(200, matchedPackages);
+
+      return respondWithCode(200, matchedPackagesName);
     } else {
-      return respondWithCode(404, {"Error" : "No package found"});
+      // If no match in Name, proceed with the query for matching against the README column
+      const [rowsReadme, fieldsReadme] = await db.promise().execute(queryReadme, [packageName]);
+
+      
+
+      if (rowsReadme.length > 0) {
+        const matchedPackagesReadme = rowsReadme.map((pkg: RowDataPacket) => ({
+          name: pkg.Name,
+          version: pkg.version,
+        }));
+
+        return respondWithCode(200, matchedPackagesReadme);
+      } else {
+        return respondWithCode(404, { "Error": "No package found" });
+      }
     }
   } catch (error) {
     console.error(error);
-    return respondWithCode(error.response.status, { "Error": 'Error in RegexGet' });
+    return respondWithCode(error.response?.status || 500, { "Error": 'Error in RegexGet' });
   }
 }
+
 
 /**
  *
