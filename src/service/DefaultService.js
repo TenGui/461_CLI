@@ -267,13 +267,16 @@ function PackageCreate(body, xAuthorization) {
                     if (typeof body["Content"] != 'string') {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Content has to be string" })];
                     }
-                    try {
-                        contentstring = body["Content"];
-                        decodedContent = atob(contentstring);
-                    }
-                    catch (error) {
-                        errorMessage = "Not a valid base64-encoded zip file";
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": errorMessage })];
+                    if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
+                        try {
+                            contentstring = body["Content"];
+                            decodedContent = atob(contentstring);
+                        }
+                        catch (error) {
+                            errorMessage = "Not a valid base64-encoded zip file";
+                            console.error(errorMessage);
+                            return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": errorMessage })];
+                        }
                     }
                     return [4 /*yield*/, upload.decompress_zip_to_github_link(body["Content"])];
                 case 6:
