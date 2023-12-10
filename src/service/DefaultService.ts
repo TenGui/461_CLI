@@ -274,7 +274,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         } catch (error) {
             // If decoding fails, it's not a valid base64 string
             const errorMessage = "Not a valid base64-encoded zip file";
-            console.error(errorMessage);
+            console.log("error", errorMessage);
             return respondWithCode(400, { "Error": errorMessage });
         }
       }
@@ -346,7 +346,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
     return respondWithCode(201, output);
   } catch (error) {
-    console.error('Error calling the stored procedure:', error);
+    console.log('Upload error:', error);
     return respondWithCode(400, JSON.stringify("Upload errorss: "+error));
     throw error; // Re-throw the error for the caller to handle
   }
