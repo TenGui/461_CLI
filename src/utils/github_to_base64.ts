@@ -4,11 +4,16 @@ const cheerio = require('cheerio');
 export async function fetchGitHubData(owner, repo, gitHubUrl): Promise<{ zipContent: Uint8Array, readmeContent: string }> {
   try {
       // Fetch the ZIP file from the GitHub repository
-      const zipUrl = `https://codeload.github.com/${owner}/${repo}/zip/master`;
-      const zipResponse = await fetch(zipUrl);
+      let zipUrl = `https://codeload.github.com/${owner}/${repo}/zip/HEAD`;
+      let zipResponse = await fetch(zipUrl);
       if (!zipResponse.ok) {
-        throw new Error(`Error fetching ZIP file: ${zipResponse.status} ${zipResponse.statusText}`);
+        // zipUrl = `https://codeload.github.com/${owner}/${repo}/zip/main`;
+        // zipResponse = await fetch(zipUrl);
+        if (!zipResponse.ok) {
+          throw new Error(`Error fetching ZIP file: ${zipResponse.status} ${zipResponse.statusText}`);
+        }
       }
+      //console.log(zipResponse);
       const zipArrayBuffer = await zipResponse.arrayBuffer();
       const zipContent = new Uint8Array(zipArrayBuffer);
 

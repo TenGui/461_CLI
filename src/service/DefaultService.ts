@@ -139,33 +139,69 @@ export async function PackageByNameGet(name: PackageName, xAuthorization: Authen
  * @returns List
  **/
 export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: AuthenticationToken) {
-  if(!body.RegEx){
-    return respondWithCode(404, {"Error" : "There is missing field(s) in the PackageRegEx"});
+  if (!body.RegEx) {
+    return respondWithCode(404, { "Error": "There is a missing field(s) in the PackageRegEx" });
   }
   const packageName = body.RegEx;
 
-  const query = 'SELECT Name, version FROM PackageMetadata WHERE Name REGEXP ?';
+  var safe = require('safe-regex');
+
+  if( !safe(packageName))
+  {
+    return respondWithCode(404, {  "Error": "unSafe Regex" });
+  }
+
+  // Query for matching against the Name column
+  const queryName = `
+    SELECT PM.Name, PM.version
+    FROM PackageMetadata PM
+    WHERE PM.Name REGEXP ?;
+  `;
+
+  // Query for matching against the README column
+  const queryReadme = `
+    SELECT PM.Name, PM.version
+    FROM PackageMetadata PM
+    LEFT JOIN PackageData PD ON PM.ID = PD.ID
+    WHERE PD.Readme REGEXP ?;
+  `;
 
   try {
-    const [rows, fields] = await db.promise().execute(query, [packageName]);
+    // Execute the query for matching against the Name column
+    const [rowsName, fieldsName] = await db.promise().execute(queryName, [packageName]);
 
-    console.log('Results:', rows);
+    
 
-    if (rows.length > 0) {
-      const matchedPackages = rows.map((pkg: RowDataPacket) => ({
+    if (rowsName.length > 0) {
+      const matchedPackagesName = rowsName.map((pkg: RowDataPacket) => ({
         name: pkg.Name,
         version: pkg.version,
       }));
-      
-      return respondWithCode(200, matchedPackages);
+
+      return respondWithCode(200, matchedPackagesName);
     } else {
-      return respondWithCode(404, {"Error" : "No package found"});
+      // If no match in Name, proceed with the query for matching against the README column
+      const [rowsReadme, fieldsReadme] = await db.promise().execute(queryReadme, [packageName]);
+
+      
+
+      if (rowsReadme.length > 0) {
+        const matchedPackagesReadme = rowsReadme.map((pkg: RowDataPacket) => ({
+          name: pkg.Name,
+          version: pkg.version,
+        }));
+
+        return respondWithCode(200, matchedPackagesReadme);
+      } else {
+        return respondWithCode(404, { "Error": "No package found" });
+      }
     }
   } catch (error) {
     console.error(error);
-    return respondWithCode(error.response.status, { "Error": 'Error in RegexGet' });
+    return respondWithCode(error.response?.status || 500, { "Error": 'Error in RegexGet' });
   }
 }
+
 
 /**
  *
@@ -188,8 +224,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     var README:string = "";
     const upload = new Upload()
 
-    //Check if package is given 
-    
+    //Edge Cases
     if("URL" in body && "Content" in body){
       console.log("Improper form, URL and Content are both set")
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
@@ -198,6 +233,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       console.log("Improper form, URL and Content are both not set")
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
     }
+
 
     if("URL" in body){
       const output = await upload.process(body["URL"])
@@ -218,7 +254,6 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
     
       const { zipContent, readmeContent } = await fetchGitHubData(output["owner"], output["repo"], output["url"]);
-     
       const zip_base64 = Buffer.from(zipContent).toString('base64');
 
       //console.log(readmeContent);
@@ -232,15 +267,17 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         return respondWithCode(400, {"Error": "Content has to be string"});
       }
       
-      try {
-        const contentstring = body["Content"]
-        const decodedContent = atob(contentstring);
-      } catch (error) {
-          // If decoding fails, it's not a valid base64 string
-          const errorMessage = "Not a valid base64-encoded zip file";
-          return respondWithCode(400, { "Error": errorMessage });
+      if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
+        try {
+          const contentstring = body["Content"]
+          const decodedContent = atob(contentstring);
+        } catch (error) {
+            // If decoding fails, it's not a valid base64 string
+            const errorMessage = "Not a valid base64-encoded zip file";
+            console.error(errorMessage);
+            return respondWithCode(400, { "Error": errorMessage });
+        }
       }
-
 
       const github_link = await upload.decompress_zip_to_github_link(body["Content"])
       if(github_link == "") {
@@ -466,7 +503,7 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
       var table: any; //map of IDs to Versions for all packages fitting the name query
 
       //Clean Version Range
-      if(VersionRange != undefined){
+      if(VersionRange != undefined) {
         if (VersionRange.includes("-")) {
           VersionRange = VersionRange.split("-")[0] + " - " + VersionRange.split("-")[1];
         }
@@ -489,7 +526,7 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
 
       for (let row = 0; row < table.length; row++) {
         //console.log("satisfies inputs: ", table[row]["version"], VersionRange, satisfies(table[row]["version"], VersionRange));
-        if (VersionRange == "*" || satisfies(table[row]["version"], VersionRange)) {
+        if (VersionRange == "*" || VersionRange == undefined || satisfies(table[row]["version"], VersionRange)) {
           idsInRange.push(table[row]["id"]);
         }
       }
@@ -568,7 +605,7 @@ export async function UserDelete(userName: string, xAuthorization: Authenticatio
  * no response value expected for this operation
  **/
 export async function UserPost(body: newUser, xAuthorization: AuthenticationToken) {
-  if(xAuthorization["isAdmin"] != 1){
+  if(xAuthorization["isAdmin"] != 1) {
     return respondWithCode(400, "Your token is valid, but you do not have proper permissions");
   }
   //let queryString: string = 'INSERT INTO Auth VALUES (\''+body.user+'\', \''+ body.pass +'\', '+ body.canSearch +', '+ body.canUpload +', '+ body.canDownload +', '+ body.isAdmin +')';

@@ -164,39 +164,54 @@ exports.PackageByNameGet = PackageByNameGet;
  * @returns List
  **/
 function PackageByRegExGet(body, xAuthorization) {
+    var _a;
     return __awaiter(this, void 0, void 0, function () {
-        var packageName, query, _a, rows, fields, matchedPackages, error_2;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var packageName, safe, queryName, queryReadme, _b, rowsName, fieldsName, matchedPackagesName, _c, rowsReadme, fieldsReadme, matchedPackagesReadme, error_2;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
                 case 0:
                     if (!body.RegEx) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "There is missing field(s) in the PackageRegEx" })];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "There is a missing field(s) in the PackageRegEx" })];
                     }
                     packageName = body.RegEx;
-                    query = 'SELECT Name, version FROM PackageMetadata WHERE Name REGEXP ?';
-                    _b.label = 1;
+                    safe = require('safe-regex');
+                    if (!safe(packageName)) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "unSafe Regex" })];
+                    }
+                    queryName = "\n    SELECT PM.Name, PM.version\n    FROM PackageMetadata PM\n    WHERE PM.Name REGEXP ?;\n  ";
+                    queryReadme = "\n    SELECT PM.Name, PM.version\n    FROM PackageMetadata PM\n    LEFT JOIN PackageData PD ON PM.ID = PD.ID\n    WHERE PD.Readme REGEXP ?;\n  ";
+                    _d.label = 1;
                 case 1:
-                    _b.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, db.promise().execute(query, [packageName])];
+                    _d.trys.push([1, 6, , 7]);
+                    return [4 /*yield*/, db.promise().execute(queryName, [packageName])];
                 case 2:
-                    _a = _b.sent(), rows = _a[0], fields = _a[1];
-                    console.log('Results:', rows);
-                    if (rows.length > 0) {
-                        matchedPackages = rows.map(function (pkg) { return ({
+                    _b = _d.sent(), rowsName = _b[0], fieldsName = _b[1];
+                    if (!(rowsName.length > 0)) return [3 /*break*/, 3];
+                    matchedPackagesName = rowsName.map(function (pkg) { return ({
+                        name: pkg.Name,
+                        version: pkg.version,
+                    }); });
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(200, matchedPackagesName)];
+                case 3: return [4 /*yield*/, db.promise().execute(queryReadme, [packageName])];
+                case 4:
+                    _c = _d.sent(), rowsReadme = _c[0], fieldsReadme = _c[1];
+                    if (rowsReadme.length > 0) {
+                        matchedPackagesReadme = rowsReadme.map(function (pkg) { return ({
                             name: pkg.Name,
                             version: pkg.version,
                         }); });
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, matchedPackages)];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, matchedPackagesReadme)];
                     }
                     else {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "No package found" })];
                     }
-                    return [3 /*break*/, 4];
-                case 3:
-                    error_2 = _b.sent();
+                    _d.label = 5;
+                case 5: return [3 /*break*/, 7];
+                case 6:
+                    error_2 = _d.sent();
                     console.error(error_2);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(error_2.response.status, { "Error": 'Error in RegexGet' })];
-                case 4: return [2 /*return*/];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(((_a = error_2.response) === null || _a === void 0 ? void 0 : _a.status) || 500, { "Error": 'Error in RegexGet' })];
+                case 7: return [2 /*return*/];
             }
         });
     });
@@ -225,7 +240,7 @@ function PackageCreate(body, xAuthorization) {
                     JSProgram = "";
                     README = "";
                     upload = new upload_endpoint_js_1.Upload();
-                    //Check if package is given 
+                    //Edge Cases
                     if ("URL" in body && "Content" in body) {
                         console.log("Improper form, URL and Content are both set");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both set" })];
@@ -267,13 +282,16 @@ function PackageCreate(body, xAuthorization) {
                     if (typeof body["Content"] != 'string') {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Content has to be string" })];
                     }
-                    try {
-                        contentstring = body["Content"];
-                        decodedContent = atob(contentstring);
-                    }
-                    catch (error) {
-                        errorMessage = "Not a valid base64-encoded zip file";
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": errorMessage })];
+                    if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
+                        try {
+                            contentstring = body["Content"];
+                            decodedContent = atob(contentstring);
+                        }
+                        catch (error) {
+                            errorMessage = "Not a valid base64-encoded zip file";
+                            console.error(errorMessage);
+                            return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": errorMessage })];
+                        }
                     }
                     return [4 /*yield*/, upload.decompress_zip_to_github_link(body["Content"])];
                 case 6:
@@ -557,7 +575,7 @@ function PackagesList(body, offset, xAuthorization) {
                     idsInRange = [];
                     for (row = 0; row < table.length; row++) {
                         //console.log("satisfies inputs: ", table[row]["version"], VersionRange, satisfies(table[row]["version"], VersionRange));
-                        if (VersionRange == "*" || (0, compare_versions_1.satisfies)(table[row]["version"], VersionRange)) {
+                        if (VersionRange == "*" || VersionRange == undefined || (0, compare_versions_1.satisfies)(table[row]["version"], VersionRange)) {
                             idsInRange.push(table[row]["id"]);
                         }
                     }

@@ -44,7 +44,7 @@ function getGitHubPackageVersion(githubUrl) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 7, , 8]);
-                    return [4 /*yield*/, fetch("".concat(githubUrl, "/blob/master/package.json"))];
+                    return [4 /*yield*/, fetch("".concat(githubUrl, "/blob/HEAD/package.json"))];
                 case 1:
                     response = _a.sent();
                     return [4 /*yield*/, response.text()];
