@@ -167,7 +167,6 @@ var Upload = /** @class */ (function () {
                         })
                             .on('finish', function () {
                             resolve(cleaned_github_link);
-
                         });
                     })];
             });

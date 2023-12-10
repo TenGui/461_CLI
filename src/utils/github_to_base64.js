@@ -56,7 +56,6 @@ function fetchGitHubData(owner, repo, gitHubUrl) {
                             throw new Error("Error fetching ZIP file: ".concat(zipResponse.status, " ").concat(zipResponse.statusText));
                         }
                     }
-                    console.log(zipResponse);
                     return [4 /*yield*/, zipResponse.arrayBuffer()];
                 case 2:
                     zipArrayBuffer = _a.sent();
