@@ -45,13 +45,18 @@ function fetchGitHubData(owner, repo, gitHubUrl) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 5, , 6]);
-                    zipUrl = "https://codeload.github.com/".concat(owner, "/").concat(repo, "/zip/master");
+                    zipUrl = "https://codeload.github.com/".concat(owner, "/").concat(repo, "/zip/HEAD");
                     return [4 /*yield*/, fetch(zipUrl)];
                 case 1:
                     zipResponse = _a.sent();
                     if (!zipResponse.ok) {
-                        throw new Error("Error fetching ZIP file: ".concat(zipResponse.status, " ").concat(zipResponse.statusText));
+                        // zipUrl = `https://codeload.github.com/${owner}/${repo}/zip/main`;
+                        // zipResponse = await fetch(zipUrl);
+                        if (!zipResponse.ok) {
+                            throw new Error("Error fetching ZIP file: ".concat(zipResponse.status, " ").concat(zipResponse.statusText));
+                        }
                     }
+                    console.log(zipResponse);
                     return [4 /*yield*/, zipResponse.arrayBuffer()];
                 case 2:
                     zipArrayBuffer = _a.sent();
