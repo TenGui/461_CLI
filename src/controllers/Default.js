@@ -232,12 +232,7 @@ function PackageUpdate(req, res, next, body, id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    console.log(body);
-                    console.log(id);
-                    console.log(xAuthorization);
-                    console.log(req);
-                    return [4 /*yield*/, handleRequestAsync(Default.PackageUpdate, req, res, next, body, id, req.header('X-Authorization'))];
+                case 0: return [4 /*yield*/, handleRequestAsync(Default.PackageUpdate, req, res, next, body, id, req.header('X-Authorization'))];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
