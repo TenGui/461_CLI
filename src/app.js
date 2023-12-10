@@ -25,7 +25,6 @@ morgan.token('auth', function (req, res) {
 morgan.token('resBody', function (req, res) {
     ;
     //make new json to return
-    console.log("Type of res: ".concat(typeof res.body));
     var tempBody;
     if (typeof res.body === 'object') {
         tempBody = JSON.parse(JSON.stringify(res.body));
@@ -47,19 +46,17 @@ morgan.token('reqBody', function (req, res) {
     ;
     //make new json to return
     var tempBody = JSON.parse(JSON.stringify(req.body));
-    // if(req.body.hasOwnProperty("Content")){
-    //     console.log("Hitting Content");
-    //     tempBody["Content"] = tempBody["Content"].substring(0,4);
-    // }
-    // if(req.body.hasOwnProperty("data")){
-    //     console.log("Hitting data");
-    //     if(req.body["data"].hasOwnProperty("Content")){
-    //         console.log("Hitting data.content");
-    //         tempBody["data"]["Content"] = tempBody["data"]["Content"].length;
-    //     }
-    // }
-    console.log("PRINTING REQ-----------------------------------");
-    console.log(tempBody);
+    if (req.body.hasOwnProperty("Content")) {
+        console.log("Hitting Content");
+        tempBody["Content"] = tempBody["Content"].substring(0, 4);
+    }
+    if (req.body.hasOwnProperty("data")) {
+        console.log("Hitting data");
+        if (req.body["data"].hasOwnProperty("Content")) {
+            console.log("Hitting data.content");
+            tempBody["data"]["Content"] = tempBody["data"]["Content"].length;
+        }
+    }
     return JSON.stringify(tempBody);
 });
 morgan.token('uuid', function (req, res) {
