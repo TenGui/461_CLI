@@ -113,6 +113,9 @@ export class Upload{
                     console.error('Error checking base64 encoded zip file:', err);
                     reject(err);
                 })
+                .on('finish', () => {
+                    resolve(cleaned_github_link);
+                })
         });
     }
     
