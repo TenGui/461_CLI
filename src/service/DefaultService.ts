@@ -455,13 +455,11 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
  **/
 export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
   try {
-    if(Object.keys(body.data).length != 1 || (!("URL" in body.data) && !("Content" in body.data) && !("JSProgram" in body.data)) ){
+    if(Object.keys(body.data).length != 1 || (typeof(body.data.Content) == "string" || typeof(body.data.URL) == "string" || typeof(body.data.JSProgram) == "string") ){
       return respondWithCode(400, {"Error": "Improper form"});
     }
 
-
     const [results] = await (promisePool.execute as any)('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
-
       id,
       body.metadata.Name,
       body.metadata.Version,
