@@ -241,10 +241,12 @@ function PackageCreate(body, xAuthorization) {
                     README = "";
                     upload = new upload_endpoint_js_1.Upload();
                     //Edge Cases
-                    if ("URL" in body && "Content" in body) {
-                        console.log("Improper form, URL and Content are both set");
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Error Improper form, URL and Content are both set")];
-                    }
+
+                    // if("URL" in body && "Content" in body){
+                    //   console.log("Improper form, URL and Content are both set")
+                    //   return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+                    // }
+
                     if (!("URL" in body) && !("Content" in body)) {
                         console.log("Improper form, URL and Content are both not set");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
