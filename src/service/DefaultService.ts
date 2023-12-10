@@ -332,7 +332,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       "metadata" : {
         "Name": Name,
         "version": Version,
-        "ID": result[0][0].packageID
+        "ID": String(result[0][0].packageID)
       },
       "data": {
         "Content": Content
