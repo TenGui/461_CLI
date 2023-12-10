@@ -41,7 +41,7 @@ export function writeJson(response: any, arg1: any, arg2?: any) {
   if (typeof payload === 'object') {
     payload = JSON.stringify(payload, null, 2);
   }
-
+  response.body = payload;
   response.writeHead(code, { 'Content-Type': 'application/json' });
   response.end(payload);
 }
