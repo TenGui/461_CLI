@@ -144,6 +144,13 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
   }
   const packageName = body.RegEx;
 
+  var safe = require('safe-regex');
+
+  if( !safe(packageName))
+  {
+    return respondWithCode(404, {  "Error": "unSafe Regex" });
+  }
+
   // Query for matching against the Name column
   const queryName = `
     SELECT PM.Name, PM.version
@@ -163,7 +170,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
     // Execute the query for matching against the Name column
     const [rowsName, fieldsName] = await db.promise().execute(queryName, [packageName]);
 
-    console.log('Results (Name):', rowsName);
+    
 
     if (rowsName.length > 0) {
       const matchedPackagesName = rowsName.map((pkg: RowDataPacket) => ({
@@ -176,7 +183,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
       // If no match in Name, proceed with the query for matching against the README column
       const [rowsReadme, fieldsReadme] = await db.promise().execute(queryReadme, [packageName]);
 
-      console.log('Results (Readme):', rowsReadme);
+      
 
       if (rowsReadme.length > 0) {
         const matchedPackagesReadme = rowsReadme.map((pkg: RowDataPacket) => ({
