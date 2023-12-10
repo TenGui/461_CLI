@@ -159,12 +159,14 @@ var Upload = /** @class */ (function () {
                             }
                             else {
                                 entry.autodrain();
-                                resolve("");
                             }
                         })
                             .on('error', function (err) {
                             console.error('Error checking base64 encoded zip file:', err);
                             resolve("");
+                        })
+                            .on('finish', function () {
+                            resolve(cleaned_github_link);
                         });
                     })];
             });

@@ -107,12 +107,14 @@ export class Upload{
                         });
                     } else {
                         entry.autodrain();
-                        resolve("");
                     }
                 })
                 .on('error', (err: Error) => {
                     console.error('Error checking base64 encoded zip file:', err);
                     resolve("");
+                })
+                .on('finish', () => {
+                    resolve(cleaned_github_link);
                 })
         });
     }
