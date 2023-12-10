@@ -163,10 +163,7 @@ var Upload = /** @class */ (function () {
                         })
                             .on('error', function (err) {
                             console.error('Error checking base64 encoded zip file:', err);
-                            reject("");
-                        })
-                            .on('finish', function () {
-                            resolve(cleaned_github_link);
+                            reject(err);
                         });
                     })];
             });
