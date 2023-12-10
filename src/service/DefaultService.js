@@ -310,7 +310,7 @@ function PackageCreate(body, xAuthorization) {
                     // README = $('article').text();
                     Name = output_2["repo"];
                     Content = body.Content;
-                    URL = github_link;
+                    URL = output_2["url"];
                     //Version = await getGitHubPackageVersion(output["url"]);
                     Version = "";
                     JSProgram = body["JSProgram"];
