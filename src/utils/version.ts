@@ -1,7 +1,7 @@
 export async function getGitHubPackageVersion(githubUrl: string): Promise<string> {
     try {
         // Fetch the GitHub API response for the file
-        const response = await fetch(`${githubUrl}/blob/master/package.json`);
+        const response = await fetch(`${githubUrl}/blob/HEAD/package.json`);
         const apiResponse = await response.text();
 
         // Parse the GitHub HTML response to extract the rawBlobUrl
