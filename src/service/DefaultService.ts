@@ -225,10 +225,12 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     const upload = new Upload()
 
     //Edge Cases
+
     // if("URL" in body && "Content" in body){
     //   console.log("Improper form, URL and Content are both set")
     //   return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
     // }
+
     if(!("URL" in body) && !("Content" in body)){
       console.log("Improper form, URL and Content are both not set")
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
@@ -274,7 +276,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         } catch (error) {
             // If decoding fails, it's not a valid base64 string
             const errorMessage = "Not a valid base64-encoded zip file";
-            console.error(errorMessage);
+            console.log("error", errorMessage);
             return respondWithCode(400, { "Error": errorMessage });
         }
       }
@@ -346,8 +348,8 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
     return respondWithCode(201, output);
   } catch (error) {
-    console.error('Error calling the stored procedure:', error);
-    return respondWithCode(400, JSON.stringify("Upload errorss: "+error));
+    console.log('Upload error:', error);
+    return respondWithCode(400, JSON.stringify("Upload errors: "+error));
     throw error; // Re-throw the error for the caller to handle
   }
 }
