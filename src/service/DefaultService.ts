@@ -227,7 +227,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     //Edge Cases
     if("URL" in body && "Content" in body){
       console.log("Improper form, URL and Content are both set")
-      return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+      return respondWithCode(400, "Error Improper form, URL and Content are both set");
     }
     if(!("URL" in body) && !("Content" in body)){
       console.log("Improper form, URL and Content are both not set")
