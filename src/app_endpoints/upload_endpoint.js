@@ -139,7 +139,7 @@ var Upload = /** @class */ (function () {
                                             var parsedContent = JSON.parse(data);
                                             if (parsedContent && parsedContent['repository']) {
                                                 var github_link = parsedContent['repository'].url;
-                                                cleaned_github_link = "https://" + github_link.substring(6, github_link.length - 4);
+                                                cleaned_github_link = github_link;
                                                 console.log("Extracted github repo link from ZIP file: ", cleaned_github_link);
                                             }
                                             console.log('base64 ZIP file decoded.');
@@ -175,6 +175,9 @@ var Upload = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (url.endsWith(".git")) {
+                            url = url.substring(0, url.length - 4);
+                        }
                         githubUrlRegex = /github\.com\/(.+)/;
                         match = url.match(githubUrlRegex);
                         if (match) {
