@@ -37,11 +37,11 @@ export function writeJson(response: any, arg1: any, arg2?: any) {
     // if no response code given, we default to 200
     code = 200;
   }
-
+  response.body = payload;
   if (typeof payload === 'object') {
     payload = JSON.stringify(payload, null, 2);
   }
-  response.body = payload;
+
   response.writeHead(code, { 'Content-Type': 'application/json' });
   response.end(payload);
 }
