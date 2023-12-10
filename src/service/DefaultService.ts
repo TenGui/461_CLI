@@ -301,7 +301,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
       Name = output["repo"];
       Content = body.Content;
-      URL = github_link;
+      URL = output["url"];
       //Version = await getGitHubPackageVersion(output["url"]);
       Version = "";
       JSProgram = body["JSProgram"];
