@@ -359,7 +359,7 @@ function PackageCreate(body, xAuthorization) {
                 case 14:
                     error_3 = _c.sent();
                     console.error('Error calling the stored procedure:', error_3);
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(400, "Upload error: " + error_3)];
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(400, JSON.stringify("Upload errorss: " + error_3))];
                 case 15: return [2 /*return*/];
             }
         });
