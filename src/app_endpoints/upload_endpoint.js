@@ -159,7 +159,6 @@ var Upload = /** @class */ (function () {
                             }
                             else {
                                 entry.autodrain();
-                                resolve("");
                             }
                         })
                             .on('error', function (err) {
