@@ -347,7 +347,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     return respondWithCode(201, output);
   } catch (error) {
     console.error('Error calling the stored procedure:', error);
-    return respondWithCode(400, "Upload error: "+error);
+    return respondWithCode(400, JSON.stringify("Upload errorss: "+error));
     throw error; // Re-throw the error for the caller to handle
   }
 }
