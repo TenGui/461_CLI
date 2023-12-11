@@ -302,8 +302,6 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       URL = output["url"];
       Version = await getGitHubPackageVersion(output["url"]);
       JSProgram = newBody["jsprogram"];
-
-
     }
     
     //Check if the inserted package already exists
@@ -314,6 +312,15 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     }
 
     //console.log(README)
+
+    //RATE AND DETERMINE INGESTION`
+    const ratings = await eval_single_file(URL);
+    let relevantMetrics: string[] = ["NetScore", "RampUp", "Correctness", "BusFactor", "ResponsiveMaintainer", "LicenseScore"]
+    for (let metric of relevantMetrics) {
+      if (ratings[metric] < 0.5) {
+        return respondWithCode(424, {"Package fails on at least one rating": ratings});
+      }
+    }
 
     const [result, fields] = await promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
       Name,

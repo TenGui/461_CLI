@@ -228,11 +228,11 @@ var github_to_base64_js_1 = require("../utils/github_to_base64.js");
 var version_js_1 = require("../utils/version.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Content, URL, Version, JSProgram, README, upload, newBody, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, readmeResponse, readmeText, $, package_exist_check, _b, result, fields, output, error_3;
+        var Name, Content, URL, Version, JSProgram, README, upload, newBody, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, readmeResponse, readmeText, $, package_exist_check, ratings, relevantMetrics, _i, relevantMetrics_1, metric, _b, result, fields, output, error_3;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _c.trys.push([0, 14, , 15]);
+                    _c.trys.push([0, 15, , 16]);
                     Name = "";
                     Content = "";
                     URL = "";
@@ -326,6 +326,16 @@ function PackageCreate(body, xAuthorization) {
                         console.log("Upload Error: Package exists already");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Error": "Package exists already" })];
                     }
+                    return [4 /*yield*/, (0, rate_endpoint_js_1.eval_single_file)(URL)];
+                case 13:
+                    ratings = _c.sent();
+                    relevantMetrics = ["NetScore", "RampUp", "Correctness", "BusFactor", "ResponsiveMaintainer", "LicenseScore"];
+                    for (_i = 0, relevantMetrics_1 = relevantMetrics; _i < relevantMetrics_1.length; _i++) {
+                        metric = relevantMetrics_1[_i];
+                        if (ratings[metric] < 0.5) {
+                            return [2 /*return*/, (0, writer_1.respondWithCode)(424, { "Package fails on at least one rating": ratings })];
+                        }
+                    }
                     return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
                             Name,
                             Version,
@@ -334,7 +344,7 @@ function PackageCreate(body, xAuthorization) {
                             URL,
                             JSProgram
                         ])];
-                case 13:
+                case 14:
                     _b = _c.sent(), result = _b[0], fields = _b[1];
                     output = {
                         "metadata": {
@@ -354,11 +364,11 @@ function PackageCreate(body, xAuthorization) {
                     // }
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
-                case 14:
+                case 15:
                     error_3 = _c.sent();
                     console.log('Upload error:', error_3);
                     return [2 /*return*/, (0, writer_1.respondWithCode)(400, JSON.stringify("Upload errors: " + error_3))];
-                case 15: return [2 /*return*/];
+                case 16: return [2 /*return*/];
             }
         });
     });
