@@ -9,7 +9,7 @@ describe("Version Pinning Metric", () => {
         expect(versionPinningScore).toBeLessThanOrEqual(1);
         console.log(versionPinningScore);
     });
-    it('Should return number between 0 and 1 for the broken test case', async () => {
+    it('Should return number between 0 and 1 for test case 1', async () => {
         const versionPinningScore = await vp.get_version_pin_score(
            ["jashkenas", "underscore"]
         );
@@ -17,8 +17,21 @@ describe("Version Pinning Metric", () => {
         expect(versionPinningScore).toBeLessThanOrEqual(1);
         console.log(versionPinningScore);
     });
-    // it ('Should return 0 if no contributors', async () => {
-    //     const res = BusFactorRunner.getScore(0);
-    //     expect(res).toEqual(0);
-    // });
+    it('Should return number between 0 and 1 for test case 2', async () => {
+        const versionPinningScore = await vp.get_version_pin_score(
+           ["debug-js", "debug"]
+        );
+        expect(versionPinningScore).toBeGreaterThanOrEqual(0);
+        expect(versionPinningScore).toBeLessThanOrEqual(1);
+        console.log(versionPinningScore);
+    });
+    it('Should return number between 0 and 1 for test case 3', async () => {
+        const versionPinningScore = await vp.get_version_pin_score(
+           ["taylorhakes", "fecha"]
+        );
+        expect(versionPinningScore).toBeGreaterThanOrEqual(0);
+        expect(versionPinningScore).toBeLessThanOrEqual(1);
+        console.log(versionPinningScore);
+    });
+
 });
