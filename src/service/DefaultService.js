@@ -308,7 +308,7 @@ function PackageCreate(body, xAuthorization) {
                     // const $ = cheerio.load(readmeText);
                     // README = $('article').text();
                     Name = output_2["repo"];
-                    Content = newBody.content;
+                    Content = newBody["content"];
                     URL = output_2["url"];
                     //Version = await getGitHubPackageVersion(output["url"]);
                     Version = "";
