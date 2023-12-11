@@ -232,7 +232,7 @@ function PackageCreate(body, xAuthorization) {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _c.trys.push([0, 12, , 13]);
+                    _c.trys.push([0, 15, , 16]);
                     Name = "";
                     Content = "";
                     URL = "";
@@ -274,9 +274,9 @@ function PackageCreate(body, xAuthorization) {
                     Content = zip_base64;
                     README = readmeContent;
                     JSProgram = newBody["jsprogram"];
-                    return [3 /*break*/, 9];
+                    return [3 /*break*/, 11];
                 case 5:
-                    if (!("content" in newBody)) return [3 /*break*/, 9];
+                    if (!("content" in newBody)) return [3 /*break*/, 11];
                     if (typeof newBody["content"] != 'string') {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Content has to be string" })];
                     }
@@ -315,13 +315,12 @@ function PackageCreate(body, xAuthorization) {
                     Content = newBody["content"];
                     URL = output_2["url"];
                     return [4 /*yield*/, (0, version_js_1.getGitHubPackageVersion)(output_2["url"])];
-                case 8:
-                    Version = _c.sent();
-                    // Version = "";
-                    JSProgram = newBody["jsprogram"];
-                    _c.label = 9;
-                case 9: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
                 case 10:
+                    Version = _c.sent();
+                    JSProgram = newBody["jsprogram"];
+                    _c.label = 11;
+                case 11: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                case 12:
                     package_exist_check = _c.sent();
                     if (package_exist_check) {
                         console.log("Upload Error: Package exists already");
@@ -345,7 +344,7 @@ function PackageCreate(body, xAuthorization) {
                             URL,
                             JSProgram
                         ])];
-                case 11:
+                case 14:
                     _b = _c.sent(), result = _b[0], fields = _b[1];
                     output = {
                         "metadata": {
@@ -365,11 +364,11 @@ function PackageCreate(body, xAuthorization) {
                     // }
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
-                case 12:
+                case 15:
                     error_3 = _c.sent();
                     console.log('Upload error:', error_3);
                     return [2 /*return*/, (0, writer_1.respondWithCode)(400, JSON.stringify("Upload errors: " + error_3))];
-                case 13: return [2 /*return*/];
+                case 16: return [2 /*return*/];
             }
         });
     });
