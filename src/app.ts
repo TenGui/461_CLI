@@ -17,14 +17,14 @@ morgan.token('auth', function (req, res) { ;
 morgan.token('resBody', function (req, res) { ;
     //make new json to return
     let tempBody:JSON;
-    if(res.body) {
+    if(typeof res.body === 'object') {
         tempBody = JSON.parse(JSON.stringify(res.body));
         if(res.body.hasOwnProperty("Content")){
             tempBody["Content"] = tempBody["Content"].length;
         }
-        if(res.body.hasOwnProperty("PackageData")){
-            if(res.hasOwnProperty("PackageData")){
-                tempBody["PackageData"]["Content"] = tempBody["PackageData"]["Content"].length;
+        if(res.body.hasOwnProperty("data")){
+            if(res.body["data"].hasOwnProperty("Content")){
+                tempBody["data"]["Content"] = tempBody["data"]["Content"].length;
             }
         }
     }
@@ -37,14 +37,18 @@ morgan.token('reqBody', function (req, res) { ;
     //make new json to return
     let tempBody:JSON = JSON.parse(JSON.stringify(req.body));
     if(req.body.hasOwnProperty("Content")){
-        tempBody["Content"] = tempBody["Content"].length;
+        console.log("Hitting Content");
+        tempBody["Content"] = tempBody["Content"].substring(0,4);
     }
-    if(req.body.hasOwnProperty("PackageData")){
-        if(req.hasOwnProperty("PackageData")){
-            tempBody["PackageData"]["Content"] = tempBody["PackageData"]["Content"].length;
+    if(req.body.hasOwnProperty("data")){
+        console.log("Hitting data");
+        if(req.body["data"].hasOwnProperty("Content")){
+            console.log("Hitting data.content");
+            tempBody["data"]["Content"] = tempBody["data"]["Content"].length;
         }
     }
-    return JSON.stringify(tempBody)});    
+    return JSON.stringify(tempBody)}); 
+
 morgan.token('uuid', function (req, res) { ;
     return req.requestId});
 //make format strings for logging 

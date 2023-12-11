@@ -225,28 +225,32 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     const upload = new Upload()
 
     //Edge Cases
-    if("URL" in body && "Content" in body){
-      console.log("Improper form, URL and Content are both set")
-      return respondWithCode(400, "Error Improper form, URL and Content are both set");
-    }
-    if(!("URL" in body) && !("Content" in body)){
-      console.log("Improper form, URL and Content are both not set")
+
+    // if("URL" in body && "Content" in body){
+    //   console.log("Improper form, URL and Content are both set")
+    //   return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
+    // }
+    const newBody = Object.fromEntries(Object.entries(body).map(([key, value]) => [key.toLowerCase(), value]));
+
+    if (!("url" in newBody) && !("content" in newBody)) {
+      console.log("Improper form, URL and Content are both not set");
       return respondWithCode(400, {"Error": "Improper form, URL and Content are both not set"});
     }
 
 
-    if("URL" in body){
-      const output = await upload.process(body["URL"])
+    if("url" in newBody){
+      const output = await upload.process(newBody["url"])
       if(!output) {
         return respondWithCode(400, {"Error": "Repository does not exists"});
       }
 
       Name = output["repo"];
       URL = output["url"];
-      Version = await getGitHubPackageVersion(output["url"]);
+      //Version = await getGitHubPackageVersion(output["url"]);
+      Version = "";
       //console.log(Version);
 
-      const package_exist_check = await upload.check_Package_Existence(Name, Version);
+      const package_exist_check = await upload.check_Package_Existence(Name, Version); 
       if(package_exist_check){
         console.log("Upload Error: Package exists already");
         return respondWithCode(409, {"Error": "Package exists already"});
@@ -260,16 +264,16 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
       Content = zip_base64
       README = readmeContent
-      JSProgram = body["JSProgram"];
+      JSProgram = newBody["jsprogram"];
     }
-    else if("Content" in body){
-      if(typeof body["Content"] != 'string'){
+    else if("content" in newBody){
+      if(typeof newBody["content"] != 'string'){
         return respondWithCode(400, {"Error": "Content has to be string"});
       }
       
-      if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
+      if (typeof newBody["content"] === 'string' && newBody["content"].trim() !== '') {
         try {
-          const contentstring = body["Content"]
+          const contentstring = newBody["content"]
           const decodedContent = atob(contentstring);
         } catch (error) {
             // If decoding fails, it's not a valid base64 string
@@ -279,7 +283,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         }
       }
 
-      const github_link = await upload.decompress_zip_to_github_link(body["Content"])
+      const github_link = await upload.decompress_zip_to_github_link(newBody["content"])
       if(github_link == "") {
         return respondWithCode(400, {"Error": "Repository does not exists/Cannot locate package.json file"});
       }
@@ -289,18 +293,19 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         return respondWithCode(400, {"Error": "Repository does not exists"});
       }
 
-      const readmeResponse = await fetch(output["url"] + '/blob/main/README.md');
-      const readmeText = await readmeResponse.text();
+      // const readmeResponse = await fetch(output["url"] + '/blob/main/README.md');
+      // const readmeText = await readmeResponse.text();
 
-      // Use cheerio to parse the README content
-      const $ = cheerio.load(readmeText);
-      README = $('article').text();
+      // // Use cheerio to parse the README content
+      // const $ = cheerio.load(readmeText);
+      // README = $('article').text();
 
       Name = output["repo"];
-      Content = body.Content;
-      URL = github_link;
-      Version = await getGitHubPackageVersion(output["url"]);
-      JSProgram = body["JSProgram"];
+      Content = newBody["content"];
+      URL = output["url"];
+      //Version = await getGitHubPackageVersion(output["url"]);
+      Version = "";
+      JSProgram = newBody["jsprogram"];
 
     }
     
@@ -328,7 +333,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       "metadata" : {
         "Name": Name,
         "version": Version,
-        "ID": result[0][0].packageID
+        "ID": String(result[0][0].packageID)
       },
       "data": {
         "Content": Content
@@ -430,7 +435,7 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
     const [results] = await (promisePool.execute as any)(query, values);
 
 
-    console.log(results);
+    //console.log(results);
 
     if (results[0].length === 0) {
       return respondWithCode(404);
