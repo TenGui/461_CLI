@@ -225,14 +225,13 @@ exports.PackageByRegExGet = PackageByRegExGet;
  **/
 var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 var github_to_base64_js_1 = require("../utils/github_to_base64.js");
-var version_js_1 = require("../utils/version.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Content, URL, Version, JSProgram, README, upload, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, readmeResponse, readmeText, $, package_exist_check, _b, result, fields, output, error_3;
+        var Name, Content, URL, Version, JSProgram, README, upload, newBody, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, package_exist_check, _b, result, fields, output, error_3;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _c.trys.push([0, 14, , 15]);
+                    _c.trys.push([0, 10, , 11]);
                     Name = "";
                     Content = "";
                     URL = "";
@@ -240,19 +239,16 @@ function PackageCreate(body, xAuthorization) {
                     JSProgram = "";
                     README = "";
                     upload = new upload_endpoint_js_1.Upload();
-                    //Edge Cases
-
-                    // if("URL" in body && "Content" in body){
-                    //   console.log("Improper form, URL and Content are both set")
-                    //   return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
-                    // }
-
-                    if (!("URL" in body) && !("Content" in body)) {
+                    newBody = Object.fromEntries(Object.entries(body).map(function (_a) {
+                        var key = _a[0], value = _a[1];
+                        return [key.toLowerCase(), value];
+                    }));
+                    if (!("url" in newBody) && !("content" in newBody)) {
                         console.log("Improper form, URL and Content are both not set");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
                     }
-                    if (!("URL" in body)) return [3 /*break*/, 5];
-                    return [4 /*yield*/, upload.process(body["URL"])];
+                    if (!("url" in newBody)) return [3 /*break*/, 4];
+                    return [4 /*yield*/, upload.process(newBody["url"])];
                 case 1:
                     output_1 = _c.sent();
                     if (!output_1) {
@@ -260,33 +256,32 @@ function PackageCreate(body, xAuthorization) {
                     }
                     Name = output_1["repo"];
                     URL = output_1["url"];
-                    return [4 /*yield*/, (0, version_js_1.getGitHubPackageVersion)(output_1["url"])];
-                case 2:
-                    Version = _c.sent();
+                    //Version = await getGitHubPackageVersion(output["url"]);
+                    Version = "";
                     return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
-                case 3:
+                case 2:
                     package_exist_check_1 = _c.sent();
                     if (package_exist_check_1) {
                         console.log("Upload Error: Package exists already");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Error": "Package exists already" })];
                     }
                     return [4 /*yield*/, (0, github_to_base64_js_1.fetchGitHubData)(output_1["owner"], output_1["repo"], output_1["url"])];
-                case 4:
+                case 3:
                     _a = _c.sent(), zipContent = _a.zipContent, readmeContent = _a.readmeContent;
                     zip_base64 = Buffer.from(zipContent).toString('base64');
                     //console.log(readmeContent);
                     Content = zip_base64;
                     README = readmeContent;
-                    JSProgram = body["JSProgram"];
-                    return [3 /*break*/, 11];
-                case 5:
-                    if (!("Content" in body)) return [3 /*break*/, 11];
-                    if (typeof body["Content"] != 'string') {
+                    JSProgram = newBody["jsprogram"];
+                    return [3 /*break*/, 7];
+                case 4:
+                    if (!("content" in newBody)) return [3 /*break*/, 7];
+                    if (typeof newBody["content"] != 'string') {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Content has to be string" })];
                     }
-                    if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
+                    if (typeof newBody["content"] === 'string' && newBody["content"].trim() !== '') {
                         try {
-                            contentstring = body["Content"];
+                            contentstring = newBody["content"];
                             decodedContent = atob(contentstring);
                         }
                         catch (error) {
@@ -295,36 +290,32 @@ function PackageCreate(body, xAuthorization) {
                             return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": errorMessage })];
                         }
                     }
-                    return [4 /*yield*/, upload.decompress_zip_to_github_link(body["Content"])];
-                case 6:
+                    return [4 /*yield*/, upload.decompress_zip_to_github_link(newBody["content"])];
+                case 5:
                     github_link = _c.sent();
                     if (github_link == "") {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists/Cannot locate package.json file" })];
                     }
                     return [4 /*yield*/, upload.process(github_link)];
-                case 7:
+                case 6:
                     output_2 = _c.sent();
                     if (!output_2) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
                     }
-                    return [4 /*yield*/, fetch(output_2["url"] + '/blob/main/README.md')];
-                case 8:
-                    readmeResponse = _c.sent();
-                    return [4 /*yield*/, readmeResponse.text()];
-                case 9:
-                    readmeText = _c.sent();
-                    $ = cheerio.load(readmeText);
-                    README = $('article').text();
+                    // const readmeResponse = await fetch(output["url"] + '/blob/main/README.md');
+                    // const readmeText = await readmeResponse.text();
+                    // // Use cheerio to parse the README content
+                    // const $ = cheerio.load(readmeText);
+                    // README = $('article').text();
                     Name = output_2["repo"];
-                    Content = body.Content;
-                    URL = github_link;
-                    return [4 /*yield*/, (0, version_js_1.getGitHubPackageVersion)(output_2["url"])];
-                case 10:
-                    Version = _c.sent();
-                    JSProgram = body["JSProgram"];
-                    _c.label = 11;
-                case 11: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
-                case 12:
+                    Content = newBody["content"];
+                    URL = output_2["url"];
+                    //Version = await getGitHubPackageVersion(output["url"]);
+                    Version = "";
+                    JSProgram = newBody["jsprogram"];
+                    _c.label = 7;
+                case 7: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                case 8:
                     package_exist_check = _c.sent();
                     if (package_exist_check) {
                         console.log("Upload Error: Package exists already");
@@ -338,13 +329,13 @@ function PackageCreate(body, xAuthorization) {
                             URL,
                             JSProgram
                         ])];
-                case 13:
+                case 9:
                     _b = _c.sent(), result = _b[0], fields = _b[1];
                     output = {
                         "metadata": {
                             "Name": Name,
                             "version": Version,
-                            "ID": result[0][0].packageID
+                            "ID": String(result[0][0].packageID)
                         },
                         "data": {
                             "Content": Content
@@ -358,11 +349,11 @@ function PackageCreate(body, xAuthorization) {
                     // }
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
-                case 14:
+                case 10:
                     error_3 = _c.sent();
                     console.log('Upload error:', error_3);
                     return [2 /*return*/, (0, writer_1.respondWithCode)(400, JSON.stringify("Upload errors: " + error_3))];
-                case 15: return [2 /*return*/];
+                case 11: return [2 /*return*/];
             }
         });
     });
@@ -461,7 +452,7 @@ function PackageRetrieve(id, xAuthorization) {
                     return [4 /*yield*/, promisePool.execute(query, values)];
                 case 1:
                     results = (_a.sent())[0];
-                    console.log(results);
+                    //console.log(results);
                     if (results[0].length === 0) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
                     }

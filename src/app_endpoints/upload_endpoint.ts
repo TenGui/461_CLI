@@ -90,7 +90,7 @@ export class Upload{
                                     const parsedContent = JSON.parse(data);
                                     if (parsedContent && parsedContent['repository']) {
                                         const github_link = parsedContent['repository'].url
-                                        cleaned_github_link = "https://" + github_link.substring(6, github_link.length - 4);
+                                        cleaned_github_link = github_link;
                                         console.log("Extracted github repo link from ZIP file: ", cleaned_github_link);
                                     }
                                     console.log('base64 ZIP file decoded.');
@@ -111,15 +111,15 @@ export class Upload{
                 })
                 .on('error', (err: Error) => {
                     console.error('Error checking base64 encoded zip file:', err);
-                    reject("");
-                })
-                .on('finish', () => {
-                    resolve(cleaned_github_link);
+                    reject(err);
                 })
         });
     }
     
     async process(url){
+        if(url.endsWith(".git")){
+            url = url.substring(0,url.length-4);
+        }
         const githubUrlRegex = /github\.com\/(.+)/;
         const match = url.match(githubUrlRegex);
     
