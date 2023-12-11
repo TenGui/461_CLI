@@ -434,7 +434,7 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
     const [results] = await (promisePool.execute as any)(query, values);
 
 
-    console.log(results);
+    //console.log(results);
 
     if (results[0].length === 0) {
       return respondWithCode(404);
