@@ -246,8 +246,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
       Name = output["repo"];
       URL = output["url"];
-      //Version = await getGitHubPackageVersion(output["url"]);
-      Version = "";
+      Version = await getGitHubPackageVersion(output["url"]);
       //console.log(Version);
 
       const package_exist_check = await upload.check_Package_Existence(Name, Version); 
@@ -259,8 +258,6 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
     
       const { zipContent, readmeContent } = await fetchGitHubData(output["owner"], output["repo"], output["url"]);
       const zip_base64 = Buffer.from(zipContent).toString('base64');
-
-      //console.log(readmeContent);
 
       Content = zip_base64
       README = readmeContent
@@ -293,19 +290,19 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
         return respondWithCode(400, {"Error": "Repository does not exists"});
       }
 
-      // const readmeResponse = await fetch(output["url"] + '/blob/main/README.md');
-      // const readmeText = await readmeResponse.text();
+      const readmeResponse = await fetch(output["url"] + '/blob/main/README.md');
+      const readmeText = await readmeResponse.text();
 
-      // // Use cheerio to parse the README content
-      // const $ = cheerio.load(readmeText);
-      // README = $('article').text();
+      // Use cheerio to parse the README content
+      const $ = cheerio.load(readmeText);
+      README = $('article').text();
 
       Name = output["repo"];
       Content = newBody["content"];
       URL = output["url"];
-      //Version = await getGitHubPackageVersion(output["url"]);
-      Version = "";
+      Version = await getGitHubPackageVersion(output["url"]);
       JSProgram = newBody["jsprogram"];
+
 
     }
     
