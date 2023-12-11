@@ -326,6 +326,9 @@ function PackageCreate(body, xAuthorization) {
                         console.log("Upload Error: Package exists already");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Error": "Package exists already" })];
                     }
+                    //console.log(README)
+                    //RATE AND DETERMINE INGESTION`
+                    console.log("starting rating");
                     return [4 /*yield*/, (0, rate_endpoint_js_1.eval_single_file)(URL)];
                 case 13:
                     ratings = _c.sent();
@@ -336,6 +339,7 @@ function PackageCreate(body, xAuthorization) {
                             return [2 /*return*/, (0, writer_1.respondWithCode)(424, { "Package fails on at least one rating": ratings })];
                         }
                     }
+                    console.log("ending rating");
                     return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
                             Name,
                             Version,
