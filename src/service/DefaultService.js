@@ -227,7 +227,7 @@ var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 var github_to_base64_js_1 = require("../utils/github_to_base64.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Content, URL, Version, JSProgram, README, upload, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, package_exist_check, _b, result, fields, output, error_3;
+        var Name, Content, URL, Version, JSProgram, README, upload, newBody, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, package_exist_check, _b, result, fields, output, error_3;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -239,17 +239,16 @@ function PackageCreate(body, xAuthorization) {
                     JSProgram = "";
                     README = "";
                     upload = new upload_endpoint_js_1.Upload();
-                    //Edge Cases
-                    // if("URL" in body && "Content" in body){
-                    //   console.log("Improper form, URL and Content are both set")
-                    //   return respondWithCode(400, {"Error": "Improper form, URL and Content are both set"});
-                    // }
-                    if (!("URL" in body) && !("Content" in body)) {
+                    newBody = Object.fromEntries(Object.entries(body).map(function (_a) {
+                        var key = _a[0], value = _a[1];
+                        return [key.toLowerCase(), value];
+                    }));
+                    if (!("url" in newBody) && !("content" in newBody)) {
                         console.log("Improper form, URL and Content are both not set");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
                     }
-                    if (!("URL" in body)) return [3 /*break*/, 4];
-                    return [4 /*yield*/, upload.process(body["URL"])];
+                    if (!("url" in newBody)) return [3 /*break*/, 4];
+                    return [4 /*yield*/, upload.process(newBody["url"])];
                 case 1:
                     output_1 = _c.sent();
                     if (!output_1) {
@@ -273,16 +272,16 @@ function PackageCreate(body, xAuthorization) {
                     //console.log(readmeContent);
                     Content = zip_base64;
                     README = readmeContent;
-                    JSProgram = body["JSProgram"];
+                    JSProgram = newBody["jsprogram"];
                     return [3 /*break*/, 7];
                 case 4:
-                    if (!("Content" in body)) return [3 /*break*/, 7];
-                    if (typeof body["Content"] != 'string') {
+                    if (!("content" in newBody)) return [3 /*break*/, 7];
+                    if (typeof newBody["content"] != 'string') {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Content has to be string" })];
                     }
-                    if (typeof body["Content"] === 'string' && body["Content"].trim() !== '') {
+                    if (typeof newBody["content"] === 'string' && newBody["content"].trim() !== '') {
                         try {
-                            contentstring = body["Content"];
+                            contentstring = newBody["content"];
                             decodedContent = atob(contentstring);
                         }
                         catch (error) {
@@ -291,7 +290,7 @@ function PackageCreate(body, xAuthorization) {
                             return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": errorMessage })];
                         }
                     }
-                    return [4 /*yield*/, upload.decompress_zip_to_github_link(body["Content"])];
+                    return [4 /*yield*/, upload.decompress_zip_to_github_link(newBody["content"])];
                 case 5:
                     github_link = _c.sent();
                     if (github_link == "") {
@@ -309,11 +308,11 @@ function PackageCreate(body, xAuthorization) {
                     // const $ = cheerio.load(readmeText);
                     // README = $('article').text();
                     Name = output_2["repo"];
-                    Content = body.Content;
+                    Content = newBody.content;
                     URL = output_2["url"];
                     //Version = await getGitHubPackageVersion(output["url"]);
                     Version = "";
-                    JSProgram = body["JSProgram"];
+                    JSProgram = newBody["jsprogram"];
                     _c.label = 7;
                 case 7: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
                 case 8:
@@ -453,7 +452,7 @@ function PackageRetrieve(id, xAuthorization) {
                     return [4 /*yield*/, promisePool.execute(query, values)];
                 case 1:
                     results = (_a.sent())[0];
-                    console.log(results);
+                    //console.log(results);
                     if (results[0].length === 0) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
                     }
