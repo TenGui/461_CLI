@@ -228,7 +228,7 @@ var github_to_base64_js_1 = require("../utils/github_to_base64.js");
 var version_js_1 = require("../utils/version.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var Name, Content, URL, Version, JSProgram, README, upload, newBody, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, package_exist_check, _b, result, fields, output, error_3;
+        var Name, Content, URL, Version, JSProgram, README, upload, newBody, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, readmeResponse, readmeText, $, package_exist_check, _b, result, fields, output, error_3;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -271,7 +271,6 @@ function PackageCreate(body, xAuthorization) {
                 case 4:
                     _a = _c.sent(), zipContent = _a.zipContent, readmeContent = _a.readmeContent;
                     zip_base64 = Buffer.from(zipContent).toString('base64');
-                    //console.log(readmeContent);
                     Content = zip_base64;
                     README = readmeContent;
                     JSProgram = newBody["jsprogram"];
@@ -304,11 +303,14 @@ function PackageCreate(body, xAuthorization) {
                     if (!output_2) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
                     }
-                    // const readmeResponse = await fetch(output["url"] + '/blob/main/README.md');
-                    // const readmeText = await readmeResponse.text();
-                    // // Use cheerio to parse the README content
-                    // const $ = cheerio.load(readmeText);
-                    // README = $('article').text();
+                    return [4 /*yield*/, fetch(output_2["url"] + '/blob/HEAD/README.md')];
+                case 8:
+                    readmeResponse = _c.sent();
+                    return [4 /*yield*/, readmeResponse.text()];
+                case 9:
+                    readmeText = _c.sent();
+                    $ = cheerio.load(readmeText);
+                    README = $('article').text();
                     Name = output_2["repo"];
                     Content = newBody["content"];
                     URL = output_2["url"];
