@@ -170,8 +170,6 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
     // Execute the query for matching against the Name column
     const [rowsName, fieldsName] = await db.promise().execute(queryName, [packageName]);
 
-    
-
     if (rowsName.length > 0) {
       const matchedPackagesName = rowsName.map((pkg: RowDataPacket) => ({
         name: pkg.Name,
@@ -246,8 +244,8 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
 
       Name = output["repo"];
       URL = output["url"];
-      //Version = await getGitHubPackageVersion(output["url"]);
-      Version = "";
+      Version = await getGitHubPackageVersion(output["url"]);
+      // Version = "";
       //console.log(Version);
 
       const package_exist_check = await upload.check_Package_Existence(Name, Version); 
@@ -303,8 +301,8 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       Name = output["repo"];
       Content = newBody["content"];
       URL = output["url"];
-      //Version = await getGitHubPackageVersion(output["url"]);
-      Version = "";
+      Version = await getGitHubPackageVersion(output["url"]);
+      // Version = "";
       JSProgram = newBody["jsprogram"];
 
     }
@@ -459,9 +457,30 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
  * @returns void
  **/
 export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
+  const upload = new Upload();
+  // const newBody = Object.fromEntries(Object.entries(body).map(([key, value]) => [key.toLowerCase(), value]));
+
   try {
-    if(Object.keys(body.data).length != 1 || (typeof(body.data.Content) == "string" || typeof(body.data.URL) == "string" || typeof(body.data.JSProgram) == "string") ){
-      return respondWithCode(400, {"Error": "Improper form"});
+    // if(Object.keys(body.data).length != 1 || (typeof(body.data.Content) == "string" || typeof(body.data.URL) == "string" || typeof(body.data.JSProgram) == "string") ){
+    //   return respondWithCode(400, {"Error": "Improper form"});
+    // }
+
+    if(typeof body["content"] === 'string' && typeof body["url"] === 'string'){
+      return respondWithCode(400, {"Error": "Improper form both content and url set"});
+    }
+
+    if(typeof body["content"] !== 'string' && typeof body["url"] !== 'string'){
+      return respondWithCode(400, {"Error": "Improper form both content and url not set"});
+    }
+
+    if(typeof body["content"] === 'string') {
+      const output = await upload.process(body["url"])
+        if(!output) {
+          return respondWithCode(400, {"Error": "Repository does not exists"});
+        }
+
+      const { zipContent, readmeContent } = await fetchGitHubData(output["owner"], output["repo"], output["url"]);
+      body.data.Content= Buffer.from(zipContent).toString('base64');
     }
 
     const [results] = await (promisePool.execute as any)('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
@@ -473,11 +492,11 @@ export async function PackageUpdate(body: Package, id: PackageID, xAuthorization
       body.data.JSProgram || null  // Replace undefined with null for JSProgram
   ]);
   
-    if(results[0][0].updateSuccess == 0) {
-      return respondWithCode(404);
-    } else {
-      return respondWithCode(200);
-    }
+  if(results[0][0].updateSuccess == 0) {
+    return respondWithCode(404);
+  } else {
+    return respondWithCode(200);
+  }
   } catch (error) {
     console.log(error);
     throw error;

@@ -225,13 +225,14 @@ exports.PackageByRegExGet = PackageByRegExGet;
  **/
 var upload_endpoint_js_1 = require("../app_endpoints/upload_endpoint.js");
 var github_to_base64_js_1 = require("../utils/github_to_base64.js");
+var version_js_1 = require("../utils/version.js");
 function PackageCreate(body, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         var Name, Content, URL, Version, JSProgram, README, upload, newBody, output_1, package_exist_check_1, _a, zipContent, readmeContent, zip_base64, contentstring, decodedContent, errorMessage, github_link, output_2, package_exist_check, _b, result, fields, output, error_3;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _c.trys.push([0, 10, , 11]);
+                    _c.trys.push([0, 12, , 13]);
                     Name = "";
                     Content = "";
                     URL = "";
@@ -247,7 +248,7 @@ function PackageCreate(body, xAuthorization) {
                         console.log("Improper form, URL and Content are both not set");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form, URL and Content are both not set" })];
                     }
-                    if (!("url" in newBody)) return [3 /*break*/, 4];
+                    if (!("url" in newBody)) return [3 /*break*/, 5];
                     return [4 /*yield*/, upload.process(newBody["url"])];
                 case 1:
                     output_1 = _c.sent();
@@ -256,26 +257,27 @@ function PackageCreate(body, xAuthorization) {
                     }
                     Name = output_1["repo"];
                     URL = output_1["url"];
-                    //Version = await getGitHubPackageVersion(output["url"]);
-                    Version = "";
-                    return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                    return [4 /*yield*/, (0, version_js_1.getGitHubPackageVersion)(output_1["url"])];
                 case 2:
+                    Version = _c.sent();
+                    return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                case 3:
                     package_exist_check_1 = _c.sent();
                     if (package_exist_check_1) {
                         console.log("Upload Error: Package exists already");
                         return [2 /*return*/, (0, writer_1.respondWithCode)(409, { "Error": "Package exists already" })];
                     }
                     return [4 /*yield*/, (0, github_to_base64_js_1.fetchGitHubData)(output_1["owner"], output_1["repo"], output_1["url"])];
-                case 3:
+                case 4:
                     _a = _c.sent(), zipContent = _a.zipContent, readmeContent = _a.readmeContent;
                     zip_base64 = Buffer.from(zipContent).toString('base64');
                     //console.log(readmeContent);
                     Content = zip_base64;
                     README = readmeContent;
                     JSProgram = newBody["jsprogram"];
-                    return [3 /*break*/, 7];
-                case 4:
-                    if (!("content" in newBody)) return [3 /*break*/, 7];
+                    return [3 /*break*/, 9];
+                case 5:
+                    if (!("content" in newBody)) return [3 /*break*/, 9];
                     if (typeof newBody["content"] != 'string') {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Content has to be string" })];
                     }
@@ -291,13 +293,13 @@ function PackageCreate(body, xAuthorization) {
                         }
                     }
                     return [4 /*yield*/, upload.decompress_zip_to_github_link(newBody["content"])];
-                case 5:
+                case 6:
                     github_link = _c.sent();
                     if (github_link == "") {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists/Cannot locate package.json file" })];
                     }
                     return [4 /*yield*/, upload.process(github_link)];
-                case 6:
+                case 7:
                     output_2 = _c.sent();
                     if (!output_2) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
@@ -310,12 +312,14 @@ function PackageCreate(body, xAuthorization) {
                     Name = output_2["repo"];
                     Content = newBody["content"];
                     URL = output_2["url"];
-                    //Version = await getGitHubPackageVersion(output["url"]);
-                    Version = "";
-                    JSProgram = newBody["jsprogram"];
-                    _c.label = 7;
-                case 7: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                    return [4 /*yield*/, (0, version_js_1.getGitHubPackageVersion)(output_2["url"])];
                 case 8:
+                    Version = _c.sent();
+                    // Version = "";
+                    JSProgram = newBody["jsprogram"];
+                    _c.label = 9;
+                case 9: return [4 /*yield*/, upload.check_Package_Existence(Name, Version)];
+                case 10:
                     package_exist_check = _c.sent();
                     if (package_exist_check) {
                         console.log("Upload Error: Package exists already");
@@ -329,7 +333,7 @@ function PackageCreate(body, xAuthorization) {
                             URL,
                             JSProgram
                         ])];
-                case 9:
+                case 11:
                     _b = _c.sent(), result = _b[0], fields = _b[1];
                     output = {
                         "metadata": {
@@ -349,11 +353,11 @@ function PackageCreate(body, xAuthorization) {
                     // }
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
-                case 10:
+                case 12:
                     error_3 = _c.sent();
                     console.log('Upload error:', error_3);
                     return [2 /*return*/, (0, writer_1.respondWithCode)(400, JSON.stringify("Upload errors: " + error_3))];
-                case 11: return [2 /*return*/];
+                case 13: return [2 /*return*/];
             }
         });
     });
@@ -481,36 +485,57 @@ exports.PackageRetrieve = PackageRetrieve;
  **/
 function PackageUpdate(body, id, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
-        var results, error_7;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var upload, output, _a, zipContent, readmeContent, results, error_7;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    if (Object.keys(body.data).length != 1 || (!("URL" in body.data) && !("Content" in body.data) && !("JSProgram" in body.data))) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form" })];
-                    }
-                    return [4 /*yield*/, promisePool.execute('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
-                            id,
-                            body.metadata.Name,
-                            body.metadata.Version,
-                            body.data.Content || null,
-                            body.data.URL || null,
-                            body.data.JSProgram || null // Replace undefined with null for JSProgram
-                        ])];
+                    upload = new upload_endpoint_js_1.Upload();
+                    _b.label = 1;
                 case 1:
-                    results = (_a.sent())[0];
+                    _b.trys.push([1, 6, , 7]);
+                    // if(Object.keys(body.data).length != 1 || (typeof(body.data.Content) == "string" || typeof(body.data.URL) == "string" || typeof(body.data.JSProgram) == "string") ){
+                    //   return respondWithCode(400, {"Error": "Improper form"});
+                    // }
+                    if (typeof body["content"] === 'string' && typeof body["url"] === 'string') {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form both content and url set" })];
+                    }
+                    if (typeof body["content"] !== 'string' && typeof body["url"] !== 'string') {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form both content and url not set" })];
+                    }
+                    if (!(typeof body["content"] === 'string')) return [3 /*break*/, 4];
+                    return [4 /*yield*/, upload.process(body["url"])];
+                case 2:
+                    output = _b.sent();
+                    if (!output) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Repository does not exists" })];
+                    }
+                    return [4 /*yield*/, (0, github_to_base64_js_1.fetchGitHubData)(output["owner"], output["repo"], output["url"])];
+                case 3:
+                    _a = _b.sent(), zipContent = _a.zipContent, readmeContent = _a.readmeContent;
+                    body.data.Content = Buffer.from(zipContent).toString('base64');
+                    _b.label = 4;
+                case 4: return [4 /*yield*/, promisePool.execute('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
+                        id,
+                        body.metadata.Name,
+                        body.metadata.Version,
+                        body.data.Content || null,
+                        body.data.URL || null,
+                        body.data.JSProgram || null // Replace undefined with null for JSProgram
+                    ])];
+                case 5:
+                    results = (_b.sent())[0];
                     if (results[0][0].updateSuccess == 0) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
                     }
                     else {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(200)];
                     }
-                    return [3 /*break*/, 3];
-                case 2:
-                    error_7 = _a.sent();
+                    return [3 /*break*/, 7];
+                case 6:
+                    error_7 = _b.sent();
                     console.log(error_7);
                     throw error_7;
-                case 3: return [2 /*return*/];
+                case 7: return [2 /*return*/];
             }
         });
     });
