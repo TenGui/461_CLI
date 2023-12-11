@@ -85,7 +85,7 @@ BEGIN
   VALUES (@package_id, Content, JSProgram, README, URL);
 
   -- Select the last inserted ID
-  SELECT @packageID as packageID;
+  SELECT @package_id as packageID;
 
   COMMIT;
 END;
