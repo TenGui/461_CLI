@@ -33,7 +33,7 @@ export async function get_version_pin_score(url:string[]): Promise<number>{
           count += 1;
           if(fullPinnedEX.test(curVer))
             fullPinned += 1;
-          if(majorMinorEX.test(curVer))
+          else if(majorMinorEX.test(curVer))
             majorMinor += 1;
         }
         let score:number;
