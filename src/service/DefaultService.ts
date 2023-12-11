@@ -301,7 +301,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
       // README = $('article').text();
 
       Name = output["repo"];
-      Content = newBody.content;
+      Content = newBody["content"];
       URL = output["url"];
       //Version = await getGitHubPackageVersion(output["url"]);
       Version = "";
