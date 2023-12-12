@@ -116,14 +116,14 @@ function eval_file(filepath) {
                                         adjustedScores[key] =
                                             Math.round((score + Number.EPSILON) * 100000) / 100000;
                                     });
-                                    overallScore = Math.round((multipliers.license * licenseScore +
-                                        multipliers.rampUp * rampUpScore +
+                                    overallScore = Math.round((multipliers.rampUp * rampUpScore +
                                         multipliers.busFactor * busFactorScore +
                                         multipliers.maintainer * maintainerScore +
                                         multipliers.correctness * correctnessScore +
                                         multipliers.pull_request * pull_request_score +
                                         Number.EPSILON) *
                                         100000) / 100000;
+                                    overallScore *= licenseScore;
                                     output = "{\"URL\": \"".concat(urlstr, "\", \"NET_SCORE\": ").concat(overallScore, ", \"RAMP_UP_SCORE\": ").concat(adjustedScores.rampUpScore, ", \"CORRECTNESS_SCORE\": ").concat(adjustedScores.correctnessScore, ", \"BUS_FACTOR_SCORE\": ").concat(adjustedScores.busFactorScore, ", \"RESPONSIVE_MAINTAINER_SCORE\": ").concat(adjustedScores.maintainerScore, ", \"LICENSE_SCORE\": ").concat(adjustedScores.licenseScore, ", \"PullRequest\": ").concat(adjustedScores.pullrequestScore, "}");
                                     console.log(output);
                                     finished += 1;
