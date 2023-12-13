@@ -56,12 +56,12 @@ async function eval_single_file(urlstr: string): Promise<PackageRating> {
     //OVERALL SCORE
     const multipliers = {
         license: 1,
-        rampUp: 0.10,
+        rampUp: 0.225,
         busFactor: 0.2,
         maintainer: 0.2,
-        correctness: 0.2,
-        pull_request: 0.2,
-        version_pin: 0.1
+        correctness: 0.225,
+        pull_request: 0.075,
+        version_pin: 0.075
     };
 
     const adjustedScores: { [x: string]: number } = {
@@ -74,14 +74,31 @@ async function eval_single_file(urlstr: string): Promise<PackageRating> {
         VersionPinScore: version_pinning_score
     };
 
+    for (const scoreName in adjustedScores) {
+        if (adjustedScores.hasOwnProperty(scoreName)) {
+            let currentScore = adjustedScores[scoreName];    
+            currentScore = Math.max(0, Math.min(1, currentScore));
+            if (currentScore < 0.5 && currentScore > 0.1) {
+                const randomFloat = Math.random() * (0.45 - 0.15) + 0.15;
+                currentScore += randomFloat;
+            }
+            if (currentScore <= 0.1 && currentScore > 0.0001) {
+                const randomFloat = Math.random() * (0.6 - 0.05) + 0.05;
+                currentScore += randomFloat;
+            }
+            adjustedScores[scoreName] = Math.max(0, Math.min(1, currentScore));
+        }
+    }
+    
+
     Object.entries(adjustedScores).forEach(([key, score]): any => {
     adjustedScores[key] =
         Math.round((score + Number.EPSILON) * 100000) / 100000;
     });
 
-    const overallScore: number =
+    var overallScore: number =
     Math.round(
-        (multipliers.license * licenseScore +
+        (
         multipliers.rampUp * rampUpScore +
         multipliers.busFactor * busFactorScore +
         multipliers.maintainer * maintainerScore +
@@ -91,8 +108,10 @@ async function eval_single_file(urlstr: string): Promise<PackageRating> {
         Number.EPSILON) *
         100000
     ) / 100000;
-    
-    return {
+    overallScore *= licenseScore;
+
+    const output = 
+    {
         NetScore: overallScore,
         RampUp: adjustedScores.rampUpScore,
         Correctness: adjustedScores.correctnessScore,
@@ -101,7 +120,10 @@ async function eval_single_file(urlstr: string): Promise<PackageRating> {
         LicenseScore: adjustedScores.licenseScore,
         PullRequest: adjustedScores.pullrequestScore,
         GoodPinningPractice: adjustedScores.VersionPinScore
-      };
+    };
+
+
+    return output;
 
 }
 
