@@ -76,7 +76,7 @@ function getScore(keycontributor) {
     var e = 2.71828;
     if (keycontributor == 0)
         return 0;
-    var busFactorScore = (1 - Math.pow(e, (0.3 * (-keycontributor + 1)))) / (1 + Math.pow(e, (-keycontributor + 1)));
+    var busFactorScore = (1 - Math.pow(e, (1.5 * (-keycontributor + 1)))) / (1 + Math.pow(e, (-keycontributor + 1)));
     return Number(busFactorScore.toFixed(5));
 }
 exports.getScore = getScore;

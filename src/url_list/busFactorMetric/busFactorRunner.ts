@@ -27,6 +27,6 @@ export function getScore(keycontributor: number): number {
   const e: number = 2.71828;
   if (keycontributor == 0) return 0;
   let busFactorScore: number =
-    (1 - e ** (0.3 * (-keycontributor + 1))) / (1 + e ** (-keycontributor + 1));
+    (1 - e ** (1.8 * (-keycontributor + 1))) / (1 + e ** (-keycontributor + 1));
   return Number(busFactorScore.toFixed(5));
 }

@@ -273,7 +273,7 @@ export async function PackageCreate(body: PackageData, xAuthorization: Authentic
             // If decoding fails, it's not a valid base64 string
             const errorMessage = "Not a valid base64-encoded zip file";
             console.log("error", errorMessage);
-            return respondWithCode(400, { "Error": errorMessage });
+            return respondWithCode(400, {"Error": errorMessage});
         }
       }
 

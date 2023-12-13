@@ -650,7 +650,7 @@
                                                     Swal.fire({
                                                         icon: 'error',
                                                         title: `Upload Error`,
-                                                        text: `Error: Package failed on at least one rating`,
+                                                        text: `Error: ${JSON.stringify(error.response.data, null, 4)}`,
                                                         showConfirmButton: true
                                                     });
                                                 }
@@ -658,10 +658,10 @@
                                                     Swal.fire({
                                                         icon: 'error',
                                                         title: `Upload Error`,
-                                                        text: `Error: ${error.response.data}`,
+                                                        text: `Error: ${JSON.stringify(error.response.data, null, 4)}`,
                                                         showConfirmButton: true
                                                     });
-                                                    ZipPackageUploadContainer.innerHTML = "Error: " + error.response.data["Error"];
+                                                    ZipPackageUploadContainer.innerHTML = `Error: ${JSON.stringify(error.response.data, null, 4)}`;
                                                 }
                                                 console.error(error);
                                             });
@@ -812,17 +812,17 @@
                         Swal.fire({
                             icon: 'error',
                             title: `Upload Error`,
-                            text: `Error: Package failed on at least one rating`,
+                            text: `Error: ${JSON.stringify(error.response.data, null, 4)}`,
                             showConfirmButton: true
                         });
                     } else {
                         Swal.fire({
                             icon: 'error',
                             title: `Upload Error`,
-                            text: `Error: ${error.response.data["Error"]}`,
+                            text: `Error: ${JSON.stringify(error.response.data, null, 4)}`,
                             showConfirmButton: true
                         });
-                        PackageUploadContainer.textContent = "Error: " + error.response.data["Error"];
+                        PackageUploadContainer.textContent = `Error: ${JSON.stringify(error.response.data, null, 4)}`;
                     }
                     console.error(error);
                 });
