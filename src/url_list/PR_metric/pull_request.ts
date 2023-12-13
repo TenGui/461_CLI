@@ -14,7 +14,7 @@ async function getPRscore(url: [string, string]): Promise<number> {
 
     const linesJS = await sumLines(dir, jsList);
     
-    fs.rmSync(dir, { recursive: true, force: true }); //clean up dir
+    //fs.rmSync(dir, { recursive: true, force: true }); //clean up dir
     
     const octokit = new Octokit({
       auth: process.env.GITHUB_TOKEN // Put your GitHub token here

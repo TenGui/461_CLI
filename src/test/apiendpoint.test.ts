@@ -1,7 +1,7 @@
 import * as request from 'supertest';
 import type { AuthenticationRequest, AuthenticationToken, PackageName, PackageRegEx, PackageData, PackageMetadata, PackageID, PackageRating, Package, List, newUser } from '../utils/types';
 
-const baseUrl = 'http://18.225.95.73:3000/';
+const baseUrl = 'http://18.217.22.60::3000/';
 let token: string;
 
 describe('/package endpoint', () => {

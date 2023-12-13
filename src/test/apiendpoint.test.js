@@ -37,46 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var request = require("supertest");
-var baseUrl = 'http://18.225.95.73:3000/';
+var baseUrl = 'http://18.217.22.60::3000/';
 var token;
-function authenticate() {
-    return __awaiter(this, void 0, void 0, function () {
-        var response;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, request(baseUrl)
-                        .put('authenticate')
-                        .send({
-                        User: {
-                            name: "ece30861defaultadminuser",
-                            isAdmin: true
-                        },
-                        Secret: {
-                            password: "correcthorsebatterystaple123(!__+@**(A'\"`;DROP TABLE packages;"
-                        }
-                    })];
-                case 1:
-                    response = _a.sent();
-                    return [2 /*return*/, response.body];
-            }
-        });
-    });
-}
-function reset() {
-    return __awaiter(this, void 0, void 0, function () {
-        var response;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, request(baseUrl)
-                        .delete('reset')
-                        .set('X-Authorization', token)];
-                case 1:
-                    response = _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
 describe('/package endpoint', function () {
     beforeAll(function () { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -99,7 +61,176 @@ describe('/package endpoint', function () {
             }
         });
     }); });
+    it('reset', function () { return __awaiter(void 0, void 0, void 0, function () {
+        var response;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, reset()];
+                case 1:
+                    response = _a.sent();
+                    expect(response.statusCode).toBe(200);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
     it('should add a new package', function () { return __awaiter(void 0, void 0, void 0, function () {
+        var response;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, postDefault()];
+                case 1:
+                    response = _a.sent();
+                    expect(response.statusCode).toBe(201);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    it('should not add new package', function () { return __awaiter(void 0, void 0, void 0, function () {
+        var response;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, postDefault()];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, postDefault()];
+                case 2:
+                    response = _a.sent();
+                    expect(response.statusCode).toBe(409);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    it('get package', function () { return __awaiter(void 0, void 0, void 0, function () {
+        var response1, response2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, postDefault()];
+                case 1:
+                    response1 = _a.sent();
+                    return [4 /*yield*/, request(baseUrl)
+                            .get('package/' + response1.body.metadata.ID)
+                            .set('X-Authorization', token)];
+                case 2:
+                    response2 = _a.sent();
+                    expect(response2.statusCode).toBe(200);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    it('rate endpoint', function () { return __awaiter(void 0, void 0, void 0, function () {
+        var response1, expectedProperties, response2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, postDefault()];
+                case 1:
+                    response1 = _a.sent();
+                    expectedProperties = {
+                        "BusFactor": 0,
+                        "Correctness": 0,
+                        "RampUp": 0,
+                        "ResponsiveMaintainer": 0,
+                        "LicenseScore": 0,
+                        "GoodPinningPractice": 0,
+                        "PullRequest": 0,
+                        "NetScore": 0
+                    };
+                    return [4 /*yield*/, request(baseUrl)
+                            .get("package/".concat(response1.body.metadata.ID, "/rate"))
+                            .set('X-Authorization', token)];
+                case 2:
+                    response2 = _a.sent();
+                    Object.entries(expectedProperties).forEach(function (_a) {
+                        var property = _a[0], expectedValue = _a[1];
+                        expect(response2.body).toHaveProperty(property);
+                        // expect(response2.body[property]).toBeCloseTo(expectedValue); // Use toBeCloseTo for comparing floating-point numbers
+                    });
+                    return [2 /*return*/];
+            }
+        });
+    }); }, 15000);
+    it('authenticate wrong user, password', function () { return __awaiter(void 0, void 0, void 0, function () {
+        var response;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, request(baseUrl)
+                        .put('authenticate')
+                        .send({
+                        User: {
+                            name: "ece3086",
+                            isAdmin: true
+                        },
+                        Secret: {
+                            password: "correcthorsebatterystaple123(!"
+                        }
+                    })];
+                case 1:
+                    response = _a.sent();
+                    expect(response.statusCode).toBe(401);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    it('regex', function () { return __awaiter(void 0, void 0, void 0, function () {
+        var response1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, postDefault()];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, request(baseUrl)
+                            .post('package/byRegEx')
+                            .set('X-Authorization', token)
+                            .send({
+                            "RegEx": ".*?Underscore.*"
+                        })];
+                case 2:
+                    response1 = _a.sent();
+                    expect(response1.statusCode).toBe(200);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+});
+function authenticate() {
+    return __awaiter(this, void 0, void 0, function () {
+        var response;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, request(baseUrl)
+                        .put('authenticate')
+                        .send({
+                        User: {
+                            name: "ece30861defaultadminuser",
+                            isAdmin: true
+                        },
+                        Secret: {
+                            password: "correcthorsebatterystaple123(!__+@**(A'\"`;DROP TABLE packages;"
+                        }
+                    })];
+                case 1:
+                    response = _a.sent();
+                    return [2 /*return*/, JSON.stringify(response.body)];
+            }
+        });
+    });
+}
+function reset() {
+    return __awaiter(this, void 0, void 0, function () {
+        var response;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, request(baseUrl)
+                        .delete('reset')
+                        .set('X-Authorization', token)];
+                case 1:
+                    response = _a.sent();
+                    return [2 /*return*/, response];
+            }
+        });
+    });
+}
+function postDefault() {
+    return __awaiter(this, void 0, void 0, function () {
         var response;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -112,15 +243,8 @@ describe('/package endpoint', function () {
                     })];
                 case 1:
                     response = _a.sent();
-                    expect(response.statusCode).toBe(201);
-                    expect(response.body).toMatchObject();
-                    return [2 /*return*/];
+                    return [2 /*return*/, response];
             }
         });
-    }); });
-    it('should be new', function () { return __awaiter(void 0, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/];
-        });
-    }); });
-});
+    });
+}

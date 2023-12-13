@@ -58,7 +58,6 @@ function getPRscore(url) {
                     return [4 /*yield*/, (0, rampUpUtils_1.sumLines)(dir, jsList)];
                 case 2:
                     linesJS = _a.sent();
-                    fs.rmSync(dir, { recursive: true, force: true }); //clean up dir
                     octokit = new Octokit({
                         auth: process.env.GITHUB_TOKEN // Put your GitHub token here
                     });

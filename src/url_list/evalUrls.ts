@@ -80,9 +80,9 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
         Math.round((score + Number.EPSILON) * 100000) / 100000;
     });
 
-    const overallScore: number =
+    var overallScore: number =
       Math.round(
-        (multipliers.license * licenseScore +
+        (
           multipliers.rampUp * rampUpScore +
           multipliers.busFactor * busFactorScore +
           multipliers.maintainer * maintainerScore +
@@ -91,6 +91,7 @@ async function eval_file(filepath: string = "URL_FILE_PATH"): Promise<void> {
           Number.EPSILON) *
           100000
       ) / 100000;
+    overallScore *= licenseScore;
     
     const output = `{"URL": "${urlstr}", "NET_SCORE": ${overallScore}, "RAMP_UP_SCORE": ${adjustedScores.rampUpScore}, "CORRECTNESS_SCORE": ${adjustedScores.correctnessScore}, "BUS_FACTOR_SCORE": ${adjustedScores.busFactorScore}, "RESPONSIVE_MAINTAINER_SCORE": ${adjustedScores.maintainerScore}, "LICENSE_SCORE": ${adjustedScores.licenseScore}, "PullRequest": ${adjustedScores.pullrequestScore}}`;
     console.log(output);
