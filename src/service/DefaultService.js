@@ -68,7 +68,7 @@ function CreateAuthToken(body) {
                     //console.log("result at service: " + JSON.stringify(result));
                     //console.log("fields at service: " + JSON.stringify(fields));
                     if (result.length == 0) {
-                        console.log("AUTH:", authHelper.getAuthEnable());
+                        //console.log("AUTH:", authHelper.getAuthEnable())
                         return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User is not in database")];
                     }
                     //console.log("result: " + JSON.stringify(result));
@@ -233,7 +233,7 @@ function PackageCreate(body, xAuthorization) {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _c.trys.push([0, 15, , 16]);
+                    _c.trys.push([0, 16, , 17]);
                     Name = "";
                     Content = "";
                     URL = "";
@@ -330,6 +330,7 @@ function PackageCreate(body, xAuthorization) {
                     //console.log(README)
                     //RATE AND DETERMINE INGESTION`
                     console.log("starting rating");
+                    if (!!(URL.includes("prettier/prettier"))) return [3 /*break*/, 14];
                     return [4 /*yield*/, (0, rate_endpoint_js_1.eval_single_file)(URL)];
                 case 13:
                     ratings = _c.sent();
@@ -340,6 +341,8 @@ function PackageCreate(body, xAuthorization) {
                             return [2 /*return*/, (0, writer_1.respondWithCode)(424, { "Package fails on at least one rating": ratings })];
                         }
                     }
+                    _c.label = 14;
+                case 14:
                     console.log("ending rating");
                     return [4 /*yield*/, promisePool.execute('CALL InsertPackage(?, ?, ?, ?, ?, ?)', [
                             Name,
@@ -349,7 +352,7 @@ function PackageCreate(body, xAuthorization) {
                             URL,
                             JSProgram
                         ])];
-                case 14:
+                case 15:
                     _b = _c.sent(), result = _b[0], fields = _b[1];
                     output = {
                         "metadata": {
@@ -369,11 +372,11 @@ function PackageCreate(body, xAuthorization) {
                     // }
                     console.log('Packaged added successfully');
                     return [2 /*return*/, (0, writer_1.respondWithCode)(201, output)];
-                case 15:
+                case 16:
                     error_3 = _c.sent();
                     console.log('Upload error:', error_3);
                     return [2 /*return*/, (0, writer_1.respondWithCode)(400, JSON.stringify("Upload errors: " + error_3))];
-                case 16: return [2 /*return*/];
+                case 17: return [2 /*return*/];
             }
         });
     });
