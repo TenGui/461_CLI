@@ -131,10 +131,3 @@ http.createServer(app).listen(serverPort, function () {
     var helper = new authorization_1.Helper();
     helper.setEnvVariables();
 });
-// Shutdown function
-function shutdown() {
-    console.log('Server Timeout');
-    process.exit(0);
-}
-// Schedule shutdown after 5 minutes
-setTimeout(shutdown, 20 * 60 * 1000); // 300000 milliseconds = 5 minutes
