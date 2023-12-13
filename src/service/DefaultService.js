@@ -490,19 +490,23 @@ function PackageUpdate(body, id, xAuthorization) {
             switch (_b.label) {
                 case 0:
                     upload = new upload_endpoint_js_1.Upload();
+                    // const newBody = Object.fromEntries(Object.entries(body).map(([key, value]) => [key.toLowerCase(), value]));
+                    console.log("hi");
+                    console.log(typeof (body.data.Content));
+                    console.log(typeof (body.data.URL));
                     _b.label = 1;
                 case 1:
                     _b.trys.push([1, 6, , 7]);
-                    // if(Object.keys(body.data).length != 1 || (typeof(body.data.Content) == "string" || typeof(body.data.URL) == "string" || typeof(body.data.JSProgram) == "string") ){
-                    //   return respondWithCode(400, {"Error": "Improper form"});
-                    // }
-                    if (typeof body["content"] === 'string' && typeof body["url"] === 'string') {
+                    if (Object.keys(body.data).length != 1 || (typeof (body.data.Content) == "string" || typeof (body.data.URL) == "string" || typeof (body.data.JSProgram) == "string")) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form" })];
+                    }
+                    if (typeof body.data.Content === 'string' && typeof body.data.URL === 'string') {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form both content and url set" })];
                     }
-                    if (typeof body["content"] !== 'string' && typeof body["url"] !== 'string') {
+                    if (typeof body.data.Content !== 'string' && typeof body.data.URL !== 'string') {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "Improper form both content and url not set" })];
                     }
-                    if (!(typeof body["content"] === 'string')) return [3 /*break*/, 4];
+                    if (!(typeof body.data.URL === 'string')) return [3 /*break*/, 4];
                     return [4 /*yield*/, upload.process(body["url"])];
                 case 2:
                     output = _b.sent();
