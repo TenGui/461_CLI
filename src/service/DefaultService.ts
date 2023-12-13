@@ -465,22 +465,22 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
  **/
 export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
   const upload = new Upload();
-  // const newBody = Object.fromEntries(Object.entries(body).map(([key, value]) => [key.toLowerCase(), value]));
+  // const newBody = Object.fromEntries(Object.entries(body).map(([key, value]) => [key.toLowerCase(), value]))
 
   try {
     // if(Object.keys(body.data).length != 1 || (typeof(body.data.Content) == "string" || typeof(body.data.URL) == "string" || typeof(body.data.JSProgram) == "string") ){
     //   return respondWithCode(400, {"Error": "Improper form"});
     // }
 
-    if(typeof body["content"] === 'string' && typeof body["url"] === 'string'){
+    if(typeof body.data.Content === 'string' && typeof body.data.URL === 'string'){
       return respondWithCode(400, {"Error": "Improper form both content and url set"});
     }
 
-    if(typeof body["content"] !== 'string' && typeof body["url"] !== 'string'){
+    if(typeof body.data.Content !== 'string' && typeof body.data.URL !== 'string'){
       return respondWithCode(400, {"Error": "Improper form both content and url not set"});
     }
 
-    if(typeof body["content"] === 'string') {
+    if(typeof body.data.URL === 'string') {
       const output = await upload.process(body["url"])
         if(!output) {
           return respondWithCode(400, {"Error": "Repository does not exists"});
