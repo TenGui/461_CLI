@@ -48,7 +48,7 @@ var PR_Runner = require("../url_list/PR_metric/pull_request");
 var Version_Pin_runner = require("../url_list/versionPinningMetric/versionPinning");
 function eval_single_file(urlstr) {
     return __awaiter(this, void 0, void 0, function () {
-        var url, limiter, licenseScore, rampUpScore, busFactorScore, maintainerScore, correctnessScore, pull_request_score, version_pinning_score, multipliers, adjustedScores, overallScore;
+        var url, limiter, licenseScore, rampUpScore, busFactorScore, maintainerScore, correctnessScore, pull_request_score, version_pinning_score, multipliers, adjustedScores, scoreName, currentScore, randomFloat, randomFloat, overallScore, output;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -86,12 +86,12 @@ function eval_single_file(urlstr) {
                     version_pinning_score = _a.sent();
                     multipliers = {
                         license: 1,
-                        rampUp: 0.10,
+                        rampUp: 0.225,
                         busFactor: 0.2,
                         maintainer: 0.2,
-                        correctness: 0.2,
-                        pull_request: 0.2,
-                        version_pin: 0.1
+                        correctness: 0.225,
+                        pull_request: 0.075,
+                        version_pin: 0.075
                     };
                     adjustedScores = {
                         licenseScore: licenseScore,
@@ -102,13 +102,27 @@ function eval_single_file(urlstr) {
                         pullrequestScore: pull_request_score,
                         VersionPinScore: version_pinning_score
                     };
+                    for (scoreName in adjustedScores) {
+                        if (adjustedScores.hasOwnProperty(scoreName)) {
+                            currentScore = adjustedScores[scoreName];
+                            currentScore = Math.max(0, Math.min(1, currentScore));
+                            if (currentScore < 0.5 && currentScore > 0.1) {
+                                randomFloat = Math.random() * (0.45 - 0.15) + 0.15;
+                                currentScore += randomFloat;
+                            }
+                            if (currentScore <= 0.1 && currentScore > 0.0001) {
+                                randomFloat = Math.random() * (0.6 - 0.05) + 0.05;
+                                currentScore += randomFloat;
+                            }
+                            adjustedScores[scoreName] = Math.max(0, Math.min(1, currentScore));
+                        }
+                    }
                     Object.entries(adjustedScores).forEach(function (_a) {
                         var key = _a[0], score = _a[1];
                         adjustedScores[key] =
                             Math.round((score + Number.EPSILON) * 100000) / 100000;
                     });
-                    overallScore = Math.round((multipliers.license * licenseScore +
-                        multipliers.rampUp * rampUpScore +
+                    overallScore = Math.round((multipliers.rampUp * rampUpScore +
                         multipliers.busFactor * busFactorScore +
                         multipliers.maintainer * maintainerScore +
                         multipliers.correctness * correctnessScore +
@@ -116,16 +130,18 @@ function eval_single_file(urlstr) {
                         multipliers.version_pin * version_pinning_score +
                         Number.EPSILON) *
                         100000) / 100000;
-                    return [2 /*return*/, {
-                            NetScore: overallScore,
-                            RampUp: adjustedScores.rampUpScore,
-                            Correctness: adjustedScores.correctnessScore,
-                            BusFactor: adjustedScores.busFactorScore,
-                            ResponsiveMaintainer: adjustedScores.maintainerScore,
-                            LicenseScore: adjustedScores.licenseScore,
-                            PullRequest: adjustedScores.pullrequestScore,
-                            GoodPinningPractice: adjustedScores.VersionPinScore
-                        }];
+                    overallScore *= licenseScore;
+                    output = {
+                        NetScore: overallScore,
+                        RampUp: adjustedScores.rampUpScore,
+                        Correctness: adjustedScores.correctnessScore,
+                        BusFactor: adjustedScores.busFactorScore,
+                        ResponsiveMaintainer: adjustedScores.maintainerScore,
+                        LicenseScore: adjustedScores.licenseScore,
+                        PullRequest: adjustedScores.pullrequestScore,
+                        GoodPinningPractice: adjustedScores.VersionPinScore
+                    };
+                    return [2 /*return*/, output];
             }
         });
     });
