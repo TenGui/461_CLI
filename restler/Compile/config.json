@@ -1,0 +1,23 @@
+{
+  "SwaggerSpecFilePath": [
+    "C:/Users/wston/Code/SWE/RESTLER/openapi.yaml"
+  ],
+  "GrammarOutputDirectoryPath": "C:\\Users\\wston\\Code\\SWE\\RESTLER\\restler\\Compile",
+  "CustomDictionaryFilePath": "C:\\Users\\wston\\Code\\SWE\\RESTLER\\restler\\Compile\\defaultDict.json",
+  "IncludeOptionalParameters": true,
+  "UseHeaderExamples": true,
+  "UsePathExamples": false,
+  "UseQueryExamples": true,
+  "UseBodyExamples": true,
+  "UseAllExamplePayloads": false,
+  "DiscoverExamples": false,
+  "ExamplesDirectory": "",
+  "DataFuzzing": true,
+  "ReadOnlyFuzz": false,
+  "ResolveQueryDependencies": true,
+  "ResolveBodyDependencies": true,
+  "ResolveHeaderDependencies": false,
+  "UseRefreshableToken": true,
+  "AllowGetProducers": false,
+  "TrackFuzzedParameterNames": false
+}

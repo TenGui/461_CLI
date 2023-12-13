@@ -43,6 +43,7 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
     //console.log("result at service: " + JSON.stringify(result));
     //console.log("fields at service: " + JSON.stringify(fields));
     if(result.length == 0) {
+      //console.log("AUTH:", authHelper.getAuthEnable())
       return respondWithCode(401, "User is not in database");
     }
 

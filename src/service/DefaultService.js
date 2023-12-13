@@ -68,6 +68,7 @@ function CreateAuthToken(body) {
                     //console.log("result at service: " + JSON.stringify(result));
                     //console.log("fields at service: " + JSON.stringify(fields));
                     if (result.length == 0) {
+                        console.log("AUTH:", authHelper.getAuthEnable());
                         return [2 /*return*/, (0, writer_1.respondWithCode)(401, "User is not in database")];
                     }
                     //console.log("result: " + JSON.stringify(result));
@@ -336,9 +337,7 @@ function PackageCreate(body, xAuthorization) {
                     for (_i = 0, relevantMetrics_1 = relevantMetrics; _i < relevantMetrics_1.length; _i++) {
                         metric = relevantMetrics_1[_i];
                         if (ratings[metric] < 0.5) {
-                            console.log(JSON.stringify({ "Package fails on at least one rating": ratings }));
-                            console.log(typeof JSON.stringify({ "Package fails on at least one rating": ratings }));
-                            return [2 /*return*/, (0, writer_1.respondWithCode)(424, JSON.stringify({ "Package fails on at least one rating": ratings }))];
+                            return [2 /*return*/, (0, writer_1.respondWithCode)(424, { "Package fails on at least one rating": ratings })];
                         }
                     }
                     console.log("ending rating");
