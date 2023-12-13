@@ -461,9 +461,9 @@ export async function PackageUpdate(body: Package, id: PackageID, xAuthorization
   // const newBody = Object.fromEntries(Object.entries(body).map(([key, value]) => [key.toLowerCase(), value]))
 
   try {
-    if(Object.keys(body.data).length != 1 || (typeof(body.data.Content) == "string" || typeof(body.data.URL) == "string" || typeof(body.data.JSProgram) == "string") ){
-      return respondWithCode(400, {"Error": "Improper form"});
-    }
+    // if(Object.keys(body.data).length != 1 || (typeof(body.data.Content) == "string" || typeof(body.data.URL) == "string" || typeof(body.data.JSProgram) == "string") ){
+    //   return respondWithCode(400, {"Error": "Improper form"});
+    // }
 
     if(typeof body.data.Content === 'string' && typeof body.data.URL === 'string'){
       return respondWithCode(400, {"Error": "Improper form both content and url set"});
