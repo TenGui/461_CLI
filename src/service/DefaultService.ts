@@ -458,11 +458,7 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
  **/
 export async function PackageUpdate(body: Package, id: PackageID, xAuthorization: AuthenticationToken) {
   const upload = new Upload();
-  // const newBody = Object.fromEntries(Object.entries(body).map(([key, value]) => [key.toLowerCase(), value]));
-
-  console.log("hi")
-  console.log(typeof(body.data.Content))
-  console.log(typeof(body.data.URL))
+  // const newBody = Object.fromEntries(Object.entries(body).map(([key, value]) => [key.toLowerCase(), value]))
 
   try {
     if(Object.keys(body.data).length != 1 || (typeof(body.data.Content) == "string" || typeof(body.data.URL) == "string" || typeof(body.data.JSProgram) == "string") ){
