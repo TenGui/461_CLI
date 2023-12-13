@@ -650,7 +650,7 @@
                                                     Swal.fire({
                                                         icon: 'error',
                                                         title: `Upload Error`,
-                                                        text: `Error: Package failed on at least one rating`,
+                                                        text: `Error: ${JSON.stringify(error.response.data, null, 4)}`,
                                                         showConfirmButton: true
                                                     });
                                                 }
@@ -812,7 +812,7 @@
                         Swal.fire({
                             icon: 'error',
                             title: `Upload Error`,
-                            text: `Error: Package failed on at least one rating`,
+                            text: `Error: ${JSON.stringify(error.response.data, null, 4)}`,
                             showConfirmButton: true
                         });
                     } else {
