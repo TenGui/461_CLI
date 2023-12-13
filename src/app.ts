@@ -131,8 +131,6 @@ const firstEntries2 = stack2.splice(0, 1); //How many middlewares should come be
 app._router.stack = [...firstEntries2, ...lastEntries2, ...stack2];
 //console.log(app._router.stack);
 
-
-
 // // Initialize the Swagger middleware
 http.createServer(app).listen(serverPort, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
@@ -142,3 +140,12 @@ http.createServer(app).listen(serverPort, function () {
     helper.setEnvVariables();
     
 });
+
+// Shutdown function
+function shutdown() {
+    console.log('Server Timeout');
+    process.exit(0);
+}
+
+// Schedule shutdown after 5 minutes
+setTimeout(shutdown,  20 * 60 * 1000); // 300000 milliseconds = 5 minutes
