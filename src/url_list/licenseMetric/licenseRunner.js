@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getLicenseScore = void 0;
 function getLicenseScore(RateLimiter, url) {
     return __awaiter(this, void 0, void 0, function () {
-        var License, _license, readme, content, license, regex, match, _a;
+        var License, _license, find_license_regex, apiMatch, readme, content, license, _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -48,21 +48,25 @@ function getLicenseScore(RateLimiter, url) {
                     return [4 /*yield*/, RateLimiter.getGitHubInfo(url + "/license")];
                 case 1:
                     _license = _b.sent();
-                    if (!(_license == null)) return [3 /*break*/, 3];
+                    find_license_regex = new RegExp('(apache-2.0)|(bsd-[2-3]-clause)|(MIT)|(lgpl-2.1)|(lgpl-3.0)|(gpl-[2-3].0)|([MIT])', 'i');
+                    apiMatch = _license.license.spdx_id.match(find_license_regex);
+                    if (!(_license == null || !(apiMatch))) return [3 /*break*/, 3];
                     return [4 /*yield*/, RateLimiter.getGitHubInfo(url + "/readme")];
                 case 2:
                     readme = _b.sent();
                     content = Buffer.from(readme.content, "base64").toString("utf-8");
                     license = content.split("License\n")[1];
-                    regex = / (\S+)\s+license/i;
-                    match = license.match(regex);
-                    if (match && match[1] == License) {
+                    //const regex = / (\S+)\s+license/i;
+                    console.log("License for ".concat(url, " is ").concat(license));
+                    //const match = license.match(regex);
+                    //console.log(`Match for ${url} was ` + match);
+                    if ((find_license_regex.test(license))) {
                         return [2 /*return*/, 1];
                     }
                     else
                         return [2 /*return*/, 0];
                     return [3 /*break*/, 4];
-                case 3: return [2 /*return*/, _license.license.spdx_id == License ? 1 : 0];
+                case 3: return [2 /*return*/, apiMatch ? 1 : 0];
                 case 4: return [3 /*break*/, 6];
                 case 5:
                     _a = _b.sent();

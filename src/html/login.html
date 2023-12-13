@@ -16,7 +16,7 @@
             }
     
             #main-title {
-                color: #4CAF50;
+                color: #449d48;
                 font-size: 36px;
                 margin-bottom: 20px;
             }
@@ -55,7 +55,7 @@
             }
     
             button {
-                background-color: #4CAF50;
+                background-color: #39853c;
                 color: white;
                 cursor: pointer;
             }
@@ -82,7 +82,7 @@
                 display: inline-block;
                 padding: 6px 12px;
                 cursor: pointer;
-                background-color: #4CAF50;
+                background-color: #39853c;
                 color: white;
                 border-radius: 4px;
             }
@@ -106,14 +106,14 @@
                 border: 1px solid #ccc;
                 padding: 6px 12px;
                 cursor: pointer;
-                background-color: #28c232;
+                background-color: #1a8520;
                 color: white;
                 border-radius: 4px;
                 margin-right: 10px;
             }
     
             .file-upload-container button {
-                background-color: #4CAF50;
+                background-color: #39853c;
                 color: white;
                 padding: 8px;
                 border: none;
@@ -131,7 +131,7 @@
             }
 
             #resetForm button {
-                background-color: #FF5733;
+                background-color: #ce4527;
                 color: white;
                 padding: 12px;
                 border: none;
@@ -175,9 +175,9 @@
             <h1>Add User</h1>
             <form id="addUserForm">
                 <label for="username">Username:</label>
-                <input type="text" name="username" required><br>
+                <input title = "username" type="text" name="username" required><br>
                 <label for="password">Password:</label>
-                <input type="password" name="password" required><br>
+                <input title = "password" type="password" name="password" required><br>
                 <button type="button" onclick="addUser()">Add User</button>
             </form>
 
@@ -186,9 +186,9 @@
             <h1>Login</h1>
             <form id="loginForm">
                 <label for="loginUsername">Username:</label>
-                <input type="text" name="loginUsername" required><br>
+                <input title = "loginUsername" type="text" name="loginUsername" required><br>
                 <label for="loginPassword">Password:</label>
-                <input type="password" name="loginPassword" required><br>
+                <input title = "logingPass" type="password" name="loginPassword" required><br>
                 <button type="button" onclick="loginUser()">Login</button>
             </form>
 
@@ -197,8 +197,11 @@
             <h1>Upload package</h1>
             <form id="github_Package">
                 <label for="github_url">Github URL:</label>
-                <input type="text" name="github_url" id="git_URL"><br>
-                <button type="submit" onclick="sendPackageUpload()">Upload Github Package</button>
+                <input title="uploadURL" type="text" name="github_url" id="git_URL"><br>
+                <button type="submit" onclick="sendPackageUpload()" id="uploadButton">
+                    Upload Github Package
+                    <span class="loader" id="loader"></span>
+                </button>
             </form>
             <div id="PackageUploadContainer"></div>
 
@@ -219,7 +222,7 @@
             <h1>Search Package By Regex</h1>
             <form>
                 <label for="regex">Search Regex:</label>
-                <input type="text" id="packageName" name="Regex" required><br>
+                <input title = "searchRegex" type="text" id="packageName" name="Regex" required><br>
                 <button type="button" onclick="packageRegex()">Search RegEx</button>
             </form>
             <div id="resultContainer"></div>
@@ -231,7 +234,7 @@
                 <label for="byName">Package Name:</label>
                 <input type="text" id="byName" name="byName" required>
                 
-                <select id="operation" name="operation">
+                <select title = "operation" id="operation" name="operation">
                     <option value="delete">Delete</option>
                     <option value="get">Get</option>
                 </select>
@@ -604,6 +607,17 @@
                                                 JSProgram: "",
                                                 URL: githubRepository
                                             };
+
+                                            // Display loading spinner
+                                            Swal.fire({
+                                                title: 'Ingesting Package...',
+                                                allowOutsideClick: false,
+                                                showConfirmButton: false,
+                                                didOpen: () => {
+                                                    Swal.showLoading();
+                                                },
+                                            });
+
                                             axios.post('/package', requestBody, {
                                                 headers: {
                                                     'Content-Type': 'application/json',
@@ -611,6 +625,7 @@
                                                 },
                                             })
                                             .then(response => {
+                                                Swal.close();
                                                 const ZipPackageUploadContainer = document.getElementById('ZipPackageUploadContainer');
                                                 Swal.fire({
                                                     icon: 'success',
@@ -628,6 +643,14 @@
                                                         icon: 'warning',
                                                         title: `Authentication Error`,
                                                         text: `'Auth token invalid. Please log in or provide a valid token'`,
+                                                        showConfirmButton: true
+                                                    });
+                                                }
+                                                else if(error.response.status == 424){
+                                                    Swal.fire({
+                                                        icon: 'error',
+                                                        title: `Upload Error`,
+                                                        text: `Error: Package failed on at least one rating`,
                                                         showConfirmButton: true
                                                     });
                                                 }
@@ -716,8 +739,9 @@
 
             function sendPackageUpload(event) {
                 event.preventDefault(); // Prevent default form submission behavior
+
                 const git_url = document.getElementById("git_URL").value;
-                if(!git_url){
+                if (!git_url) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Reset Error',
@@ -727,7 +751,7 @@
                 }
 
                 const githubUrl = document.querySelector('input[name="github_url"]').value;
-                
+
                 // Example JSProgram string, replace it with the actual value you want to use
                 const jsProgram = "if (process.argv.length === 7) {\nconsole.log('Success')\nprocess.exit(0)\n} else {\nconsole.log('Failed')\nprocess.exit(1)\n}\n";
 
@@ -736,6 +760,16 @@
                     URL: githubUrl
                 };
 
+                // Display loading spinner
+                Swal.fire({
+                    title: 'Ingesting Package...',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
                 axios.post('/package', requestBody, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -743,6 +777,9 @@
                     },
                 })
                 .then(response => {
+                    // Close loading spinner
+                    Swal.close();
+
                     const PackageUploadContainer = document.getElementById('PackageUploadContainer');
                     Swal.fire({
                         icon: 'success',
@@ -754,10 +791,13 @@
                     console.log(response.data);
                 })
                 .catch(error => {
+                    // Close loading spinner
+                    Swal.close();
+
                     const PackageUploadContainer = document.getElementById('PackageUploadContainer');
-                    if(error.response.status == 400){
+                    if (error.response.status == 400) {
                         var testOutput = 'Auth token invalid. Please log in or provide a valid token'
-                        if(error.response.data.Error != undefined){
+                        if (error.response.data.Error != undefined) {
                             testOutput = error.response.data.Error;
                         }
 
@@ -768,7 +808,14 @@
                             showConfirmButton: true
                         });
                     }
-                    else{
+                    else if(error.response.status == 424){
+                        Swal.fire({
+                            icon: 'error',
+                            title: `Upload Error`,
+                            text: `Error: Package failed on at least one rating`,
+                            showConfirmButton: true
+                        });
+                    } else {
                         Swal.fire({
                             icon: 'error',
                             title: `Upload Error`,
@@ -780,6 +827,7 @@
                     console.error(error);
                 });
             }
+
 
             document.getElementById('github_Package').addEventListener('submit', sendPackageUpload);
         
