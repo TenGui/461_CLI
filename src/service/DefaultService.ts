@@ -413,7 +413,7 @@ export async function PackageRate(id: PackageID, xAuthorization: AuthenticationT
       if (hasInvalidScore) {
         return respondWithCode(500, {"Error": 'The package rating system choked on at least one of the metrics.'});
       }
-
+      console.log(typeof output["NetScore"]);
       return respondWithCode(200, output);
       
     } else {
@@ -440,8 +440,8 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
     const [results] = await (promisePool.execute as any)(query, values);
 
 
-    //console.log(results);
-
+    console.log(results[0][0]["metadata"]["ID"]);
+    results[0][0]["metadata"]["ID"] = String(results[0][0]["metadata"]["ID"]);
     if (results[0].length === 0) {
       return respondWithCode(404);
     } else {
@@ -500,7 +500,7 @@ export async function PackageUpdate(body: Package, id: PackageID, xAuthorization
   ]);
   
   if(results[0][0].updateSuccess == 0) {
-    return respondWithCode(404);
+    return respondWithCode(404, {"Error": "Repository does not exists"});
   } else {
     return respondWithCode(200);
   }

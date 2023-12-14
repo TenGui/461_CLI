@@ -443,6 +443,7 @@ function PackageRate(id, xAuthorization) {
                     if (hasInvalidScore) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(500, { "Error": 'The package rating system choked on at least one of the metrics.' })];
                     }
+                    console.log(typeof output["NetScore"]);
                     return [2 /*return*/, (0, writer_1.respondWithCode)(200, output)];
                 case 3: return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "Package does not exist." })];
                 case 4: return [3 /*break*/, 6];
@@ -475,7 +476,8 @@ function PackageRetrieve(id, xAuthorization) {
                     return [4 /*yield*/, promisePool.execute(query, values)];
                 case 1:
                     results = (_a.sent())[0];
-                    //console.log(results);
+                    console.log(results[0][0]["metadata"]["ID"]);
+                    results[0][0]["metadata"]["ID"] = String(results[0][0]["metadata"]["ID"]);
                     if (results[0].length === 0) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
                     }
@@ -544,7 +546,7 @@ function PackageUpdate(body, id, xAuthorization) {
                 case 5:
                     results = (_b.sent())[0];
                     if (results[0][0].updateSuccess == 0) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "Repository does not exists" })];
                     }
                     else {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(200)];
