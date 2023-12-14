@@ -25,7 +25,7 @@ export class Bus{
                 let total = 0;
 
                 for (const person of response.data) {
-                    if (person.contributions >= 3) {
+                    if (person.contributions >= 2) {
                         good += 1;
                     }
                     total += 1;

@@ -69,7 +69,7 @@ var Bus = /** @class */ (function () {
                             total = 0;
                             for (_i = 0, _a = response.data; _i < _a.length; _i++) {
                                 person = _a[_i];
-                                if (person.contributions >= 3) {
+                                if (person.contributions >= 2) {
                                     good += 1;
                                 }
                                 total += 1;
