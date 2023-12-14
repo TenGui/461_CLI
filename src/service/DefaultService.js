@@ -177,7 +177,7 @@ function PackageByRegExGet(body, xAuthorization) {
                     packageName = body.RegEx;
                     safe = require('safe-regex');
                     if (!safe(packageName)) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "unSafe Regex" })];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "unSafe Regex" })];
                     }
                     queryName = "\n    SELECT PM.Name, PM.version\n    FROM PackageMetadata PM\n    WHERE PM.Name REGEXP ?;\n  ";
                     queryReadme = "\n    SELECT PM.Name, PM.version\n    FROM PackageMetadata PM\n    LEFT JOIN PackageData PD ON PM.ID = PD.ID\n    WHERE PD.Readme REGEXP ?;\n  ";
@@ -196,8 +196,8 @@ function PackageByRegExGet(body, xAuthorization) {
                     for (i = 0; i < matchedPackagesName.length; i++) {
                         originalDictionary = matchedPackagesName[i];
                         modifiedDictionary = {
-                            Name: originalDictionary.name,
                             Version: originalDictionary.version,
+                            Name: originalDictionary.name,
                         };
                         pkg.push(modifiedDictionary);
                     }
@@ -214,8 +214,8 @@ function PackageByRegExGet(body, xAuthorization) {
                         for (i = 0; i < matchedPackagesReadme.length; i++) {
                             originalDictionary = matchedPackagesReadme[i];
                             modifiedDictionary = {
-                                Name: originalDictionary.name,
                                 Version: originalDictionary.version,
+                                Name: originalDictionary.name,
                             };
                             pkg.push(modifiedDictionary);
                         }

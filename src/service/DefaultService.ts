@@ -149,7 +149,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
 
   if( !safe(packageName))
   {
-    return respondWithCode(400, {  "Error": "unSafe Regex" });
+    return respondWithCode(404, {  "Error": "unSafe Regex" });
   }
 
   // Query for matching against the Name column
@@ -171,8 +171,8 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
     // Execute the query for matching against the Name column
     const [rowsName, fieldsName] = await db.promise().execute(queryName, [packageName]);
     interface Package {
-      Name: string;
       Version: string;
+      Name: string;
       // Add more properties as needed
     }
 
@@ -188,8 +188,8 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
       for (let i = 0; i < matchedPackagesName.length; i++) {
         const originalDictionary = matchedPackagesName[i];
         const modifiedDictionary: Package = {
-          Name: originalDictionary.name,
           Version: originalDictionary.version,
+          Name: originalDictionary.name,
         };
         pkg.push(modifiedDictionary);
       }
@@ -213,8 +213,8 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
         for (let i = 0; i < matchedPackagesReadme.length; i++) {
           const originalDictionary = matchedPackagesReadme[i];
           const modifiedDictionary: Package = {
-            Name: originalDictionary.name,
             Version: originalDictionary.version,
+            Name: originalDictionary.name,
           };
           pkg.push(modifiedDictionary);
         }
