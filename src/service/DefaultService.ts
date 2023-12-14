@@ -521,7 +521,7 @@ export async function PackageUpdate(body: Package, id: PackageID, xAuthorization
       body.data.Content= Buffer.from(zipContent).toString('base64');
     }
     const [results] = await (promisePool.execute as any)('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
-      body.metadata.ID,
+      id,
       body.metadata.Name,
       body.metadata.Version,
       body.data.Content || null,   // Replace undefined with null for Content
