@@ -375,7 +375,7 @@ function PackageCreate(body, xAuthorization) {
                     output = {
                         "metadata": {
                             "Name": Name,
-                            "version": Version,
+                            "Version": Version,
                             "ID": String(result[0][0].packageID)
                         },
                         "data": {
