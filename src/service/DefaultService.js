@@ -167,7 +167,7 @@ exports.PackageByNameGet = PackageByNameGet;
 function PackageByRegExGet(body, xAuthorization) {
     var _a;
     return __awaiter(this, void 0, void 0, function () {
-        var packageName, safe, queryName, queryReadme, _b, rowsName, fieldsName, matchedPackagesName, _c, rowsReadme, fieldsReadme, matchedPackagesReadme, error_2;
+        var packageName, safe, queryName, queryReadme, _b, rowsName, fieldsName, matchedPackagesName, pkg, i, originalDictionary, modifiedDictionary, _c, rowsReadme, fieldsReadme, matchedPackagesReadme, pkg, i, originalDictionary, modifiedDictionary, error_2;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
@@ -177,7 +177,7 @@ function PackageByRegExGet(body, xAuthorization) {
                     packageName = body.RegEx;
                     safe = require('safe-regex');
                     if (!safe(packageName)) {
-                        return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "unSafe Regex" })];
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(400, { "Error": "unSafe Regex" })];
                     }
                     queryName = "\n    SELECT PM.Name, PM.version\n    FROM PackageMetadata PM\n    WHERE PM.Name REGEXP ?;\n  ";
                     queryReadme = "\n    SELECT PM.Name, PM.version\n    FROM PackageMetadata PM\n    LEFT JOIN PackageData PD ON PM.ID = PD.ID\n    WHERE PD.Readme REGEXP ?;\n  ";
@@ -192,7 +192,16 @@ function PackageByRegExGet(body, xAuthorization) {
                         name: pkg.Name,
                         version: pkg.version,
                     }); });
-                    return [2 /*return*/, (0, writer_1.respondWithCode)(200, matchedPackagesName)];
+                    pkg = [];
+                    for (i = 0; i < matchedPackagesName.length; i++) {
+                        originalDictionary = matchedPackagesName[i];
+                        modifiedDictionary = {
+                            Name: originalDictionary.name,
+                            Version: originalDictionary.version,
+                        };
+                        pkg.push(modifiedDictionary);
+                    }
+                    return [2 /*return*/, (0, writer_1.respondWithCode)(200, pkg)];
                 case 3: return [4 /*yield*/, db.promise().execute(queryReadme, [packageName])];
                 case 4:
                     _c = _d.sent(), rowsReadme = _c[0], fieldsReadme = _c[1];
@@ -201,6 +210,15 @@ function PackageByRegExGet(body, xAuthorization) {
                             name: pkg.Name,
                             version: pkg.version,
                         }); });
+                        pkg = [];
+                        for (i = 0; i < matchedPackagesReadme.length; i++) {
+                            originalDictionary = matchedPackagesReadme[i];
+                            modifiedDictionary = {
+                                Name: originalDictionary.name,
+                                Version: originalDictionary.version,
+                            };
+                            pkg.push(modifiedDictionary);
+                        }
                         return [2 /*return*/, (0, writer_1.respondWithCode)(200, matchedPackagesReadme)];
                     }
                     else {

@@ -149,7 +149,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
 
   if( !safe(packageName))
   {
-    return respondWithCode(404, {  "Error": "unSafe Regex" });
+    return respondWithCode(400, {  "Error": "unSafe Regex" });
   }
 
   // Query for matching against the Name column
@@ -170,6 +170,11 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
   try {
     // Execute the query for matching against the Name column
     const [rowsName, fieldsName] = await db.promise().execute(queryName, [packageName]);
+    interface Package {
+      Name: string;
+      Version: string;
+      // Add more properties as needed
+    }
 
     if (rowsName.length > 0) {
       const matchedPackagesName = rowsName.map((pkg: RowDataPacket) => ({
@@ -177,7 +182,19 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
         version: pkg.version,
       }));
 
-      return respondWithCode(200, matchedPackagesName);
+      
+      var pkg: Package[] = [];
+      
+      for (let i = 0; i < matchedPackagesName.length; i++) {
+        const originalDictionary = matchedPackagesName[i];
+        const modifiedDictionary: Package = {
+          Name: originalDictionary.name,
+          Version: originalDictionary.version,
+        };
+        pkg.push(modifiedDictionary);
+      }
+
+      return respondWithCode(200, pkg);
     } else {
       // If no match in Name, proceed with the query for matching against the README column
       const [rowsReadme, fieldsReadme] = await db.promise().execute(queryReadme, [packageName]);
@@ -189,6 +206,18 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
           name: pkg.Name,
           version: pkg.version,
         }));
+
+        //Capitalize name and version
+        var pkg: Package[] = [];
+      
+        for (let i = 0; i < matchedPackagesReadme.length; i++) {
+          const originalDictionary = matchedPackagesReadme[i];
+          const modifiedDictionary: Package = {
+            Name: originalDictionary.name,
+            Version: originalDictionary.version,
+          };
+          pkg.push(modifiedDictionary);
+        }
 
         return respondWithCode(200, matchedPackagesReadme);
       } else {
@@ -592,6 +621,7 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
  **/
 import { resetDatabase } from '../app_endpoints/reset_endpoint.js';
 import { version } from 'yargs';
+import { match } from 'assert';
 export async function RegistryReset(xAuthorization: AuthenticationToken): Promise<void> {
   await resetDatabase(); 
 }
