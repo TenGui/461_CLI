@@ -178,8 +178,8 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
 
     if (rowsName.length > 0) {
       const matchedPackagesName = rowsName.map((pkg: RowDataPacket) => ({
-        name: pkg.Name,
-        version: pkg.version,
+        Name: pkg.Name,
+        Version: pkg.version,
       }));
 
       
@@ -203,8 +203,8 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
 
       if (rowsReadme.length > 0) {
         const matchedPackagesReadme = rowsReadme.map((pkg: RowDataPacket) => ({
-          name: pkg.Name,
-          version: pkg.version,
+          Name: pkg.Name,
+          Version: pkg.version,
         }));
 
         //Capitalize name and version
@@ -595,7 +595,7 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
       //console.log("ids in range: ", idsInRange)
 
       for (const id of idsInRange) {
-        const [result, fields] = await promisePool.execute('SELECT Version, ID, Name FROM PackageMetadata WHERE ID = ?', [id]);
+        const [result, fields] = await promisePool.execute('SELECT Version, CAST(ID as CHAR(36)) as ID, Name FROM PackageMetadata WHERE ID = ?', [id]);
         const basicMetadata = result[0];
         //console.log("id: ", id, " corresp Metadata: ", result);
         response['application/json'].push(basicMetadata);
