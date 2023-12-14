@@ -25,11 +25,13 @@ CREATE TABLE Auth (
 -- Create Package table with foreign keys to PackageMetadata and PackageData
 CREATE TABLE Package (
     PackageID INT AUTO_INCREMENT PRIMARY KEY
+    -- PackageID_string VARCHAR(36) GENERATED ALWAYS AS (CAST(ID AS CHAR(36))) STORED
 ) ENGINE=InnoDB;
 
 -- Create PackageMetadata table
 CREATE TABLE PackageMetadata (
     ID INT PRIMARY KEY,
+    -- ID_string VARCHAR(36) GENERATED ALWAYS AS (CAST(ID AS CHAR(36))) STORED
     Name VARCHAR(255) NOT NULL,
     Version VARCHAR(20) NOT NULL,
     UNIQUE (Name, Version),
@@ -39,6 +41,7 @@ CREATE TABLE PackageMetadata (
 -- Create PackageData table
 CREATE TABLE PackageData (
     ID INT PRIMARY KEY,
+    -- ID_string VARCHAR(36) GENERATED ALWAYS AS (CAST(ID AS CHAR(36))) STORED
     Content LONGTEXT,
     README LONGTEXT,
     URL VARCHAR(255),
@@ -103,7 +106,7 @@ BEGIN
         JSON_OBJECT(
             'Name', pm.Name,
             'Version', pm.Version,
-            'ID', pm.ID
+            'ID', CAST(pm.ID AS CHAR(36)) -- Convert ID to string
         ) as metadata,
         JSON_OBJECT(
             'Content', pd.Content
