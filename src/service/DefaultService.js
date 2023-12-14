@@ -476,8 +476,10 @@ function PackageRetrieve(id, xAuthorization) {
                     return [4 /*yield*/, promisePool.execute(query, values)];
                 case 1:
                     results = (_a.sent())[0];
-                    console.log(results[0][0]["metadata"]["ID"]);
-                    results[0][0]["metadata"]["ID"] = String(results[0][0]["metadata"]["ID"]);
+                    //Changing id to be string
+                    if (results[0].length > 0) {
+                        results[0][0]["metadata"]["ID"] = String(results[0][0]["metadata"]["ID"]);
+                    }
                     if (results[0].length === 0) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
                     }
