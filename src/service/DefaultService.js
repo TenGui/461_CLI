@@ -189,8 +189,8 @@ function PackageByRegExGet(body, xAuthorization) {
                     _b = _d.sent(), rowsName = _b[0], fieldsName = _b[1];
                     if (!(rowsName.length > 0)) return [3 /*break*/, 3];
                     matchedPackagesName = rowsName.map(function (pkg) { return ({
-                        name: pkg.Name,
-                        version: pkg.version,
+                        Name: pkg.Name,
+                        Version: pkg.version,
                     }); });
                     pkg = [];
                     for (i = 0; i < matchedPackagesName.length; i++) {
@@ -207,8 +207,8 @@ function PackageByRegExGet(body, xAuthorization) {
                     _c = _d.sent(), rowsReadme = _c[0], fieldsReadme = _c[1];
                     if (rowsReadme.length > 0) {
                         matchedPackagesReadme = rowsReadme.map(function (pkg) { return ({
-                            name: pkg.Name,
-                            version: pkg.version,
+                            Name: pkg.Name,
+                            Version: pkg.version,
                         }); });
                         pkg = [];
                         for (i = 0; i < matchedPackagesReadme.length; i++) {
@@ -643,7 +643,7 @@ function PackagesList(body, offset, xAuthorization) {
                 case 7:
                     if (!(_c < idsInRange_1.length)) return [3 /*break*/, 10];
                     id = idsInRange_1[_c];
-                    return [4 /*yield*/, promisePool.execute('SELECT Version, ID, Name FROM PackageMetadata WHERE ID = ?', [id])];
+                    return [4 /*yield*/, promisePool.execute('SELECT Version, CAST(ID as CHAR(36)) as ID, Name FROM PackageMetadata WHERE ID = ?', [id])];
                 case 8:
                     _d = _e.sent(), result = _d[0], fields = _d[1];
                     basicMetadata = result[0];
