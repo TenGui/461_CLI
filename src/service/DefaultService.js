@@ -556,7 +556,7 @@ function PackageUpdate(body, id, xAuthorization) {
                     body.data.Content = Buffer.from(zipContent).toString('base64');
                     _b.label = 4;
                 case 4: return [4 /*yield*/, promisePool.execute('CALL PackageUpdate(?, ?, ?, ?, ?, ?)', [
-                        body.metadata.ID,
+                        id,
                         body.metadata.Name,
                         body.metadata.Version,
                         body.data.Content || null,
