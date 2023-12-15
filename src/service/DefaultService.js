@@ -179,8 +179,8 @@ function PackageByRegExGet(body, xAuthorization) {
                     if (!safe(packageName)) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "unSafe Regex" })];
                     }
-                    queryName = "\n    SELECT PM.Name, PM.version\n    FROM PackageMetadata PM\n    WHERE PM.Name REGEXP ?;\n  ";
-                    queryReadme = "\n    SELECT PM.Name, PM.version\n    FROM PackageMetadata PM\n    LEFT JOIN PackageData PD ON PM.ID = PD.ID\n    WHERE PD.Readme REGEXP ?;\n  ";
+                    queryName = "\n    SELECT PM.Name, PM.version, CAST(PM.ID AS CHAR(36)) as ID\n    FROM PackageMetadata PM\n    WHERE PM.Name REGEXP ?;\n  ";
+                    queryReadme = "\n    SELECT PM.Name, PM.version, CAST(PM.ID AS CHAR(36)) as ID\n    FROM PackageMetadata PM\n    LEFT JOIN PackageData PD ON PM.ID = PD.ID\n    WHERE PD.Readme REGEXP ?;\n  ";
                     _d.label = 1;
                 case 1:
                     _d.trys.push([1, 6, , 7]);

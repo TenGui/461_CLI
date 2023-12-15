@@ -154,14 +154,14 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
 
   // Query for matching against the Name column
   const queryName = `
-    SELECT PM.Name, PM.version
+    SELECT PM.Name, PM.version, CAST(PM.ID AS CHAR(36)) as ID
     FROM PackageMetadata PM
     WHERE PM.Name REGEXP ?;
   `;
 
   // Query for matching against the README column
   const queryReadme = `
-    SELECT PM.Name, PM.version
+    SELECT PM.Name, PM.version, CAST(PM.ID AS CHAR(36)) as ID
     FROM PackageMetadata PM
     LEFT JOIN PackageData PD ON PM.ID = PD.ID
     WHERE PD.Readme REGEXP ?;
