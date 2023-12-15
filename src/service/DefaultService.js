@@ -76,10 +76,11 @@ function CreateAuthToken(body) {
                     // If credentials are valid, create a JWT with permissions that correspond to that of the user
                     //console.log("password check: incoming = " + password + " database = "+ result[0].pass);
                     if (password === result[0].pass) {
+                        console.log("user is admin: ".concat(body.User.isAdmin));
                         token = authHelper.createToken({
                             user: username,
                             pass: result[0].pass,
-                            isAdmin: result[0].isAdmin,
+                            isAdmin: body.User.isAdmin,
                             canSearch: result[0].canSearch,
                             canUpload: result[0].canUpload,
                             canDownload: result[0].canDownload
@@ -687,7 +688,11 @@ function RegistryReset(xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, (0, reset_endpoint_js_1.resetDatabase)()];
+                case 0:
+                    if (xAuthorization["isAdmin"] != 1) {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(401, "Your token is valid, but you do not have proper permissions")];
+                    }
+                    return [4 /*yield*/, (0, reset_endpoint_js_1.resetDatabase)()];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];

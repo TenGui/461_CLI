@@ -103,6 +103,7 @@ export async function PackagesList(req: Request, res: Response, next: NextFuncti
 
 export async function RegistryReset(req: Request, res: Response, next: NextFunction, xAuthorization: string) {
   // const xAuthorization = req.headers['x-authorization'];
+  console.log(`reset recieved request with token ${req.header('X-Authorization')}`);
   await handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization);
 }
 

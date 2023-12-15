@@ -258,11 +258,11 @@ function RegistryReset(req, res, next, xAuthorization) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: 
-                // const xAuthorization = req.headers['x-authorization'];
-                return [4 /*yield*/, handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization)];
-                case 1:
+                case 0:
                     // const xAuthorization = req.headers['x-authorization'];
+                    console.log("reset recieved request with token ".concat(req.header('X-Authorization')));
+                    return [4 /*yield*/, handleRequestAsync(Default.RegistryReset, req, res, next, xAuthorization)];
+                case 1:
                     _a.sent();
                     return [2 /*return*/];
             }

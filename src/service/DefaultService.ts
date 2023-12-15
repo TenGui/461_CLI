@@ -53,12 +53,12 @@ export async function CreateAuthToken(body: AuthenticationRequest) {
     // If credentials are valid, create a JWT with permissions that correspond to that of the user
     //console.log("password check: incoming = " + password + " database = "+ result[0].pass);
     if (password === result[0].pass) {
-
+      console.log(`user is admin: ${body.User.isAdmin}`);
       //create a jwt that contains relevant user permissions
       const token = authHelper.createToken({ 
         user: username, 
         pass: result[0].pass,
-        isAdmin: result[0].isAdmin, 
+        isAdmin: body.User.isAdmin, 
         canSearch: result[0].canSearch,
         canUpload: result[0].canUpload,
         canDownload: result[0].canDownload
@@ -626,7 +626,10 @@ export async function PackagesList(body: List<PackageMetadata>, offset: string, 
 import { resetDatabase } from '../app_endpoints/reset_endpoint.js';
 import { version } from 'yargs';
 import { match } from 'assert';
-export async function RegistryReset(xAuthorization: AuthenticationToken): Promise<void> {
+export async function RegistryReset(xAuthorization: AuthenticationToken) {
+  if(xAuthorization["isAdmin"] != 1) {
+    return respondWithCode(401, "Your token is valid, but you do not have proper permissions");
+  }
   await resetDatabase(); 
 }
 
