@@ -154,14 +154,14 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
 
   // Query for matching against the Name column
   const queryName = `
-    SELECT PM.Name, PM.version
+    SELECT PM.Name, PM.version, CAST(PM.ID AS CHAR(36)) as ID
     FROM PackageMetadata PM
     WHERE PM.Name REGEXP ?;
   `;
 
   // Query for matching against the README column
   const queryReadme = `
-    SELECT PM.Name, PM.version
+    SELECT PM.Name, PM.version, CAST(PM.ID AS CHAR(36)) as ID
     FROM PackageMetadata PM
     LEFT JOIN PackageData PD ON PM.ID = PD.ID
     WHERE PD.Readme REGEXP ?;
@@ -173,13 +173,15 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
     interface Package {
       Version: string;
       Name: string;
+      ID: string;
       // Add more properties as needed
     }
 
     if (rowsName.length > 0) {
       const matchedPackagesName = rowsName.map((pkg: RowDataPacket) => ({
-        version: pkg.version,
         name: pkg.Name,
+        version: pkg.version,
+        id: pkg.ID
       }));
 
       
@@ -190,6 +192,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
         const modifiedDictionary: Package = {
           Version: originalDictionary.version,
           Name: originalDictionary.name.charAt(0).toUpperCase() + originalDictionary.name.slice(1), //originalDictionary originalName.charAt(0).toUpperCase() + originalName.slice(1);
+          ID: originalDictionary.id
         };
         pkg.push(modifiedDictionary);
       }
@@ -203,8 +206,9 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
 
       if (rowsReadme.length > 0) {
         const matchedPackagesReadme = rowsReadme.map((pkg: RowDataPacket) => ({
-          version: pkg.version,
           name: pkg.Name,
+          version: pkg.version,
+          id: pkg.ID
         }));
 
         //Capitalize name and version
@@ -215,6 +219,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
           const modifiedDictionary: Package = {
             Version: originalDictionary.version,
             Name: originalDictionary.name,
+            ID: originalDictionary.id
           };
           pkg.push(modifiedDictionary);
         }

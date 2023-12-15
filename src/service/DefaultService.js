@@ -179,8 +179,8 @@ function PackageByRegExGet(body, xAuthorization) {
                     if (!safe(packageName)) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404, { "Error": "unSafe Regex" })];
                     }
-                    queryName = "\n    SELECT PM.Name, PM.version\n    FROM PackageMetadata PM\n    WHERE PM.Name REGEXP ?;\n  ";
-                    queryReadme = "\n    SELECT PM.Name, PM.version\n    FROM PackageMetadata PM\n    LEFT JOIN PackageData PD ON PM.ID = PD.ID\n    WHERE PD.Readme REGEXP ?;\n  ";
+                    queryName = "\n    SELECT PM.Name, PM.version, CAST(PM.ID AS CHAR(36)) as ID\n    FROM PackageMetadata PM\n    WHERE PM.Name REGEXP ?;\n  ";
+                    queryReadme = "\n    SELECT PM.Name, PM.version, CAST(PM.ID AS CHAR(36)) as ID\n    FROM PackageMetadata PM\n    LEFT JOIN PackageData PD ON PM.ID = PD.ID\n    WHERE PD.Readme REGEXP ?;\n  ";
                     _d.label = 1;
                 case 1:
                     _d.trys.push([1, 6, , 7]);
@@ -189,15 +189,17 @@ function PackageByRegExGet(body, xAuthorization) {
                     _b = _d.sent(), rowsName = _b[0], fieldsName = _b[1];
                     if (!(rowsName.length > 0)) return [3 /*break*/, 3];
                     matchedPackagesName = rowsName.map(function (pkg) { return ({
-                        version: pkg.version,
                         name: pkg.Name,
+                        version: pkg.version,
+                        id: pkg.ID
                     }); });
                     pkg = [];
                     for (i = 0; i < matchedPackagesName.length; i++) {
                         originalDictionary = matchedPackagesName[i];
                         modifiedDictionary = {
                             Version: originalDictionary.version,
-                            Name: originalDictionary.name.charAt(0).toUpperCase() + originalDictionary.name.slice(1), //originalDictionary originalName.charAt(0).toUpperCase() + originalName.slice(1);
+                            Name: originalDictionary.name.charAt(0).toUpperCase() + originalDictionary.name.slice(1),
+                            ID: originalDictionary.id
                         };
                         pkg.push(modifiedDictionary);
                     }
@@ -207,8 +209,9 @@ function PackageByRegExGet(body, xAuthorization) {
                     _c = _d.sent(), rowsReadme = _c[0], fieldsReadme = _c[1];
                     if (rowsReadme.length > 0) {
                         matchedPackagesReadme = rowsReadme.map(function (pkg) { return ({
-                            version: pkg.version,
                             name: pkg.Name,
+                            version: pkg.version,
+                            id: pkg.ID
                         }); });
                         pkg = [];
                         for (i = 0; i < matchedPackagesReadme.length; i++) {
@@ -216,6 +219,7 @@ function PackageByRegExGet(body, xAuthorization) {
                             modifiedDictionary = {
                                 Version: originalDictionary.version,
                                 Name: originalDictionary.name,
+                                ID: originalDictionary.id
                             };
                             pkg.push(modifiedDictionary);
                         }
