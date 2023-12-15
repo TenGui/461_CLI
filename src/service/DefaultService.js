@@ -197,7 +197,7 @@ function PackageByRegExGet(body, xAuthorization) {
                         originalDictionary = matchedPackagesName[i];
                         modifiedDictionary = {
                             Version: originalDictionary.version,
-                            Name: originalDictionary.name,
+                            Name: originalDictionary.name.charAt(0).toUpperCase() + originalDictionary.name.slice(1), //originalDictionary originalName.charAt(0).toUpperCase() + originalName.slice(1);
                         };
                         pkg.push(modifiedDictionary);
                     }
@@ -502,6 +502,7 @@ function PackageRetrieve(id, xAuthorization) {
                         return [2 /*return*/, (0, writer_1.respondWithCode)(404)];
                     }
                     else {
+                        return [2 /*return*/, (0, writer_1.respondWithCode)(200, { "test": "hi" })];
                         return [2 /*return*/, (0, writer_1.respondWithCode)(200, results[0][0])];
                     }
                     return [3 /*break*/, 3];

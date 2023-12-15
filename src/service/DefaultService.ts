@@ -189,7 +189,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
         const originalDictionary = matchedPackagesName[i];
         const modifiedDictionary: Package = {
           Version: originalDictionary.version,
-          Name: originalDictionary.name,
+          Name: originalDictionary.name.charAt(0).toUpperCase() + originalDictionary.name.slice(1), //originalDictionary originalName.charAt(0).toUpperCase() + originalName.slice(1);
         };
         pkg.push(modifiedDictionary);
       }
@@ -476,6 +476,7 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
     if (results[0].length === 0) {
       return respondWithCode(404);
     } else {
+      return respondWithCode(200, {"test": "hi"});
       return respondWithCode(200, results[0][0]);
     }
   } catch (error) {
