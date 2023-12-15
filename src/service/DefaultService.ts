@@ -476,7 +476,6 @@ export async function PackageRetrieve(id: PackageID, xAuthorization: Authenticat
     if (results[0].length === 0) {
       return respondWithCode(404);
     } else {
-      return respondWithCode(200, {"test": "hi"});
       return respondWithCode(200, results[0][0]);
     }
   } catch (error) {
