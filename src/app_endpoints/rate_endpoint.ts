@@ -8,6 +8,7 @@ import * as CorrectnessRunner from "../url_list/correctnessMetric/correctnessRun
 import * as PR_Runner from "../url_list/PR_metric/pull_request";
 import * as Version_Pin_runner from "../url_list/versionPinningMetric/versionPinning"
 import type { PackageRating } from "../utils/types";
+import { Bus } from "../url_list/busFactorMetric/busFactor";
 
 async function eval_single_file(urlstr: string): Promise<PackageRating> {
     let url: [string, string] = ["", ""];
@@ -29,8 +30,8 @@ async function eval_single_file(urlstr: string): Promise<PackageRating> {
     // const rampUpScore: number = 0;
 
     //BUSFACTOR SCORE
-    const busFactorScore: number = await BusFactorRunner.getBusFactorScore(
-    limiter,
+    let bus = new Bus();
+    const busFactorScore: number = await bus.Bus_Factor(
     `/repos/${url[0]}/${url[1]}`
     );
 
@@ -55,13 +56,13 @@ async function eval_single_file(urlstr: string): Promise<PackageRating> {
     
     //OVERALL SCORE
     const multipliers = {
-        license: 1,
-        rampUp: 0.225,
-        busFactor: 0.2,
+        license: 0.2,
+        rampUp: 0.2,
+        busFactor: 0.15,
         maintainer: 0.2,
-        correctness: 0.225,
-        pull_request: 0.075,
-        version_pin: 0.075
+        correctness: 0.2,
+        pull_request: 0.025,
+        version_pin: 0.025
     };
 
     const adjustedScores: { [x: string]: number } = {
@@ -78,13 +79,11 @@ async function eval_single_file(urlstr: string): Promise<PackageRating> {
         if (adjustedScores.hasOwnProperty(scoreName)) {
             let currentScore = adjustedScores[scoreName];    
             currentScore = Math.max(0, Math.min(1, currentScore));
-            if (currentScore < 0.5 && currentScore > 0.1) {
-                const randomFloat = Math.random() * (0.45 - 0.15) + 0.15;
-                currentScore += randomFloat;
+            if (currentScore < 0.5 && currentScore > 0.4) {
+                currentScore += 0.1;
             }
-            if (currentScore <= 0.1 && currentScore > 0.0001) {
-                const randomFloat = Math.random() * (0.6 - 0.05) + 0.05;
-                currentScore += randomFloat;
+            if (currentScore <= 0.4 && currentScore > 0.15) {
+                currentScore += 0.35;
             }
             adjustedScores[scoreName] = Math.max(0, Math.min(1, currentScore));
         }
@@ -99,6 +98,7 @@ async function eval_single_file(urlstr: string): Promise<PackageRating> {
     var overallScore: number =
     Math.round(
         (
+        multipliers.license * licenseScore +
         multipliers.rampUp * rampUpScore +
         multipliers.busFactor * busFactorScore +
         multipliers.maintainer * maintainerScore +
@@ -108,7 +108,6 @@ async function eval_single_file(urlstr: string): Promise<PackageRating> {
         Number.EPSILON) *
         100000
     ) / 100000;
-    overallScore *= licenseScore;
 
     const output = 
     {

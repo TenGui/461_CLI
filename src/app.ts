@@ -52,8 +52,8 @@ morgan.token('reqBody', function (req, res) { ;
 morgan.token('uuid', function (req, res) { ;
     return req.requestId});
 //make format strings for logging 
-const reqFormat = "\nREQUEST reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" authHeader\: :auth reqBody\: :reqBody";
-const resFormat = "\nRESPONSE reqID\::uuid :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status  authHeader\: :auth resBody\: :resBody";
+const reqFormat = "\nREQUEST   :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\"      reqBody\: :reqBody reqID\::uuid authHeader\: :auth";
+const resFormat = "RESPONSE  :remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status  resBody\: :resBody reqID\::uuid authHeader\: :auth";
 // create a write stream (in append mode) for the logger
 var logStream = fs.createWriteStream(path.join(__dirname, 'req.log'), { flags: 'a' });
 //setup typedef for uuid field in request so that typescript doesn't throw a fit 

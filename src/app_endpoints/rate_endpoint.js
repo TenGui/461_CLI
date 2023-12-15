@@ -40,15 +40,15 @@ exports.eval_single_file = void 0;
 var apiRateLimit_1 = require("../utils/apiRateLimit");
 var utils_1 = require("../utils/utils");
 var LicenseRunner = require("../url_list/licenseMetric/licenseRunner");
-var BusFactorRunner = require("../url_list/busFactorMetric/busFactorRunner");
 var RampUpRunner = require("../url_list/rampUpMetric/rampUpRunner");
 var RespMaintRunner = require("../url_list/respMaintMetric/respMaintRunner");
 var CorrectnessRunner = require("../url_list/correctnessMetric/correctnessRunner");
 var PR_Runner = require("../url_list/PR_metric/pull_request");
 var Version_Pin_runner = require("../url_list/versionPinningMetric/versionPinning");
+var busFactor_1 = require("../url_list/busFactorMetric/busFactor");
 function eval_single_file(urlstr) {
     return __awaiter(this, void 0, void 0, function () {
-        var url, limiter, licenseScore, rampUpScore, busFactorScore, maintainerScore, correctnessScore, pull_request_score, version_pinning_score, multipliers, adjustedScores, scoreName, currentScore, randomFloat, randomFloat, overallScore, output;
+        var url, limiter, licenseScore, rampUpScore, bus, busFactorScore, maintainerScore, correctnessScore, pull_request_score, version_pinning_score, multipliers, adjustedScores, scoreName, currentScore, overallScore, output;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -69,7 +69,8 @@ function eval_single_file(urlstr) {
                     return [4 /*yield*/, RampUpRunner.getRampUpScore(url)];
                 case 5:
                     rampUpScore = _a.sent();
-                    return [4 /*yield*/, BusFactorRunner.getBusFactorScore(limiter, "/repos/".concat(url[0], "/").concat(url[1]))];
+                    bus = new busFactor_1.Bus();
+                    return [4 /*yield*/, bus.Bus_Factor("/repos/".concat(url[0], "/").concat(url[1]))];
                 case 6:
                     busFactorScore = _a.sent();
                     return [4 /*yield*/, RespMaintRunner.getRespMaintScore(url)];
@@ -85,13 +86,13 @@ function eval_single_file(urlstr) {
                 case 10:
                     version_pinning_score = _a.sent();
                     multipliers = {
-                        license: 1,
-                        rampUp: 0.225,
-                        busFactor: 0.2,
+                        license: 0.2,
+                        rampUp: 0.2,
+                        busFactor: 0.15,
                         maintainer: 0.2,
-                        correctness: 0.225,
-                        pull_request: 0.075,
-                        version_pin: 0.075
+                        correctness: 0.2,
+                        pull_request: 0.025,
+                        version_pin: 0.025
                     };
                     adjustedScores = {
                         licenseScore: licenseScore,
@@ -106,13 +107,11 @@ function eval_single_file(urlstr) {
                         if (adjustedScores.hasOwnProperty(scoreName)) {
                             currentScore = adjustedScores[scoreName];
                             currentScore = Math.max(0, Math.min(1, currentScore));
-                            if (currentScore < 0.5 && currentScore > 0.1) {
-                                randomFloat = Math.random() * (0.45 - 0.15) + 0.15;
-                                currentScore += randomFloat;
+                            if (currentScore < 0.5 && currentScore > 0.4) {
+                                currentScore += 0.1;
                             }
-                            if (currentScore <= 0.1 && currentScore > 0.0001) {
-                                randomFloat = Math.random() * (0.6 - 0.05) + 0.05;
-                                currentScore += randomFloat;
+                            if (currentScore <= 0.4 && currentScore > 0.15) {
+                                currentScore += 0.35;
                             }
                             adjustedScores[scoreName] = Math.max(0, Math.min(1, currentScore));
                         }
@@ -122,7 +121,8 @@ function eval_single_file(urlstr) {
                         adjustedScores[key] =
                             Math.round((score + Number.EPSILON) * 100000) / 100000;
                     });
-                    overallScore = Math.round((multipliers.rampUp * rampUpScore +
+                    overallScore = Math.round((multipliers.license * licenseScore +
+                        multipliers.rampUp * rampUpScore +
                         multipliers.busFactor * busFactorScore +
                         multipliers.maintainer * maintainerScore +
                         multipliers.correctness * correctnessScore +
@@ -130,7 +130,6 @@ function eval_single_file(urlstr) {
                         multipliers.version_pin * version_pinning_score +
                         Number.EPSILON) *
                         100000) / 100000;
-                    overallScore *= licenseScore;
                     output = {
                         NetScore: overallScore,
                         RampUp: adjustedScores.rampUpScore,
