@@ -198,7 +198,7 @@ function PackageByRegExGet(body, xAuthorization) {
                         originalDictionary = matchedPackagesName[i];
                         modifiedDictionary = {
                             Version: originalDictionary.version,
-                            Name: originalDictionary.name.charAt(0).toUpperCase() + originalDictionary.name.slice(1),
+                            Name: originalDictionary.name,
                             ID: originalDictionary.id
                         };
                         pkg.push(modifiedDictionary);
