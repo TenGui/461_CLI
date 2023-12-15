@@ -189,9 +189,9 @@ function PackageByRegExGet(body, xAuthorization) {
                     _b = _d.sent(), rowsName = _b[0], fieldsName = _b[1];
                     if (!(rowsName.length > 0)) return [3 /*break*/, 3];
                     matchedPackagesName = rowsName.map(function (pkg) { return ({
-                        Name: pkg.Name,
-                        Version: pkg.version,
-                        ID: pkg.ID
+                        name: pkg.Name,
+                        version: pkg.version,
+                        id: pkg.ID
                     }); });
                     pkg = [];
                     for (i = 0; i < matchedPackagesName.length; i++) {
@@ -209,9 +209,9 @@ function PackageByRegExGet(body, xAuthorization) {
                     _c = _d.sent(), rowsReadme = _c[0], fieldsReadme = _c[1];
                     if (rowsReadme.length > 0) {
                         matchedPackagesReadme = rowsReadme.map(function (pkg) { return ({
-                            Name: pkg.Name,
-                            Version: pkg.version,
-                            ID: pkg.ID
+                            name: pkg.Name,
+                            version: pkg.version,
+                            id: pkg.ID
                         }); });
                         pkg = [];
                         for (i = 0; i < matchedPackagesReadme.length; i++) {

@@ -179,9 +179,9 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
 
     if (rowsName.length > 0) {
       const matchedPackagesName = rowsName.map((pkg: RowDataPacket) => ({
-        Name: pkg.Name,
-        Version: pkg.version,
-        ID: pkg.ID
+        name: pkg.Name,
+        version: pkg.version,
+        id: pkg.ID
       }));
 
       
@@ -206,9 +206,9 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
 
       if (rowsReadme.length > 0) {
         const matchedPackagesReadme = rowsReadme.map((pkg: RowDataPacket) => ({
-          Name: pkg.Name,
-          Version: pkg.version,
-          ID: pkg.ID
+          name: pkg.Name,
+          version: pkg.version,
+          id: pkg.ID
         }));
 
         //Capitalize name and version
