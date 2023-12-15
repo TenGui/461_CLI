@@ -173,6 +173,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
     interface Package {
       Version: string;
       Name: string;
+      ID: string;
       // Add more properties as needed
     }
 
@@ -180,6 +181,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
       const matchedPackagesName = rowsName.map((pkg: RowDataPacket) => ({
         Name: pkg.Name,
         Version: pkg.version,
+        ID: pkg.ID
       }));
 
       
@@ -190,6 +192,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
         const modifiedDictionary: Package = {
           Version: originalDictionary.version,
           Name: originalDictionary.name.charAt(0).toUpperCase() + originalDictionary.name.slice(1), //originalDictionary originalName.charAt(0).toUpperCase() + originalName.slice(1);
+          ID: originalDictionary.id
         };
         pkg.push(modifiedDictionary);
       }
@@ -205,6 +208,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
         const matchedPackagesReadme = rowsReadme.map((pkg: RowDataPacket) => ({
           Name: pkg.Name,
           Version: pkg.version,
+          ID: pkg.ID
         }));
 
         //Capitalize name and version
@@ -215,6 +219,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
           const modifiedDictionary: Package = {
             Version: originalDictionary.version,
             Name: originalDictionary.name,
+            ID: originalDictionary.id
           };
           pkg.push(modifiedDictionary);
         }

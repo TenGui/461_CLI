@@ -191,13 +191,15 @@ function PackageByRegExGet(body, xAuthorization) {
                     matchedPackagesName = rowsName.map(function (pkg) { return ({
                         Name: pkg.Name,
                         Version: pkg.version,
+                        ID: pkg.ID
                     }); });
                     pkg = [];
                     for (i = 0; i < matchedPackagesName.length; i++) {
                         originalDictionary = matchedPackagesName[i];
                         modifiedDictionary = {
                             Version: originalDictionary.version,
-                            Name: originalDictionary.name.charAt(0).toUpperCase() + originalDictionary.name.slice(1), //originalDictionary originalName.charAt(0).toUpperCase() + originalName.slice(1);
+                            Name: originalDictionary.name.charAt(0).toUpperCase() + originalDictionary.name.slice(1),
+                            ID: originalDictionary.id
                         };
                         pkg.push(modifiedDictionary);
                     }
@@ -209,6 +211,7 @@ function PackageByRegExGet(body, xAuthorization) {
                         matchedPackagesReadme = rowsReadme.map(function (pkg) { return ({
                             Name: pkg.Name,
                             Version: pkg.version,
+                            ID: pkg.ID
                         }); });
                         pkg = [];
                         for (i = 0; i < matchedPackagesReadme.length; i++) {
@@ -216,6 +219,7 @@ function PackageByRegExGet(body, xAuthorization) {
                             modifiedDictionary = {
                                 Version: originalDictionary.version,
                                 Name: originalDictionary.name,
+                                ID: originalDictionary.id
                             };
                             pkg.push(modifiedDictionary);
                         }
