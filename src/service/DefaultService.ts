@@ -191,7 +191,7 @@ export async function PackageByRegExGet(body: PackageRegEx, xAuthorization: Auth
         const originalDictionary = matchedPackagesName[i];
         const modifiedDictionary: Package = {
           Version: originalDictionary.version,
-          Name: originalDictionary.name.charAt(0).toUpperCase() + originalDictionary.name.slice(1), //originalDictionary originalName.charAt(0).toUpperCase() + originalName.slice(1);
+          Name: originalDictionary.name, //originalDictionary originalName.charAt(0).toUpperCase() + originalName.slice(1);
           ID: originalDictionary.id
         };
         pkg.push(modifiedDictionary);
